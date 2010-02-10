@@ -7,7 +7,7 @@ module Common
         has_many :groups
         # has_many :bible_studies
         has_many :ministry_campuses, :include => :ministry
-        has_many :ministries, :through => :ministry_campuses, :order => Ministry.table_name+'.'+_(:name, :ministry)
+        has_many :ministries, :through => :ministry_campuses, :order => ::Ministry.table_name+'.'+_(:name, :ministry)
         has_many :dorms
       end
     end
