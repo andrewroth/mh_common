@@ -30,7 +30,6 @@ module Common
         has_many :involvement_questions, :dependent => :destroy
         has_many :training_categories, :class_name => "TrainingCategory", :foreign_key => _(:ministry_id, :training_category), :order => _(:position, :training_category), :dependent => :destroy
         has_many :training_questions, :order => "activity", :dependent => :destroy
-        has_many :views, :order => View.table_name + '.' + _(:title, 'view'), :dependent => :destroy
         
         has_many :training_question_activations
         has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
