@@ -48,11 +48,12 @@ module Common
         alias_method :my_staff_roles, :staff_roles
         alias_method :my_student_roles, :student_roles
         alias_method :my_other_roles, :other_roles
+        alias_method :campus_ids, :campus_ids2
         
         # Create a default view for this ministry
         # Training categories including all the categories higher up on the tree
         # Training questions including all the questions higher up on the tree
-        protected
+        #protected
       
         # TODO this should use the seed instead of recreating it inline here
       end
@@ -131,12 +132,12 @@ module Common
       @ancestor_ids ||= ancestors.collect(&:id)
     end
     
-    def campus_ids
+    def campus_ids2
       unless @campus_ids
         res =  lambda {
           ministry_ids = self_plus_descendants.collect(&:id)
-          sql = "SELECT #{_(:campus_id, :ministry_campus)} FROM #{MinistryCampus.table_name} WHERE #{_(:ministry_id, :ministry_campus)} IN(#{ministry_ids.join(',')})"
-          ActiveRecord::Base.connection.select_values(sql).collect(&:to_i)
+          sql = "SELECT #{_(:campus_id, :ministry_campus)} FROM #{::MinistryCampus.table_name} WHERE #{_(:ministry_id, :ministry_campus)} IN(#{ministry_ids.join(',')})"
+          ActiveRecord::Base.connection.select_values(sql).collect(&:to_i).uniq
         }
         @campus_ids = Rails.env.production? ? Rails.cache.fetch([self, 'campus_ids']) {res.call} : res.call
       end
@@ -188,7 +189,7 @@ module Common
     end
     
     def involved_student_roles
-      @involved_student_roles ||= StudentRole.find(:all, :conditions => { _(:involved, :ministry_roles) => true }, :order => _(:position, :ministry_roles))
+      @involved_student_roles ||= ::StudentRole.find(:all, :conditions => { _(:involved, :ministry_roles) => true }, :order => _(:position, :ministry_roles))
     end
     
     def involved_student_role_ids
@@ -264,6 +265,12 @@ module Common
       end
     end
   
+    # Create a default view for this ministry
+    # Training categories including all the categories higher up on the tree
+    # Training questions including all the questions higher up on the tree
+    protected
+
+    # TODO this should use the seed instead of recreating it inline here
     def create_default_roles
       if self.root?
         self.ministry_roles << ::MinistryRole.create(_(:name, :ministry_role) => 'Campus Coordinator', _(:position, :ministry_role) => 2)
