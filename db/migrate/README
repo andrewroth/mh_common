@@ -1,0 +1,3 @@
+migrations go in folders here
+
+use rake db:migrate:copy:<folder> to copy the contents of the folder to the main app
