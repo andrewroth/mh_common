@@ -1,6 +1,6 @@
 module Common
   module Core
-    module Address
+    module CampusInvolvement
       def self.included(base)
         base.class_eval do
 
