@@ -71,10 +71,6 @@ module Common
           # Users
           belongs_to :user, :class_name => "User", :foreign_key => _(:user_id)
           
-          # Summer Projects
-          has_many :summer_project_applications, :order =>  "#{SummerProjectApplication.table_name}.#{_(:created_at, :summer_project_application)}"
-          has_many :summer_projects, :through => :summer_project_applications, :order => "#{SummerProject.table_name}.#{_(:created_at, :summer_project)} desc"
-          
           # Custom Values
           has_many :custom_values, :class_name => "CustomValue", :foreign_key => _(:person_id, :custom_value)
           

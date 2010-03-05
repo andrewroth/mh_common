@@ -31,7 +31,7 @@ module Common
           has_many :involvement_questions, :dependent => :destroy
           has_many :training_categories, :class_name => "TrainingCategory", :foreign_key => _(:ministry_id, :training_category), :order => _(:position, :training_category), :dependent => :destroy
           has_many :training_questions, :order => "activity", :dependent => :destroy
-          has_many :views, :order => View.table_name + '.' + _(:title, 'view'), :dependent => :destroy
+          
           
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
@@ -43,7 +43,7 @@ module Common
           
           validates_uniqueness_of _(:name), :scope => _(:parent_id)
           
-          after_create :create_first_view, :create_default_roles
+          after_create :create_default_roles
           
           alias_method :my_ministry_roles, :ministry_roles
           alias_method :my_staff_roles, :staff_roles
@@ -208,36 +208,6 @@ module Common
       
       def <=>(ministry)
         self.name <=> ministry.name
-      end
-      
-      def create_first_view
-        # copy the default ministry's first view if possible
-        if Cmt::CONFIG[:default_ministry_name] && 
-          ministry = ::Ministry.find(:first, :conditions => { _(:name, :ministry) => Cmt::CONFIG[:default_ministry_name] } )
-          view = ministry.views.first
-        else
-          # copy the first view in the system if there is one
-          view = View.find(:first, :order => _(:ministry_id, :view))
-        end
-    
-        if view
-          new_view = view.clone
-          new_view.ministry_id = self.id
-          new_view.save!
-          views << new_view
-          view.view_columns.each do |view_column|
-            new_view.view_columns.create! :column_id => view_column.column_id
-          end
-        #if that doesn't exist, make a new view will have every column
-        else
-          new_view = View.create!(:title => "default", :ministry_id => self.id)
-          Column.all.each do |c|
-            new_view.columns << c
-          end
-        end
-        new_view.default_view = true
-        new_view.save!
-        new_view
       end
       
       def all_training_categories
