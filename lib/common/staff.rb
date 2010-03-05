@@ -1,7 +1,9 @@
 module Common
-  module Staff
-    def self.included(base)
-      base.class_eval do
+  module Core
+    module Staff
+      def self.included(base)
+        base.class_eval do
+        end
       end
     end
   end
