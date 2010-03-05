@@ -30,32 +30,6 @@ module Common
           has_one :permanent_address, :class_name => "PermanentAddress", :foreign_key => _(:person_id, :address), :conditions => _(:address_type, :address) + " = 'permanent'"
           has_one :emergency_address, :class_name => "EmergencyAddress", :foreign_key => _(:person_id, :address), :conditions => _(:address_type, :address) + " = 'emergency1'"
           
-          # Group Involvements
-          # all
-          has_many :all_group_involvements, :class_name => 'GroupInvolvement'
-          has_many :all_groups, :through => :all_group_involvements, 
-            :source => :group
-          # no interested or requests
-          has_many :group_involvements, 
-                   :conditions =>["#{_(:level, :group_involvement)} != ? AND " + 
-                                  "(#{_(:requested, :group_involvement)} is null OR #{_(:requested, :group_involvement)} = ?)", 'interested', false]
-          
-          has_many :groups, :through => :group_involvements
-          # interests
-          has_many :group_involvement_interests, 
-            :class_name => 'GroupInvolvement',
-            :conditions =>["#{_(:level, :group_involvement)} = ? AND " + 
-                           "(#{_(:requested, :group_involvement)} is null OR #{_(:requested, :group_involvement)} = ?)", 'interested', false]
-            
-             has_many :group_interests, :through => :group_involvement_interests,
-            :class_name => 'Group', :source => :group
-          # requests
-          has_many :group_involvement_requests,
-            :class_name => 'GroupInvolvement',
-            :conditions => { _(:requested, :group_involvement) => true }
-          has_many :group_requests, :through => :group_involvement_requests,
-            :class_name => 'Group', :source => :group
-          
           # Conferences
           has_many :conference_registrations, :class_name => "ConferenceRegistration", :foreign_key => _(:person_id, :conference_registration)
           has_many :conferences, :through => :conference_registrations
@@ -63,16 +37,10 @@ module Common
           # STINTs
           has_many :stint_applications, :class_name => "StintApplication", :foreign_key => _(:person_id, :stint_application)
           has_many :stint_locations, :through => :stint_applications
-          
-          # Training Questions
-          has_many :training_answers, :class_name => "TrainingAnswer", :foreign_key => _(:person_id, :training_answer)
-          has_many :training_questions, :through => :training_answers
         
           # Users
           belongs_to :user, :class_name => "User", :foreign_key => _(:user_id)
           
-          # Custom Values
-          has_many :custom_values, :class_name => "CustomValue", :foreign_key => _(:person_id, :custom_value)
           
           has_many :imports
           
@@ -119,36 +87,6 @@ module Common
         }
       end
 
-      def group_group_involvements(filter, options = {})
-        case filter
-        when :all
-          gis = all_group_involvements
-        when :involved
-          gis = group_involvements
-        when :interests
-          gis = group_involvement_interests
-        when :requests
-          gis = group_involvement_requests
-        end
-        if options[:ministry]
-          gis.delete_if{ |gi| 
-            gi.group.ministry != options[:ministry]
-          }
-        end
-        gis.group_by { |gi| gi.group.group_type }
-      end
-
-      def is_leading_group_with?(p)
-        !group_involvements.find_all_by_level(%w(leader co-leader)).detect{ |gi|
-          gi.group.people.detect{ |gp| gp == p }
-        }.nil?
-      end
-
-      def is_leading_mentor_priority_group_with?(p)
-        !group_involvements.find_all_by_level(%w(leader co-leader)).detect{ |gi|
-          gi.group.group_type.mentor_priority && gi.group.people.detect{ |gp| gp == p }
-        }.nil?
-      end
 
       # wrapper to make gender display nicely with crusade tables
       def human_gender(value = nil)
@@ -262,48 +200,6 @@ module Common
       def get_training_answer(question_id)
         get_training_answer_hash
         return @training_answer_hash[question_id]
-      end
-      
-      # Set the value of a custom_attribute
-      def set_value(attribute_id, value)
-        get_custom_value_hash
-        if @custom_value_hash[attribute_id].nil?
-          create_value(attribute_id, value)
-        else
-          if value && @custom_value_hash[attribute_id] != value
-            sql = "UPDATE #{CustomValue.table_name} SET   #{::Person::_(:value, :custom_value)} = '#{quote_string(value)}' 
-                                                    WHERE #{::Person::_(:person_id, :custom_value)} = #{id} 
-                                                    AND   #{::Person::_(:custom_attribute_id, :custom_value)} = #{attribute_id}"
-            CustomValue.connection.execute(sql)
-            @custom_value_hash[attribute_id] = value
-          end
-        end
-        value
-      end
-      
-      # Initialize the value of a custom_attribute
-      def create_value(attribute_id, value)
-        get_custom_value_hash
-        sql = "INSERT INTO    #{CustomValue.table_name} (#{::Person::_(:person_id, :custom_value)}, #{::Person::_(:custom_attribute_id, :custom_value)}, 
-                                                        #{::Person::_(:value, :custom_value)})
-                      VALUES  (#{id}, #{attribute_id}, '#{quote_string(value)}')"
-        CustomValue.connection.execute(sql)
-        @custom_value_hash[attribute_id] = value
-      end
-      
-      # Set the value of a training_answer
-      def set_training_answer(question_id, date, approver)
-        get_training_answer_hash
-        date = nil if date == ''
-        if @training_answer_hash[question_id].nil? && date
-          # Create a row for this answer
-          answer = TrainingAnswer.create(_(:person_id, :training_answer) => id, _(:training_question_id, :training_answer) => question_id, 
-                                          _(:completed_at, :training_answer) => date, _(:approved_by, :training_answer) => approver)
-          @training_answer_hash[question_id] = answer
-        elsif date
-          approved_by = approver ? approver : @training_answer_hash[question_id].approved_by
-          @training_answer_hash[question_id].update_attributes({_(:completed_at, :training_answer) => date, _(:approved_by, :training_answer) => approver})
-        end
       end
       
       def initialize_addresses(types = nil)
