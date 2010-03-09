@@ -33,21 +33,21 @@ module Common
         # look for the latest MC, under the assumption it will be the most nested
         # if staff start wanting to have staff-only groups with campuses, we'll have to
         # rethink this
-        ministry_campus = MinistryCampus.find :last, :conditions => { :campus_id => campus_id }
+        ministry_campus = ::MinistryCampus.find :last, :conditions => { :campus_id => campus_id }
         ministry_campus.try(:ministry)
       end
 
       def find_or_create_ministry_involvement
         return @ministry_involvement if @ministry_involvement
-        ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || Ministry.first
+        ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || ::Ministry.first
         mi = ministry.ministry_involvements.find :first, :conditions => [ "person_id = ? AND end_date IS NULL", person_id ]
         if mi.nil?
-          mi = ministry.ministry_involvements.create :person => person, :ministry_role => MinistryRole.default_student_role
+          mi = ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
         elsif mi.ministry_role_id.nil?
-          mi.ministry_role_id = StudentRole
+          mi.ministry_role_id = ::StudentRole
           mi.save
-        elsif !mi.try(:ministry_role).is_a?(StudentRole)
-          mi.ministry_role_id = MinistryRole.default_student_role.id
+        elsif !mi.try(:ministry_role).is_a?(::StudentRole)
+          mi.ministry_role_id = ::MinistryRole.default_student_role.id
         end
         @ministry_involvement = mi
       end

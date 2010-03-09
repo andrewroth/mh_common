@@ -24,18 +24,8 @@ module Common
           has_many :ministry_campuses, :include => :campus, :dependent => :destroy, :order => ::Campus.table_name + '.' + _(:name, :campus)
           has_many :campuses, :through => :ministry_campuses, :order => _(:name, 'campus')
           has_many :ministry_involvements, :dependent => :destroy, :dependent => :destroy
-          has_many :groups, :dependent => :destroy
-          has_many :group_types, :class_name => "GroupType", :foreign_key => _(:ministry_id, :group_type)
-          has_many :custom_attributes, :dependent => :destroy
-          has_many :profile_questions, :dependent => :destroy
-          has_many :involvement_questions, :dependent => :destroy
-          has_many :training_categories, :class_name => "TrainingCategory", :foreign_key => _(:ministry_id, :training_category), :order => _(:position, :training_category), :dependent => :destroy
-          has_many :training_questions, :order => "activity", :dependent => :destroy
-          
-          
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
-          
           has_many :group_types
           
           
@@ -206,16 +196,6 @@ module Common
         self.name <=> ministry.name
       end
       
-      def all_training_categories
-        @all_training_categories ||= Array.wrap(ancestors.collect(&:training_categories)).flatten.uniq
-        return @all_training_categories
-      end  
-      
-      def all_training_questions
-        @all_training_questions ||= Array.wrap(ancestors.collect(&:training_questions)).flatten.uniq
-        return @all_training_questions
-      end
-      
       def to_hash_with_children
         base_hash = { 'text' => name, 'id' => id }
         if children.empty?
@@ -225,18 +205,18 @@ module Common
             'children' => children.collect(&:to_hash_with_children))
         end
       end
-    
+      
       def before_destroy
         my_ministry_roles.each do |mr|
           mr.destroy
         end
       end
-    
+      
       # Create a default view for this ministry
       # Training categories including all the categories higher up on the tree
       # Training questions including all the questions higher up on the tree
       protected
-
+      
       # TODO this should use the seed instead of recreating it inline here
       def create_default_roles
         if self.root?
