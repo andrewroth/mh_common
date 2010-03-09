@@ -191,17 +191,6 @@ module Common
         return !mi.nil?
       end
       
-      # Get the value of a custom_attribute
-      def get_value(attribute_id)
-        get_custom_value_hash
-        return @custom_value_hash[attribute_id]
-      end
-      
-      def get_training_answer(question_id)
-        get_training_answer_hash
-        return @training_answer_hash[question_id]
-      end
-      
       def initialize_addresses(types = nil)
         self.current_address ||= ::CurrentAddress.new
         self.permanent_address ||= ::PermanentAddress.new
