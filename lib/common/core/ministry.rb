@@ -14,10 +14,10 @@ module Common
           # note - dependent is removed since these role methods are overridden
           #  to return the root ministry's roles as well, meaning the root ministry's
           #  roles were also being deleted!
-          has_many :ministry_roles, :order => _(:position, :ministry_role)
-          has_many :student_roles, :order => _(:position, :ministry_role)
-          has_many :staff_roles, :order => _(:position, :ministry_role)
-          has_many :other_roles, :order => _(:position, :ministry_role)   
+          has_many :my_ministry_roles, :order => _(:position, :ministry_role), :class_name => "MinistryRole"
+          has_many :my_student_roles, :order => _(:position, :ministry_role), :class_name => "StudentRole"
+          has_many :my_staff_roles, :order => _(:position, :ministry_role), :class_name => "StaffRole"
+          has_many :my_other_roles, :order => _(:position, :ministry_role), :class_name => "OtherRole"
           has_many :campus_involvements
           # has_many :people, :through => :campus_involvements
           has_many :people, :through => :ministry_involvements
@@ -45,10 +45,10 @@ module Common
           
           after_create :create_default_roles
           
-          alias_method :my_ministry_roles, :ministry_roles
-          alias_method :my_staff_roles, :staff_roles
-          alias_method :my_student_roles, :student_roles
-          alias_method :my_other_roles, :other_roles
+          #alias_method :my_ministry_roles, :ministry_roles
+          #alias_method :my_staff_roles, :staff_roles
+          #alias_method :my_student_roles, :student_roles
+          #alias_method :my_other_roles, :other_roles
           alias_method :campus_ids, :campus_ids2
           
           # Create a default view for this ministry
@@ -60,10 +60,6 @@ module Common
         end
       end
 
-      def all_group_types
-        @all_group_types ||= ::GroupType.find(:all, :conditions => ["ministry_id IN (?)", ancestor_ids], :order => _(:group_type, :group_type))
-      end 
-      
       def staff
         @staff ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} = ?", staff_role_ids, self.id], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
