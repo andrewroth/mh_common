@@ -63,10 +63,7 @@ module Common
           
           before_save :update_stamp
           before_create :create_stamp
-         
-          # genderization for personafication in templates
-          alias_method :get_custom_value_hash, :custom_value_hash
-          alias_method :get_training_answer_hash, :training_answer_hash
+
         end
       
         base.extend PersonClassMethods
@@ -124,22 +121,7 @@ module Common
       def full_name
         first_name.to_s + ' ' + last_name.to_s
       end
-      
-      def custom_value_hash
-        if @custom_value_hash.nil?
-          @custom_value_hash = {}
-          custom_values.each {|cv| @custom_value_hash[cv.custom_attribute_id] = cv.value }
-        end
-        @custom_value_hash
-      end
-      
-      def training_answer_hash
-        if @training_answer_hash.nil?
-          @training_answer_hash = {}
-          training_answers.each {|ta| @training_answer_hash[ta.training_question_id] = ta }
-        end
-      end
-      
+
       def primary_email
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
@@ -151,8 +133,10 @@ module Common
       end
       
       def email=(value)
-        current_address ||= self.addresses.new(:address_type => 'current')
-        current_address.email = value
+        ca = current_address
+        ca ||= self.addresses.new(:address_type => 'current')
+        ca.email = value
+        ca.save
       end
       
       def ministry_tree
