@@ -101,6 +101,7 @@ module Common
               @unique_ministry_campuses << mc unless @unique_campuses.include?(mc.campus)
               @unique_campuses << mc.campus
             end
+            @unique_ministry_campuses
           }
           @unique_ministry_campuses = (Rails.env.production? ? Rails.cache.fetch([self, 'unique_ministry_campuses']) {res.call} : res.call)
         end
