@@ -220,7 +220,7 @@ module Common
         # make sure we have a person
         unless u.person
           # Try to find a person with the same email address who doesn't already have a user account
-          address = CurrentAddress.find(:first, :conditions => _(:email, :address) + " = '#{u.username}'")
+          address = ::CurrentAddress.find(:first, :conditions => _(:email, :address) + " = '#{u.username}'")
           person = address.person if address && address.person.user.nil?
 
           # Attach the found person to the user, or create a new person
@@ -228,7 +228,7 @@ module Common
           u.person = person || new_person
 
           # Create a current address record if we don't already have one.
-          u.person.current_address ||= CurrentAddress.new(:email => receipt.user)
+          u.person.current_address ||= ::CurrentAddress.new(:email => receipt.user)
           u.person.save(false)
         end
         u
