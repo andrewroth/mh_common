@@ -193,7 +193,7 @@ module Common
         u
       end
 
-      def self.find_or_create_from_cas(ticket)
+      def find_or_create_from_cas(ticket)
         # Look for a user with this guid
         receipt = ticket.response
         atts = receipt.extra_attributes
