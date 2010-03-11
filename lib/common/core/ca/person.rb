@@ -29,6 +29,8 @@ module Common
             belongs_to :state, :foreign_key => :province_id
 
             belongs_to :country, :foreign_key => :country_id
+
+            def user() user_override end
           end
 
           base.extend PersonClassMethods
@@ -72,7 +74,7 @@ module Common
           self.person_lname = val
         end
 
-        def user
+        def user_override
           users.first
         end
 

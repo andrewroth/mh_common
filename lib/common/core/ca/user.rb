@@ -16,6 +16,8 @@ module Common
             validates_uniqueness_of _(:username), :case_sensitive => false, :message => "(username) has already been taken"
 
             validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
+
+            def person() person_override end
           end
 
           base.extend UserClassMethods
@@ -23,7 +25,7 @@ module Common
 
         def created_at=(v) end
 
-        def person
+        def person_override
           persons.first
         end
 
