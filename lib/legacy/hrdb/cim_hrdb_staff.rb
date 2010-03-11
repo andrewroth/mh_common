@@ -6,6 +6,8 @@ module Legacy
         base.class_eval do
           belongs_to :person
         end
+
+        base.extend CimHrdbStaffClassMethods
       end
 
       def boolean_is_active

@@ -7,6 +7,8 @@ module Legacy
           has_many :weekly_reports, :class_name => 'Weeklyreport', :foreign_key => _(:id)
           belongs_to :campus, :class_name => 'Campus'
         end
+
+        base.extend StatsClassMethods
       end
 
       module StatsClassMethods

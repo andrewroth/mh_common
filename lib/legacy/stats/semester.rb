@@ -6,6 +6,8 @@ module Legacy
         base.class_eval do
           has_many :prc, :class_name => 'Prc', :primary_key => _(:id), :foreign_key => _(:id)
         end
+
+        base.extend SemesterClassMethods
       end
 
       module SemesterClassMethods

@@ -8,6 +8,8 @@ module Legacy
           has_one :person_extra_ref, :class_name => 'PersonExtra',
             :foreign_key => 'person_id'
         end
+
+        base.extend CimHrdbAddressClassMethods
       end
 
 

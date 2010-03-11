@@ -12,6 +12,8 @@ module Common
 
             validates_no_association_data :states, :regions, :people
           end
+
+          base.extend CountryClassMethods
         end
 
         def country() country_desc end

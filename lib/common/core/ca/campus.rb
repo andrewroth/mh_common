@@ -12,6 +12,8 @@ module Common
 
             validates_no_association_data :people, :campus_involvements, :groups, :ministry_campuses, :ministries, :dorms
           end
+
+          base.extend CampusClassMethods
         end
 
         module CampusClassMethods

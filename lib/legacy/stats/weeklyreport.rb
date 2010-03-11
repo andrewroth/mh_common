@@ -9,6 +9,8 @@ module Legacy
           belongs_to :week, :class_name => 'Week'
           belongs_to :campus, :class_name => 'Campus'
         end
+
+        base.extend StatsClassMethods
       end
 
 

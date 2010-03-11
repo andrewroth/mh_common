@@ -5,13 +5,6 @@ module Common
 
         def self.included(base)
           base.class_eval do
-            CIM_MALE_GENDER_ID = 1
-            CIM_FEMALE_GENDER_ID = 2
-            US_MALE_GENDER_ID = 1
-            US_FEMALE_GENDER_ID = 0
-
-            MAX_SEARCH_RESULTS = 100
-
             #  doesnt_implement_attributes :major => '', :minor => '', :url => '', :staff_notes => '', :updated_at => '', :updated_by => ''
 
             has_many :cim_hrdb_admins, :class_name => 'CimHrdbAdmin'
@@ -37,8 +30,16 @@ module Common
 
             belongs_to :country, :foreign_key => :country_id
           end
+
+          base.extend PersonClassMethods
         end
 
+        CIM_MALE_GENDER_ID = 1
+        CIM_FEMALE_GENDER_ID = 2
+        US_MALE_GENDER_ID = 1
+        US_FEMALE_GENDER_ID = 0
+
+        MAX_SEARCH_RESULTS = 100
 
         def created_at=(v) end # noop since it would have set the id to the timestamp
 

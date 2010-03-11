@@ -9,6 +9,8 @@ module Legacy
           belongs_to :campus
           belongs_to :status, :class_name => 'Status', :foreign_key => _(:id, :status)
         end
+
+        base.extend AssignmentClassMethods
       end
 
       module AssignmentClassMethods

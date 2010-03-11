@@ -17,6 +17,8 @@ module Common
 
             validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
           end
+
+          base.extend UserClassMethods
         end
 
         def created_at=(v) end

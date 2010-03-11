@@ -8,6 +8,8 @@ module Legacy
 
           validates_no_association_data :assignments
         end
+
+        base.extend AssignmentstatusClassMethods
       end
 
       module AssignmentstatusClassMethods

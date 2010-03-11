@@ -6,6 +6,8 @@ module Legacy
         base.class_eval do
 
         end
+
+        base.extend StatsClassMethods
       end
 
 

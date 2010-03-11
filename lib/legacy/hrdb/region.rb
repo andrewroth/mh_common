@@ -9,6 +9,8 @@ module Legacy
 
           validates_no_association_data :campuses
         end
+
+        base.extend RegionClassMethods
       end
 
       module RegionClassMethods
