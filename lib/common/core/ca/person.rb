@@ -31,6 +31,7 @@ module Common
             belongs_to :country, :foreign_key => :country_id
 
             def user() user_override end
+            def created_at=(v) created_at_override=(v) end
           end
 
           base.extend PersonClassMethods
@@ -43,7 +44,7 @@ module Common
 
         MAX_SEARCH_RESULTS = 100
 
-        def created_at=(v) end # noop since it would have set the id to the timestamp
+        def created_at_override=(v) end # noop since it would have set the id to the timestamp
 
         def person_extra()
           @person_extra ||= person_extra_ref || ::PersonExtra.new(:person_id => id)

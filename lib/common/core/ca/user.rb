@@ -18,12 +18,13 @@ module Common
             validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
 
             def person() person_override end
+            def created_at=(v) created_at_override=(v) end
           end
 
           base.extend UserClassMethods
         end
 
-        def created_at=(v) end
+        def created_at_override=(v) end
 
         def person_override
           persons.first
