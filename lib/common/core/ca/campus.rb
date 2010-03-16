@@ -11,6 +11,10 @@ module Common
             has_many :prcs, :class_name => 'Prc', :foreign_key => _(:id)
 
             validates_no_association_data :people, :campus_involvements, :groups, :ministry_campuses, :ministries, :dorms
+
+            def type=(val) '' end
+            def country=(val) '' end
+            def enrollment() '' end
           end
 
           base.extend CampusClassMethods
