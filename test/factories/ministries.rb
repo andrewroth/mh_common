@@ -1,3 +1,4 @@
+=begin
 Factory.define :ministry_1, :class => Ministry, :singleton => true do |m|
   m.id '1'
   m.name 'YFC'
@@ -79,3 +80,4 @@ Factory.define :ministry_7, :class => Ministry, :singleton => true do |m|
   m.email 'asdf'
   m.parent_id '1'
 end
+=end
