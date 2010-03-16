@@ -314,15 +314,18 @@ module Common
 
         def create_user_and_access_only(guid, uid)
           v = ::Person.create_viewer(guid, uid)
-          self.create_access(v)
+          self.setup_and_create_access(v)
         end
 
-        def create_access(v)
-          #ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
-          puts ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
+        def setup_and_create_access(v)
+          ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
           ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
-          #AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
-          ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
+          if ag_st
+            ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
+          end
+          if ag_all
+            ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
+          end
           ::Access.create :viewer_id => v.id, :person_id => self.id
         end
 
