@@ -17,25 +17,27 @@ module Common
 
             validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
 
-            def person() person_override end
-            def created_at=(v) created_at_override=(v) end
+            unless RAILS_ENV == 'test'
+              def username=(val)
+                # don't let usernames be set to viewer_userID
+              end
+            end
+
+            def password() '' end
+            def password=(val) '' end
+
+            def created_at=(v) end
+
+            def person
+              persons.first
+            end
+
           end
 
           base.extend UserClassMethods
         end
 
-        def created_at_override=(v) end
 
-        def person_override
-          persons.first
-        end
-
-        def username=(val)
-          # don't let usernames be set to viewer_userID
-        end
-
-        def password() '' end
-        def password=(val) '' end
 
         def login_callback
           person.sync_cim_hrdb

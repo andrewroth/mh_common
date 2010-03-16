@@ -30,58 +30,94 @@ module Common
 
             belongs_to :country, :foreign_key => :country_id
 
-            def user() user_override end
-            def created_at=(v) created_at_override=(v) end
+            def created_at=(v) end # noop since it would have set the id to the timestamp
+            def user
+              users.first
+            end
+
+            def person_extra()
+              @person_extra ||= person_extra_ref || ::PersonExtra.new(:person_id => id)
+            end
+            def major() person_extra.major end
+            def major=(val) person_extra.major = val end
+            def minor() person_extra.minor end
+            def minor=(val) person_extra.minor = val end
+            def url() person_extra.major end
+            def url=(val) person_extra.url = val end
+            def staff_notes() person_extra.staff_notes end
+            def staff_notes=(val) person_extra.staff_notes = val end
+            def updated_at() person_extra.updated_at end
+            def updated_at=(val) person_extra.updated_at = val end
+            def updated_by() person_extra.updated_by end
+            def updated_by=(val) person_extra.updated_by = val end
+            def after_save
+              person_extra.save!
+            end
+
+            def first_name=(val="")
+              self.person_legal_fname ||= ""
+              self.person_fname = val
+            end
+
+            def last_name=(val="")
+              self.person_legal_lname ||= ""
+              self.person_lname = val
+            end
+
+            def user=(val)
+              throw "not implemented"
+            end
+
+            def birth_date() get_emerg ? get_emerg.emerg_birthdate : nil; end
+            def birth_date=(v) @save_emerg = true; emerg.emerg_birthdate = v if emerg; end
+            def after_save
+              if @save_emerg
+                get_emerg.save!
+                @save_emerg = false
+              end
+            end
+
+            def created_by=(v) end # don't bother
+
+            def gender()
+              case gender_id
+              when CIM_MALE_GENDER_ID
+                US_MALE_GENDER_ID
+              when CIM_FEMALE_GENDER_ID
+                US_FEMALE_GENDER_ID
+              else
+                nil
+              end
+            end
+
+            def gender=(val)
+              case val
+              when US_MALE_GENDER_ID.to_i, US_MALE_GENDER_ID.to_s, 'M'
+                self.gender_id = CIM_MALE_GENDER_ID
+              when US_FEMALE_GENDER_ID.to_i, US_FEMALE_GENDER_ID.to_s, 'F'
+                self.gender_id = CIM_FEMALE_GENDER_ID
+              end
+            end
+
+            def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
+            def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
+
+            def graduation_date() cim_hrdb_person_year.try(:grad_date) end
+
           end
 
           base.extend PersonClassMethods
         end
+
 
         CIM_MALE_GENDER_ID = 1
         CIM_FEMALE_GENDER_ID = 2
         US_MALE_GENDER_ID = 1
         US_FEMALE_GENDER_ID = 0
 
+
         MAX_SEARCH_RESULTS = 100
 
-        def created_at_override=(v) end # noop since it would have set the id to the timestamp
-
-        def person_extra()
-          @person_extra ||= person_extra_ref || ::PersonExtra.new(:person_id => id)
-        end
-        def major() person_extra.major end
-        def major=(val) person_extra.major = val end
-        def minor() person_extra.minor end
-        def minor=(val) person_extra.minor = val end
-        def url() person_extra.major end
-        def url=(val) person_extra.url = val end
-        def staff_notes() person_extra.staff_notes end
-        def staff_notes=(val) person_extra.staff_notes = val end
-        def updated_at() person_extra.updated_at end
-        def updated_at=(val) person_extra.updated_at = val end
-        def updated_by() person_extra.updated_by end
-        def updated_by=(val) person_extra.updated_by = val end
-        def after_save
-          person_extra.save!
-        end
-
-        def first_name=(val="")
-          self.person_legal_fname ||= ""
-          self.person_fname = val
-        end
-
-        def last_name=(val="")
-          self.person_legal_lname ||= ""
-          self.person_lname = val
-        end
-
-        def user_override
-          users.first
-        end
-
-        def user=(val)
-          throw "not implemented"
-        end
 
         def get_emerg()
           return @emerg if @emerg
@@ -96,41 +132,7 @@ module Common
           end
           return @emerg
         end
-        def birth_date() get_emerg ? get_emerg.emerg_birthdate : nil; end
-        def birth_date=(v) @save_emerg = true; emerg.emerg_birthdate = v if emerg; end
-        def after_save
-          if @save_emerg
-            get_emerg.save!
-            @save_emerg = false
-          end
-        end
 
-        def created_by=(v) end # don't bother
-
-        def gender()
-          case gender_id
-          when CIM_MALE_GENDER_ID
-            US_MALE_GENDER_ID
-          when CIM_FEMALE_GENDER_ID
-            US_FEMALE_GENDER_ID
-          else
-            nil
-          end
-        end
-
-        def gender=(val)
-          case val
-          when US_MALE_GENDER_ID.to_i, US_MALE_GENDER_ID.to_s, 'M'
-            self.gender_id = CIM_MALE_GENDER_ID
-          when US_FEMALE_GENDER_ID.to_i, US_FEMALE_GENDER_ID.to_s, 'F'
-            self.gender_id = CIM_FEMALE_GENDER_ID
-          end
-        end
-
-        def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
-        def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
-
-        def graduation_date() cim_hrdb_person_year.try(:grad_date) end
 
         # Attended and Unknown Status are not mapped
         ASSIGNMENTS_TO_ROLE = ActiveSupport::OrderedHash.new
@@ -317,6 +319,7 @@ module Common
 
         def create_access(v)
           #ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
+          puts ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
           ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
           #AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
           ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
