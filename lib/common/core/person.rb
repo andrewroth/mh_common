@@ -64,6 +64,12 @@ module Common
           before_save :update_stamp
           before_create :create_stamp
 
+
+          def gender=(value)
+            if value.present?
+              self[:gender] = (male?(value) ? 1 : 0)
+            end
+          end
         end
       
         base.extend PersonClassMethods
@@ -89,12 +95,6 @@ module Common
       def human_gender(value = nil)
         gender = value || self.gender
         ::Person.human_gender(gender)
-      end
-      
-      def gender=(value)
-        if value.present?
-          self[:gender] = (male?(value) ? 1 : 0)
-        end
       end
       
       def male?(value = nil)
