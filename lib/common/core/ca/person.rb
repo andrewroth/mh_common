@@ -117,9 +117,9 @@ module Common
               end
               unless p
                 p = ::Person.find(:first, :conditions => ["#{_(:email, :person)} = ?", address.email])
-                p.create_user_and_access_only("", p.email)
-                
-#                p.user ||= ::User.create!(_(:username, :user) => p.email) if p
+                unless p.user
+                  p.create_user_and_access_only("", p.email)
+                end
               end
               return p
             end

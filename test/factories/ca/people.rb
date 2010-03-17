@@ -29,6 +29,7 @@ Factory.define :person_3, :class => Person, :singleton => true do |p|
   p.last_name 'johnson'
   p.person_legal_lname 'johnson'
   p.gender 'F'
+  p.person_email 'sue@sue.com'
 end
 
 Factory.sequence :person_person_id do |n|
