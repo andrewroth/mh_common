@@ -104,6 +104,26 @@ module Common
 
             def graduation_date() cim_hrdb_person_year.try(:grad_date) end
 
+            def self.find_exact(person, address)
+              # check based on username first
+              user = ::User.find(:first, :conditions => ["#{_(:username, :user)} = ?", address.email])
+              if user && user.person.nil?
+                # If we have an orphaned user record, might as well use it...
+                user.person = person
+                person.save(false)
+                p = person
+              else
+                p = user.person if user
+              end
+              unless p
+                p = ::Person.find(:first, :conditions => ["#{_(:email, :person)} = ?", address.email])
+                p.create_user_and_access_only("", p.email)
+                
+#                p.user ||= ::User.create!(_(:username, :user) => p.email) if p
+              end
+              return p
+            end
+
           end
 
           base.extend PersonClassMethods

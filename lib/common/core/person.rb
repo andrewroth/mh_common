@@ -70,6 +70,18 @@ module Common
               self[:gender] = (male?(value) ? 1 : 0)
             end
           end
+
+          def email
+            self[:email] || primary_email
+          end
+
+          def email=(value)
+            ca = current_address
+            ca ||= self.addresses.new(:address_type => 'current')
+            ca.email = value
+            ca.save
+          end
+          
         end
       
         base.extend PersonClassMethods
@@ -126,17 +138,6 @@ module Common
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
-      end
-      
-      def email
-        self[:email] || primary_email
-      end
-      
-      def email=(value)
-        ca = current_address
-        ca ||= self.addresses.new(:address_type => 'current')
-        ca.email = value
-        ca.save
       end
       
       def ministry_tree
