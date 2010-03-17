@@ -396,10 +396,9 @@ module Common
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
               :person_legal_fname => '', :person_legal_lname => '',
               :birth_date => nil, :person_email => uid
-            v = ::Person.create_viewer(guid, uid)
-            p.create_access(v)
+            p.create_user_and_access_only(guid, uid)
 
-            v
+            p.user
           end
 
           def find_user(person, address)
