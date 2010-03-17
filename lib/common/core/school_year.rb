@@ -10,7 +10,7 @@ module Common
       end
 
       def description
-        @description ||= "#{name}#{level.present? ? ' (' + level + ')' : ''}"
+        @description ||= "#{name}#{level.present? ? ' (' + level.to_s + ')' : ''}"
       end
     end
   end
