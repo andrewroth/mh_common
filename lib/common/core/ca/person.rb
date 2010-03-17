@@ -109,7 +109,7 @@ module Common
               user = ::User.find(:first, :conditions => ["#{_(:username, :user)} = ?", address.email])
               if user && user.person.nil?
                 # If we have an orphaned user record, might as well use it...
-                user.person = person
+                person.setup_and_create_access(user)
                 person.save(false)
                 p = person
               else
@@ -409,7 +409,7 @@ module Common
               # If we have an orphaned user record, might as well use it...
               person.email = address.email
               person.save(false)
-              person.create_access(user)
+              person.setup_and_create_access(user)
               p = person
             else
               p = user.person if user
