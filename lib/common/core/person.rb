@@ -234,21 +234,22 @@ module Common
         end
         doc = Hpricot(raw_res.body)
         return false if (doc/'attribute').empty?
+        ca = current_address
         (doc/'attribute').each do |attrib|
           if attrib['value'].present?
-            current_address.email = attrib['value'].downcase if attrib['displayname'] == 'emailAddress' && current_address
-            current_address.city = attrib['value'] if attrib['displayname'] == 'city' && current_address
-            current_address.phone = attrib['value'] if attrib['displayname'] == 'landPhone' && current_address
-            current_address.alternate_phone = attrib['value'] if attrib['displayname'] == 'mobilePhone' && current_address
-            current_address.zip = attrib['value'] if attrib['displayname'] == 'zip' && current_address
-            current_address.address1 = attrib['value'] if attrib['displayname'] == 'location' && current_address
+            ca.email = attrib['value'].downcase if attrib['displayname'] == 'emailAddress' && ca
+            ca.city = attrib['value'] if attrib['displayname'] == 'city' && ca
+            ca.phone = attrib['value'] if attrib['displayname'] == 'landPhone' && ca
+            ca.alternate_phone = attrib['value'] if attrib['displayname'] == 'mobilePhone' && ca
+            ca.zip = attrib['value'] if attrib['displayname'] == 'zip' && ca
+            ca.address1 = attrib['value'] if attrib['displayname'] == 'location' && ca
             first_name = attrib['value'] if attrib['displayname'] == 'firstName'
             last_name = attrib['value'] if attrib['displayname'] == 'lastName'
             birth_date = attrib['value'] if attrib['displayname'] == 'birthdate'
             gender = attrib['value'] if attrib['displayname'] == 'gender'
           end
         end
-        current_address.save(false) if current_address
+        ca.save(false) if ca
         self.save(false)
       end
       
