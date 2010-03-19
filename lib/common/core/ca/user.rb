@@ -10,6 +10,9 @@ module Common
             has_many :accountadmin_accessgroups, :through => :accountadmin_vieweraccessgroups, :class_name => 'AccountadminAccessgroup'
             has_many :accountadmin_vieweraccessgroups, :foreign_key => :viewer_id, :class_name => 'AccountadminVieweraccessgroup'
             has_many :accountadmin_accountadminaccesses, :foreign_key => :viewer_id
+            has_many :super_admins
+            has_many :event_admins
+            has_many :accesses
             belongs_to :accountadmin_accountgroup, :foreign_key => :accountgroup_id
             belongs_to :accountadmin_language, :foreign_key => :language_id
 

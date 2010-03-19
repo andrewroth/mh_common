@@ -4,8 +4,8 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          belongs_to :user, :class_name => "User", :foreign_key => "viewer_id"
-          belongs_to :person, :class_name => "Person", :foreign_key => "person_id"
+          belongs_to :user, :class_name => "User", :foreign_key => _(:viewer_id)
+          belongs_to :person, :class_name => "Person", :foreign_key => _(:person_id)
         end
       end
 

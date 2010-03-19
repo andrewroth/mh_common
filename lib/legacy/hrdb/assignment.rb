@@ -4,10 +4,10 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          belongs_to :assignmentstatus
-          belongs_to :person
-          belongs_to :campus
+          belongs_to :assignmentstatus, :foreign_key => _(:status_id)
           belongs_to :status, :class_name => 'Status', :foreign_key => _(:id, :status)
+          belongs_to :person, :foreign_key => _(:person_id)
+          belongs_to :campus, :foreign_key => _(:campus_id)
         end
 
         base.extend AssignmentClassMethods

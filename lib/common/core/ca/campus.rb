@@ -9,6 +9,7 @@ module Common
             belongs_to :state, :foreign_key => _(:state_id)
             has_many :weekly_reports, :class_name => 'Weeklyreport', :foreign_key => _(:id)
             has_many :prcs, :class_name => 'Prc', :foreign_key => _(:id)
+            has_many :assignments, :foreign_key => _(:campus_id, :assignment)
 
             validates_no_association_data :people, :campus_involvements, :groups, :ministry_campuses, :ministries, :dorms
 
@@ -19,6 +20,14 @@ module Common
 
           base.extend CampusClassMethods
         end
+
+
+        def all_assignments()
+          Assignment.all(:joins => :person,
+                         :order => __(:first_name, :person) + " ASC, " + __(:last_name, :person) + " ASC",
+                         :conditions => ["#{__(:campus_id, :assignment)} = ?", self.id])
+        end
+
 
         module CampusClassMethods
           # This method will return the campus id associated with a given description

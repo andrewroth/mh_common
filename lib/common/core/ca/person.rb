@@ -26,9 +26,15 @@ module Common
 
             belongs_to :title, :foreign_key => :title_id
 
-            belongs_to :state, :foreign_key => :province_id
+            belongs_to :state_assoc, :foreign_key => :province_id
 
             belongs_to :country, :foreign_key => :country_id
+
+
+            has_many :registrations, :foreign_key => _(:person_id, :registration)
+            has_many :events, :through => :registrations
+            belongs_to :local_province_assoc, :class_name => "State", :foreign_key => :person_local_province_id
+
 
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
@@ -122,6 +128,16 @@ module Common
                 end
               end
               return p
+            end
+
+            # handle states with id of 0
+            def state(*args)
+              self.province_id == 0 ? ::State.new : self.state_assoc(*args)
+            end
+
+            # handle local_provinces with id of 0
+            def local_province(*args)
+              self.person_local_province_id == 0 ? ::State.new : self.local_province_assoc(*args)
             end
 
           end
@@ -359,6 +375,24 @@ module Common
 
         def is_student
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
+        end
+        
+        def get_best_assigned_campus()
+
+          # people can have multiple assignments to campuses and there is no good way to pick just one
+          # do our best to pick the most appropriate campus assignment by picking the one with
+          # the highest id where that person has student status
+          # if the person has no assignments with student status just pick the highest id
+
+          assignment = self.assignments.first( :joins => :assignmentstatus,
+                                               :conditions => ["#{__(:description, :assignmentstatus)} = ?", Assignmentstatus::CURRENT_STUDENT],
+                                               :order => "#{__(:id, :assignment)} DESC" )
+
+          if !assignment then
+            assignment = self.assignments.first( :order => "#{__(:id, :assignment)} DESC" )
+          end
+
+          assignment.campus
         end
 
 
