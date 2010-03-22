@@ -7,6 +7,7 @@ module Legacy
           belongs_to :title_bt, :class_name => 'Title', :foreign_key => :title_id
           has_one :person_extra_ref, :class_name => 'PersonExtra',
             :foreign_key => 'person_id'
+          doesnt_implement_attributes :address2 => '', :email_validated => false
         end
 
         base.extend CimHrdbAddressClassMethods
