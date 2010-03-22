@@ -1,17 +1,15 @@
 module Test
   module TestHelper
 
-    require 'factory_girl'
-    include ActionController::TestProcess
-
-    Dir[Rails.root.join("vendor/plugins/mh_common/test/factories/**/*.rb")].each do |file|
-      require file
-    end
-
     def self.included(base)
       base.class_eval do
         base.use_transactional_fixtures = false
         base.use_instantiated_fixtures  = false
+
+        require 'factory_girl'
+        Dir[Rails.root.join("vendor/plugins/mh_common/test/factories/**/*.rb")].each do |file|
+          require file
+        end
 
         def teardown() teardown_everything end
       end
@@ -36,7 +34,9 @@ module Test
 
     def teardown_everything
       reset_all_sequences
-      ActiveRecord::Base.send(:subclasses).each { |m| m.delete_all unless m.abstract_class || m == DbFile }
+      ActiveRecord::Base.send(:subclasses).each { |m| 
+        m.delete_all unless m.abstract_class || m.name == "DbFile"
+      }
     end
 
     def setup_users
