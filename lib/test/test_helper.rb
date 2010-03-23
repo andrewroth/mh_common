@@ -77,6 +77,16 @@ module Test
       Factory(:assignment_6)
     end
 
+    def setup_assignmentstatuses
+      Factory(:assignmentstatus_0)
+      Factory(:assignmentstatus_1)
+      Factory(:assignmentstatus_2)
+      Factory(:assignmentstatus_3)
+      Factory(:assignmentstatus_4)
+      Factory(:assignmentstatus_5)
+      Factory(:assignmentstatus_6)
+    end
+
     def setup_people
       reset_people_sequences
       Factory(:person_1)
@@ -135,6 +145,7 @@ module Test
     end
 
     def setup_ministry_roles
+      Factory(:ministryrole_9)
       @ministry_role_one = Factory(:ministryrole_1)
       Factory(:ministryrole_2)
       Factory(:ministryrole_3)
@@ -143,7 +154,6 @@ module Test
       Factory(:ministryrole_6)
       Factory(:ministryrole_7)
       Factory(:ministryrole_8)
-      Factory(:ministryrole_9)
     end
 
     def reset_campus_involvements_sequences
