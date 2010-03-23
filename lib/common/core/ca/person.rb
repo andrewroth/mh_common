@@ -351,11 +351,13 @@ module Common
         end
 
         def full_destroy
-          self.user.try(:destroy)
-          self.access.try(:destroy)
-          self.emerg.try(:destroy)
-          self.cim_hrdb_person_year.try(:destroy)
+          # must destroy person and access before user can be destroyed because of validates_no_association_data
+          uid = self.user.id
           self.destroy
+          self.access.try(:destroy)
+          ::User.find(uid).try(:destroy)
+          self.emerg.try(:destroy)
+          self.cim_hrdb_person_years.each {|c| c.try(:destroy)}
         end
 
         def is_student
