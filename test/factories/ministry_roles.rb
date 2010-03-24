@@ -69,6 +69,14 @@ Factory.define :ministryrole_9, :class => StaffRole, :singleton => true  do |m|
   m.id '10'
   m.ministry_id '1'
   m.name 'Staff'
-  m.position '1'
+  m.position '3'
+  m.type 'StaffRole'
+end
+
+Factory.define :ministryrole_10, :class => StaffRole, :singleton => true  do |m|
+  m.id '11'
+  m.ministry_id '1'
+  m.name 'Staff Team'
+  m.position '4'
   m.type 'StaffRole'
 end
