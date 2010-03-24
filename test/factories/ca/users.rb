@@ -4,6 +4,7 @@ Factory.define :user_1, :class => User, :singleton => true do |u|
   u.password  { User.encrypt('test') }
   u.guid 'F167605D-94A4-7121-2A58-8D0F2CA6E026'
   u.last_login { Date.today }
+  u.accountgroup_id '10'
 end
 
 Factory.define :user_2, :class => User, :singleton => true do |u|
@@ -12,6 +13,7 @@ Factory.define :user_2, :class => User, :singleton => true do |u|
   u.password 'test'
   u.guid ''
   u.last_login { Date.today }
+  u.accountgroup_id '11'
 end
 
 Factory.define :user_3, :class => User, :singleton => true do |u|
@@ -20,6 +22,7 @@ Factory.define :user_3, :class => User, :singleton => true do |u|
   u.password 'bob'
   u.guid ''
   u.last_login { Date.today }
+  u.accountgroup_id '12'
 end
 
 Factory.define :user_4, :class => User, :singleton => true do |u|
@@ -28,6 +31,7 @@ Factory.define :user_4, :class => User, :singleton => true do |u|
   u.password  { User.encrypt('test') }
   u.guid '8a4ea810-0cc2-4062-ae87-27e90e641b7a'
   u.last_login { Date.today }
+  u.accountgroup_id '13'
 end
 
 Factory.define :user_5, :class => User, :singleton => true do |u|

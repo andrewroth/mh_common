@@ -72,6 +72,14 @@ module Test
       return Factory(:person)
     end
 
+    def setup_accountadmin_accountgroups
+      Factory(:AccountadminAccountgroup_10)
+      Factory(:AccountadminAccountgroup_11)
+      Factory(:AccountadminAccountgroup_12)
+      Factory(:AccountadminAccountgroup_13)
+      Factory(:AccountadminAccountgroup_15)
+    end
+
     def setup_assignments
       Factory(:person_1)
       Factory(:person_2)
