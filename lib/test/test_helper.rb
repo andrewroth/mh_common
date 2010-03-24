@@ -44,6 +44,18 @@ module Test
       Factory(:user_3)
     end
 
+    def setup_genders
+      Factory(:gender_0)
+      Factory(:gender_1)
+      Factory(:gender_2)
+    end
+
+    def setup_regions
+      Factory(:region_1)
+      Factory(:region_2)
+      Factory(:region_3)
+    end
+
     def setup_addresses
       Factory(:address_1)
       Factory(:address_2)

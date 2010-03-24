@@ -22,7 +22,7 @@ module Legacy
           order = order.upcase
           order = "DESC" if (order != "ASC" && order != "DESC")
 
-          Gender.all(:order => _(order_field) + " " + order + ", " + _(:id) + " " + order)
+          ::Gender.all(:order => _(order_field) + " " + order + ", " + _(:id) + " " + order)
         end
       end
 
