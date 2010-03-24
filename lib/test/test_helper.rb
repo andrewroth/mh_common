@@ -58,6 +58,14 @@ module Test
     def setup_school_years
       Factory(:schoolyear_1)
       Factory(:schoolyear_2)
+      Factory(:schoolyear_3)
+      Factory(:schoolyear_4)
+      Factory(:schoolyear_5)
+      Factory(:schoolyear_6)
+      Factory(:schoolyear_7)
+      Factory(:schoolyear_8)
+      Factory(:schoolyear_9)
+      Factory(:schoolyear_10)
     end
 
     def setup_generic_person
@@ -145,9 +153,10 @@ module Test
     end
 
     def setup_ministry_roles
-      Factory(:ministryrole_9)
       @ministry_role_one = Factory(:ministryrole_1)
       Factory(:ministryrole_2)
+      Factory(:ministryrole_9)
+      Factory(:ministryrole_10)
       Factory(:ministryrole_3)
       Factory(:ministryrole_4)
       Factory(:ministryrole_5)

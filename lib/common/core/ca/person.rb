@@ -103,7 +103,7 @@ module Common
             def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
             def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
 
-            def graduation_date() cim_hrdb_person_year.try(:grad_date) end
+            def graduation_date() cim_hrdb_person_years.first.try(:grad_date) end
 
             def self.find_exact(person, address)
               # check based on username first
@@ -309,7 +309,7 @@ module Common
             }
             ci ||= ::CampusInvolvement.new :person_id => self.id, :campus_id => campus.id
 
-            school_year = cim_hrdb_person_year.try(:school_year)
+            school_year = cim_hrdb_person_years.first.try(:school_year)
             ci.ministry_id = c4c.id
             ci.campus_id = campus.id
             ci.graduation_date = graduation_date
