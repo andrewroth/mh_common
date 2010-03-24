@@ -72,12 +72,24 @@ module Test
       return Factory(:person)
     end
 
+    def setup_accountadmin_vieweraccessgroups
+      Factory(:accountadminvieweraccessgroup_1)
+      Factory(:accountadminvieweraccessgroup_2)
+      Factory(:accountadminvieweraccessgroup_3)
+      Factory(:accountadminvieweraccessgroup_4)
+    end
+
     def setup_accountadmin_accountgroups
-      Factory(:AccountadminAccountgroup_10)
-      Factory(:AccountadminAccountgroup_11)
-      Factory(:AccountadminAccountgroup_12)
-      Factory(:AccountadminAccountgroup_13)
-      Factory(:AccountadminAccountgroup_15)
+      Factory(:accountadminaccountgroup_10)
+      Factory(:accountadminaccountgroup_11)
+      Factory(:accountadminaccountgroup_12)
+      Factory(:accountadminaccountgroup_13)
+      Factory(:accountadminaccountgroup_15)
+    end
+
+    def setup_cim_hrdb_privs
+      Factory(:cimhrdbpriv_1)
+      Factory(:cimhrdbpriv_2)
     end
 
     def setup_assignments
