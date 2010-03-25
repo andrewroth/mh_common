@@ -39,6 +39,14 @@ module Test
       }
     end
 
+    def setup_titles
+      Factory(:title_1)
+      Factory(:title_2)
+      Factory(:title_3)
+      Factory(:title_4)
+      Factory(:title_5)
+    end
+
     def setup_users
       Factory(:user_1)
       Factory(:user_3)
