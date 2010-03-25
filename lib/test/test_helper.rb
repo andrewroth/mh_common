@@ -39,6 +39,16 @@ module Test
       }
     end
 
+    def setup_prcs
+      Factory(:prc_1)
+      Factory(:prc_2)
+      Factory(:prc_3)
+      Factory(:prc_4)
+      Factory(:prc_5)
+      Factory(:prc_6)
+      Factory(:prc_7)
+    end
+
     def setup_titles
       Factory(:title_1)
       Factory(:title_2)
@@ -146,6 +156,7 @@ module Test
       Factory(:campus_1)
       Factory(:campus_2)
       Factory(:campus_3)
+      Factory(:campus_4)
     end
 
     def setup_ministries
