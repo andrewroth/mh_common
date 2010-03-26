@@ -49,6 +49,52 @@ module Test
       Factory(:prc_7)
     end
 
+    def setup_prcmethods
+      Factory(:prcmethod_1)
+      Factory(:prcmethod_2)
+      Factory(:prcmethod_10)
+      Factory(:prcmethod_3)
+      Factory(:prcmethod_4)
+    end
+
+    def setup_semesters
+      Factory(:semester_10)
+      Factory(:semester_11)
+      Factory(:semester_12)
+      Factory(:semester_13)
+    end
+
+    def setup_years
+      Factory(:year_1)
+      Factory(:year_2)
+    end
+
+    def setup_weeks
+      Factory(:week_1)
+      Factory(:week_2)
+      Factory(:week_3)
+      Factory(:week_4)
+      Factory(:week_5)
+      Factory(:week_6)
+      Factory(:week_7)
+      Factory(:week_8)
+      Factory(:week_9)
+      Factory(:week_10)
+      Factory(:week_11)
+      Factory(:week_12)
+    end
+
+    def setup_weeklyreports
+      Factory(:weeklyreport_1)
+      Factory(:weeklyreport_2)
+      Factory(:weeklyreport_3)
+      Factory(:weeklyreport_4)
+      Factory(:weeklyreport_5)
+      Factory(:weeklyreport_6)
+      Factory(:weeklyreport_7)
+      Factory(:weeklyreport_8)
+    end
+
     def setup_titles
       Factory(:title_1)
       Factory(:title_2)

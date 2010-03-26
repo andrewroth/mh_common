@@ -12,11 +12,6 @@ module Legacy
 
       module SemesterClassMethods
 
-        # This method will return all the semesters associated with a given year id
-        def find_semesters_by_year(year_id)
-          find(:all, :conditions => {_(:year_id) => year_id})
-        end
-
         # This method will return the semester id associated with a given description
         def find_semester_id(description)
           find(:first, :conditions => {_(:description) => description}).id
