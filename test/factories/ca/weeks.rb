@@ -1,3 +1,7 @@
+#-------------
+# semester 11
+#-------------
+
 Factory.define :week_1, :class => Week, :singleton => true do |m|
   m.week_id '1'
   m.week_endDate '2010-01-09'
@@ -80,5 +84,31 @@ Factory.define :week_12, :class => Week, :singleton => true do |m|
   m.week_endDate '2010-03-27'
   m.semester_id '11'
   m.month_id '3'
+end
+
+Factory.define :week_13, :class => Week, :singleton => true do |m|
+  m.week_id '13'
+  m.week_endDate '2010-05-02'
+  m.semester_id '11'
+  m.month_id '5'
+end
+
+
+#-------------
+# semester 12
+#-------------
+
+Factory.define :week_14, :class => Week, :singleton => true do |m|
+  m.week_id '14'
+  m.week_endDate '2010-05-09'
+  m.semester_id '12'
+  m.month_id '5'
+end
+
+Factory.define :week_15, :class => Week, :singleton => true do |m|
+  m.week_id '15'
+  m.week_endDate '2010-05-16'
+  m.semester_id '12'
+  m.month_id '5'
 end
 

@@ -82,6 +82,9 @@ module Test
       Factory(:week_10)
       Factory(:week_11)
       Factory(:week_12)
+      Factory(:week_13)
+      Factory(:week_14)
+      Factory(:week_15)
     end
 
     def setup_weeklyreports
@@ -93,6 +96,14 @@ module Test
       Factory(:weeklyreport_6)
       Factory(:weeklyreport_7)
       Factory(:weeklyreport_8)
+      Factory(:weeklyreport_9)
+      Factory(:weeklyreport_10)
+      Factory(:weeklyreport_11)
+      Factory(:weeklyreport_12)
+      Factory(:weeklyreport_13)
+      Factory(:weeklyreport_14)
+      Factory(:weeklyreport_15)
+      Factory(:weeklyreport_16)
     end
 
     def setup_titles
