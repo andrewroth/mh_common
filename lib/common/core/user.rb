@@ -15,7 +15,7 @@ module Common
           validates_length_of       _(:username), :within => 6..40
           validates_uniqueness_of   _(:username), :case_sensitive => false, :on => :create
           before_save :encrypt_password
-          before_save :register_user_to_fb if Cmt::CONFIG[:facebook_connectivity_enabled]
+          before_save :register_user_to_fb if ::Cmt::CONFIG[:facebook_connectivity_enabled]
           before_create :stamp_created_on
 
 
