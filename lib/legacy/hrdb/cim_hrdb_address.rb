@@ -75,15 +75,6 @@ module Legacy
 
       
       module CimHrdbAddressClassMethods
-        MockAggregation = Struct.new(:klass)
-        def reflect_on_aggregation(name)
-          if [:start_date, :end_date].include? name
-            agg = MockAggregation.new
-            agg.klass = Date
-            return agg
-          end
-          super
-        end
       end
 
     end

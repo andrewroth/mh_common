@@ -51,9 +51,9 @@ module Common
             def updated_at=(val) person_extra.updated_at = val end
             def updated_by() person_extra.updated_by end
             def updated_by=(val) person_extra.updated_by = val end
-            def after_save
-              person_extra.save!
-            end
+            after_save { |record|
+              record.person_extra.save!
+            }
 
             def first_name=(val="")
               self.person_legal_fname ||= ""
@@ -141,6 +141,12 @@ module Common
 
 
         def get_emerg()
+          # really bizarre, but @emerg can get into a state where it's nil but not the NilClass
+          # I tried printing some debug statements when this happens:
+          #   @emerg.inspect='nil' @emerg.nil?='false' @emerg.is_a?(::Emerg)='' @emerg.class=''
+          # Seems the only way to get out of this is look for the inspect of 'nil'
+          # -AR
+          if @emerg.inspect == "nil" then @emerg = nil end
           return @emerg if @emerg
           @emerg = emerg
           return @emerg if @emerg
@@ -264,8 +270,8 @@ module Common
 
           c4c = ::Ministry.find_by_name 'Campus for Christ'
 
-          if !self.email.present?
-            self.email = self.user.viewer_userID if self.user
+          if !self[:person_email].present?
+            self[:person_email] = self.user.viewer_userID if self.user
             self.save
           end
 
@@ -339,11 +345,11 @@ module Common
         end
 
         def setup_and_create_access(v)
-          ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
+          #ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
           ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
-          if ag_st
-            ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
-          end
+          #if ag_st
+          #  ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
+          #end
           if ag_all
             ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
           end
@@ -366,16 +372,6 @@ module Common
         
 
         module PersonClassMethods
-          # TODO: Can this be removed now?
-          MockAggregation = Struct.new(:klass)
-          def reflect_on_aggregation(name)
-            if [:birth_date].include? name
-              agg = MockAggregation.new
-              agg.klass = Date
-              return agg
-            end
-            super
-          end
 
           def create_viewer(guid, uid)
             v = ::User.new
