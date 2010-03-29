@@ -40,10 +40,11 @@ module Common
         if mi.nil?
           mi = ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
         elsif mi.ministry_role_id.nil?
-          mi.ministry_role_id = ::StudentRole
+          mi.ministry_role_id = ::MinistryRole.default_student_role.id
           mi.save
         elsif !mi.try(:ministry_role).is_a?(::StudentRole)
           mi.ministry_role_id = ::MinistryRole.default_student_role.id
+          logger.info "Making person #{mi.person.id} (#{mi.person.full_name}) ministry involvement #{mi.inspect} to a student role.  Trace: #{caller.join("\n")}"
         end
         @ministry_involvement = mi
       end
