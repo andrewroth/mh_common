@@ -11,6 +11,13 @@ Factory.define :person_1, :class => Person, :singleton => true do |p|
   p.birth_date '07/07/1982'
   p.gender '1'
   p.person_email 'josh.starcher@uscm.org'
+  # address info
+  p.person_city "JoshCity"
+  p.province_id 1
+  p.person_addr "#1 Josh Street"
+  p.person_local_city "JoshCity Local"
+  p.person_local_province_id 2
+  p.person_local_addr "#1 Josh Street Local"
 end
 
 Factory.define :person_2, :class => Person, :singleton => true do |p|
