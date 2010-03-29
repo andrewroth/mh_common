@@ -17,9 +17,11 @@ module Common
 
             validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
 
-            unless RAILS_ENV == 'test'
-              def username=(val)
-                # don't let usernames be set to viewer_userID
+            def username=(val)
+              # don't let username= be set to viewer_userID
+              # TODO why is this here? -AR
+              if RAILS_ENV == 'test'
+                self.viewer_userID = val
               end
             end
 
@@ -36,8 +38,6 @@ module Common
 
           base.extend UserClassMethods
         end
-
-
 
         def login_callback
           person.sync_cim_hrdb
@@ -108,6 +108,7 @@ module Common
               u.viewer_userID = receipt.user
               u.save!
             rescue
+              noop = true # apparently rcov needs a statement to mark this block as covered
             end
 
             u
