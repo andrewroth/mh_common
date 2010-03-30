@@ -78,7 +78,11 @@ module Common
             end
 
             def birth_date() get_emerg ? get_emerg.emerg_birthdate : nil; end
-            def birth_date=(v) @save_emerg = true; emerg.emerg_birthdate = v if emerg; end
+            def birth_date=(v) 
+              return if new_record?
+              @save_emerg = true
+              get_emerg.emerg_birthdate = v
+            end
 
             def created_by=(v) end # don't bother
 
