@@ -53,6 +53,11 @@ module Common
             def updated_by=(val) person_extra.updated_by = val end
             after_save { |record|
               record.person_extra.save!
+              if @save_emerg
+                get_emerg.save!
+                @save_emerg = false
+              end
+
             }
 
             def first_name=(val="")
@@ -71,12 +76,6 @@ module Common
 
             def birth_date() get_emerg ? get_emerg.emerg_birthdate : nil; end
             def birth_date=(v) @save_emerg = true; emerg.emerg_birthdate = v if emerg; end
-            def after_save
-              if @save_emerg
-                get_emerg.save!
-                @save_emerg = false
-              end
-            end
 
             def created_by=(v) end # don't bother
 
