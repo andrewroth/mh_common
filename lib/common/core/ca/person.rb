@@ -54,7 +54,7 @@ module Common
             def save_emerg?() @save_emerg end
             def save_emerg=(val) @save_emerg = val end
 
-            after_save { |record|
+            after_update { |record|
               record.person_extra.save!
               if record.save_emerg?
                 record.get_emerg.save!
