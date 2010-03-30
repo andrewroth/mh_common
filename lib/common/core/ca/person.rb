@@ -51,11 +51,14 @@ module Common
             def updated_at=(val) person_extra.updated_at = val end
             def updated_by() person_extra.updated_by end
             def updated_by=(val) person_extra.updated_by = val end
+            def save_emerg?() @save_emerg end
+            def save_emerg=(val) @save_emerg = val end
+
             after_save { |record|
               record.person_extra.save!
-              if @save_emerg
-                get_emerg.save!
-                @save_emerg = false
+              if record.save_emerg?
+                record.get_emerg.save!
+                record.save_emerg = false
               end
 
             }
