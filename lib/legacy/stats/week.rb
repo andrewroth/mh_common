@@ -2,6 +2,8 @@ module Legacy
   module Stats
     module Week
 
+      unloadable
+
       def self.included(base)
         base.class_eval do
           has_many :weekly_reports, :class_name => 'Weeklyreport', :foreign_key => _(:id)
@@ -83,17 +85,20 @@ module Legacy
 
         # This method will return the week id associated with a given end date
         def find_week_id(end_date)
-          find(:first, :select => _(:id), :conditions => {_(:end_date) => end_date})["#{_(:id)}"]
+          week = find(:first, :select => _(:id), :conditions => {_(:end_date) => end_date})
+          week ? week.id : nil
         end
 
         # This method will return the start date associated with a given week id
         def find_start_date(week_id)
-          find(:first, :select => :week_endDate, :conditions => {_(:id) => (week_id-1)} )["#{_(:end_date)}"]
+          week = find(:first, :select => :week_endDate, :conditions => {_(:id) => (week_id-1)} )
+          week ? week.end_date : nil
         end
 
         # This method will return the end date associated with a given week id
         def find_end_date(week_id)
-          find(:first, :select => :week_endDate, :conditions => {_(:id) => week_id} )["#{_(:end_date)}"]
+          week = find(:first, :select => :week_endDate, :conditions => {_(:id) => week_id} )
+          week ? week.end_date : nil
         end
 
         # This method will return all the weeks associated with a given month id
