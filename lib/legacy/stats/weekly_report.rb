@@ -1,6 +1,6 @@
 module Legacy
   module Stats
-    module Weeklyreport
+    module WeeklyReport
 
       def self.included(base)
         base.class_eval do
@@ -8,6 +8,9 @@ module Legacy
           load_mappings
           belongs_to :week, :class_name => 'Week'
           belongs_to :campus, :class_name => 'Campus'
+
+          validates_presence_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)
+          validates_numericality_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)
         end
 
         base.extend StatsClassMethods
