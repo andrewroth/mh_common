@@ -15,6 +15,8 @@ module Common
           validates_presence_of _(:ministry_role_id), :on => :create, :message => "can't be blank"
           validates_presence_of _(:ministry_id)
         end
+
+        base.extend MinistryInvolvementMethods
       end
 
       def validate
@@ -26,6 +28,21 @@ module Common
       end
     
       def archived?() end_date.present? end
+
+
+      module MinistryInvolvementMethods
+
+        def build_highest_ministry_involvement_possible(person = nil)
+          mi = ::MinistryInvolvement.new
+          mi.person_id = person.nil? ? nil : person.id
+          mi.ministry_id = 1
+          mi.start_date = Date.today
+          mi.admin = 1
+          mi.ministry_role_id = ::StaffRole.find(:first, :order => :position).id
+          mi
+        end
+
+      end
 
     end
   end

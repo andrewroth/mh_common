@@ -6,7 +6,7 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          has_many :weekly_reports, :class_name => 'Weeklyreport', :foreign_key => _(:id)
+          has_many :weekly_reports, :class_name => 'WeeklyReport', :foreign_key => _(:id)
           belongs_to :campus, :class_name => 'Campus'
         end
 

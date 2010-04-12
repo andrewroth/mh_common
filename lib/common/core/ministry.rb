@@ -131,7 +131,15 @@ module Common
         end
         @campus_ids
       end
-      
+
+      def myself_and_descendants
+        unless @myself_and_descendants
+          @myself_and_descendants = [self]
+          descendants.each { |desc| @myself_and_descendants << desc }
+        end
+        return @myself_and_descendants
+      end
+
       def descendants
         unless @descendants
           @offspring = self.children.find(:all, :include => :children)

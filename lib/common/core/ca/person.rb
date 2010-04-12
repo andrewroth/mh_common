@@ -376,7 +376,7 @@ module Common
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
 
-        def highest_ministry_involvement_with_role(ministry_role)
+        def highest_ministry_involvement_with_particular_role(ministry_role)
           if ministry_role
             ministry_involvement = ::MinistryInvolvement.all(:first, :joins => :ministry,
                                                              :conditions => {:person_id => self.id, :ministry_role_id => ministry_role.id, :end_date => nil},
@@ -386,6 +386,7 @@ module Common
             nil
           end
         end
+
         
 
         module PersonClassMethods
