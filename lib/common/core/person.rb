@@ -330,6 +330,38 @@ module Common
         end
         return p
       end
+
+      def search(search, page, per_page)
+        if search then
+          ::Person.paginate(:page => page,
+                            :per_page => per_page,
+                            :conditions => ["concat(#{_(:first_name, :person)}, \" \", #{_(:last_name, :person)}) like ? " +
+                                                "or #{_(:id, :person)} like ? ",
+                                                "%#{search}%", "%#{search}%"])
+        else
+          nil
+        end
+      end
+
+      # this method was originally imported from the PAT April 13, 2010 -AR
+      # TODO: this search helper can be mergd with #search above if options are added to not return paginated results
+      def search_by_name(name)
+        return nil if name.nil?
+        name.strip!
+        fname = name.sub(/ +.+/i, '')
+        lname = name.sub(/.+ +/i, '') if name.include? " "
+        if !lname.nil?
+          people = ::Person.find(:all,
+                               :conditions => ["#{_(:first_name, :person)} like ? AND #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{lname}%"],
+                               :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
+        else
+          people = ::Person.find(:all,
+                               :conditions => ["#{_(:first_name, :person)} like ? OR #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{fname}%"],
+                               :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
+        end
+
+        people
+      end
     end
   end
 end
