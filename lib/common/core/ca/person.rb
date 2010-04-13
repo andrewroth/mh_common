@@ -139,6 +139,9 @@ module Common
 
         MAX_SEARCH_RESULTS = 100
 
+        def is_staff?
+          !cim_hrdb_staff.nil?
+        end
 
         def get_emerg()
           # really bizarre, but @emerg can get into a state where it's nil but not the NilClass
@@ -417,20 +420,7 @@ module Common
             end
             return p
           end
-
-          def search(search, page, per_page)
-            if search then
-              ::Person.paginate(:page => page,
-                                :per_page => per_page,
-                                :conditions => ["concat(#{_(:first_name, :person)}, \" \", #{_(:last_name, :person)}) like ? " +
-                                                "or #{_(:id, :person)} like ? ",
-                                                "%#{search}%", "%#{search}%"])
-            else
-              nil
-            end
-          end
         end
-
       end
     end
   end
