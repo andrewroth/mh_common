@@ -148,7 +148,7 @@ module Common
         def person_year
           person_year = cim_hrdb_person_years.first
           unless person_year
-            person_year = cim_hrdb_person_years.create(:year_id => YearInSchool::DEFAULT_YEAR, :grad_date => Time.now)
+            person_year = cim_hrdb_person_years.create(:year_id => ::SchoolYear.default_year_id, :grad_date => Time.now)
           end
           return person_year
         end
@@ -158,12 +158,11 @@ module Common
         end
 
         def year_in_school
-          return nil unless person_year
-          person_year.year_in_school
+          person_year.school_year
         end
 
         def year_in_school_id
-          cim_hrdb_person_year.year_id
+          cim_hrdb_person_years.first.try(:year_id)
         end
 
         # will need to be implemented in the utopian CDM using Address
