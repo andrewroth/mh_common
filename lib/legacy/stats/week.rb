@@ -22,6 +22,16 @@ module Legacy
           result.sum(&stat) # sum the specific stat
         end
 
+        # This method will return the given stat total associated with a given week id in a given ministry
+        def find_ministry_stats_week(week_id,ministry_id,stat)
+          week = find(:first, :conditions => {_(:id) => week_id})
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+
+          result = week.weekly_reports.find(:all, :joins => :campus, :conditions => [ "#{__(:campus_id, :campus)} IN (?)", campus_ids ])
+
+          result.sum(&stat) # sum the specific stat
+        end
+
         # This method will return the given stat total associated with a given week id in a given region
         def find_stats_week(week_id,region_id,stat)
           week = find(:first, :conditions => {_(:id) => week_id})
