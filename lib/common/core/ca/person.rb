@@ -145,6 +145,56 @@ module Common
 
         MAX_SEARCH_RESULTS = 100
 
+        def person_year
+          person_year = cim_hrdb_person_years.first
+          unless person_year
+            person_year = cim_hrdb_person_years.create(:year_id => ::SchoolYear.default_year_id, :grad_date => Time.now)
+          end
+          return person_year
+        end
+
+        def is_staff?
+          !cim_hrdb_staff.nil?
+        end
+
+        def year_in_school
+          person_year.school_year
+        end
+
+        def year_in_school_id
+          cim_hrdb_person_years.first.try(:year_id)
+        end
+
+        # will need to be implemented in the utopian CDM using Address
+        def permanent_same_as_local
+          match = %w(city addr pc phone)
+          match << %w(province_id person_local_province_id)
+          for c in match
+            if c.class == Array then
+              p, l = c      else
+              p = "person_#{c}"
+              l = "person_local_#{c}"
+              end
+
+            lv = send(l)
+            return false if lv.nil?
+            pv = send(p)
+
+            if lv != pv then return false end
+          end
+
+          true
+        end
+
+        # these will need to be implemented in the utopian CDM using Address
+        def person_local_province() loc_province end
+        def person_province() perm_province end
+        def person_province_id() province_id end
+        def person_province_id=(val) self[:province_id] = val end
+        def person_local_country() loc_country end
+        def person_country() perm_country end
+        def person_country_id() country_id end
+        def person_country_id=(val) self[:country_id] = val end
 
         def get_emerg()
           # really bizarre, but @emerg can get into a state where it's nil but not the NilClass
@@ -435,20 +485,7 @@ module Common
             end
             return p
           end
-
-          def search(search, page, per_page)
-            if search then
-              ::Person.paginate(:page => page,
-                                :per_page => per_page,
-                                :conditions => ["concat(#{_(:first_name, :person)}, \" \", #{_(:last_name, :person)}) like ? " +
-                                                "or #{_(:id, :person)} like ? ",
-                                                "%#{search}%", "%#{search}%"])
-            else
-              nil
-            end
-          end
         end
-
       end
     end
   end
