@@ -134,8 +134,7 @@ module Common
 
       def myself_and_descendants
         unless @myself_and_descendants
-          @myself_and_descendants = [self]
-          descendants.each { |desc| @myself_and_descendants << desc }
+          @myself_and_descendants = [self] | descendants
         end
         return @myself_and_descendants
       end
