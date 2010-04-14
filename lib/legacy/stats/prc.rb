@@ -2,6 +2,8 @@ module Legacy
   module Stats
     module Prc
 
+      unloadable
+
       def self.included(base)
         base.class_eval do
           belongs_to :campus, :class_name => 'Campus', :foreign_key => _(:id, :campus)
@@ -18,7 +20,14 @@ module Legacy
 
 
       module PrcClassMethods
-        
+
+        # This method will return the amount of indicated decisions that occurred between a given start and end date in a given ministry
+        def count_by_date_per_ministry(start_date,end_date,ministry_id)
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+          result = self.count(:all, :joins => :campus, :conditions => ["#{__(:campus_id, :campus)} IN (?) AND #{_(:date)} <= ? AND #{_(:date)} > ?",campus_ids,end_date,start_date])
+          result
+        end
+
         # This method will return the amount of indicated decisions that occurred between a given start and end date in a given region
         def count_by_date(start_date,end_date,region_id)
           # national team stats are not included, so if the region_id is the national_region then it means total all other regions
