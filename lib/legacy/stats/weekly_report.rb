@@ -3,6 +3,8 @@ module Legacy
     module WeeklyReport
 
       def self.included(base)
+        unloadable
+
         base.class_eval do
           set_primary_key  _(:id)
           load_mappings

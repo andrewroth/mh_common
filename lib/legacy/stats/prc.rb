@@ -55,6 +55,12 @@ module Legacy
           result
         end
 
+        # This method will return the amount of indicated decisions during a given semester and associated with a given ministry id
+        def count_by_semester_and_ministry(semester_id,ministry_id)
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+          count(:all, :joins => :campus, :conditions => ["#{__(:id, :campus)} IN (?) AND #{_(:semester_id)} = ?",campus_ids,semester_id])
+        end
+
         # This method will return the amount of indicated decisions during a given semester and associated with a given campus id
         def count_by_semester_and_campus(semester_id,campus_id)
           count(:all, :joins => :campus, :conditions => ["#{__(:id, :campus)} = ? AND #{_(:semester_id)} = ?",campus_id,semester_id])

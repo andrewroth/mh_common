@@ -97,6 +97,18 @@ module Legacy
           total
         end
 
+        # This method will return the given stat total associated with a given semester and a given ministry
+        def find_stats_semester_ministry(semester_id,ministry_id,stat)
+          weeks = find(:all, :conditions => {_(:semester_id) => semester_id})
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+          total = 0
+          weeks.each do |week| # for each week find the stat and add it to the total
+            result = week.weekly_reports.find(:all, :conditions => ["#{_(:campus_id)} IN (?)", campus_ids])
+            total += result.sum(&stat) # sum the specific stat
+          end
+          total
+        end
+
         # This method will return the given stat total associated with a given semester and a given campus
         def find_stats_semester_campus(semester_id,campus_id,stat)
           weeks = find(:all, :conditions => {_(:semester_id) => semester_id})
