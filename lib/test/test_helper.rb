@@ -14,9 +14,12 @@ module Test
         base.use_instantiated_fixtures  = false
 
         def teardown() teardown_everything end
+        def setup
+          #Attachment.saves = 0
+          #attachment_model self.class.attachment_model
+        end
       end
     end
-
 
     def logger
       RAILS_DEFAULT_LOGGER
@@ -36,7 +39,7 @@ module Test
 
     def teardown_everything
       reset_all_sequences
-      ActiveRecord::Base.send(:subclasses).each { |m| m.delete_all unless m.abstract_class || m == DbFile }
+      ActiveRecord::Base.send(:subclasses).each { |m| m.delete_all unless m.abstract_class }
     end
 
     def setup_users
@@ -103,7 +106,6 @@ module Test
     def setup_default_user
       Factory(:user_1)
       Factory(:person_1)
-      Factory(:access_1)
       Factory(:campusinvolvement_3)
       Factory(:ministry_1)
       Factory(:ministry_2)
