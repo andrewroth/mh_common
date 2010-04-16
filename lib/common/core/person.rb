@@ -131,7 +131,7 @@ module Common
       end
       
       def full_name
-        first_name.to_s + ' ' + last_name.to_s
+        first_name.to_s.capitalize + ' ' + last_name.to_s.capitalize
       end
 
       def primary_email
