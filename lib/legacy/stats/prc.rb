@@ -61,6 +61,11 @@ module Legacy
           count(:all, :joins => :campus, :conditions => ["#{__(:id, :campus)} IN (?) AND #{_(:semester_id)} = ?",campus_ids,semester_id])
         end
 
+        def count_by_semester_and_campuses(semester_id,campuses)
+          campus_ids = campuses.collect {|c| c.id}
+          count(:all, :joins => :campus, :conditions => ["#{__(:id, :campus)} IN (?) AND #{_(:semester_id)} = ?",campus_ids,semester_id])
+        end
+
         # This method will return the amount of indicated decisions during a given semester and associated with a given campus id
         def count_by_semester_and_campus(semester_id,campus_id)
           count(:all, :joins => :campus, :conditions => ["#{__(:id, :campus)} = ? AND #{_(:semester_id)} = ?",campus_id,semester_id])
