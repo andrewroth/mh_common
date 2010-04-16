@@ -31,11 +31,12 @@ module Legacy
           # the highest id where that person has student status
           # if the person has no assignments with student status just pick the highest id
 
-          assignment = self.assignments.first( :conditions => ["#{__(:description, :assignmentstatus)} = ?", Assignmentstatus::CURRENT_STUDENT],
-                                               :order => "#{__(:id, :assignment)} DESC" )
+          assignment = self.assignments.first(:include => :assignmentstatus,
+                                              :conditions => ["#{__(:description, :assignmentstatus)} = ?", Assignmentstatus::CURRENT_STUDENT],
+                                              :order => "#{__(:id, :assignment)} DESC")
 
           if !assignment then
-            assignment = self.assignments.first( :order => "#{__(:id, :assignment)} DESC" )
+            assignment = self.assignments.first(:order => "#{__(:id, :assignment)} DESC")
           end
 
           assignment.campus
