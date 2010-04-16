@@ -2,7 +2,7 @@
 # week 1, month 1, semester 11
 #------------------------------
 
-Factory.define :weeklyreport_1, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_1, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '1'
   w.weeklyReport_1on1SpConv '1'
   w.weeklyReport_1on1GosPres '1'
@@ -23,7 +23,7 @@ Factory.define :weeklyreport_1, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'one'
 end
 
-Factory.define :weeklyreport_2, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_2, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '2'
   w.weeklyReport_1on1SpConv '2'
   w.weeklyReport_1on1GosPres '2'
@@ -44,7 +44,7 @@ Factory.define :weeklyreport_2, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'two'
 end
 
-Factory.define :weeklyreport_3, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_3, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '3'
   w.weeklyReport_1on1SpConv '3'
   w.weeklyReport_1on1GosPres '3'
@@ -65,7 +65,7 @@ Factory.define :weeklyreport_3, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'three'
 end
 
-Factory.define :weeklyreport_4, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_4, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '4'
   w.weeklyReport_1on1SpConv '4'
   w.weeklyReport_1on1GosPres '4'
@@ -91,7 +91,7 @@ end
 # week 2
 #--------
 
-Factory.define :weeklyreport_5, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_5, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '5'
   w.weeklyReport_1on1SpConv '5'
   w.weeklyReport_1on1GosPres '5'
@@ -112,7 +112,7 @@ Factory.define :weeklyreport_5, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'five'
 end
 
-Factory.define :weeklyreport_6, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_6, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '6'
   w.weeklyReport_1on1SpConv '6'
   w.weeklyReport_1on1GosPres '6'
@@ -133,7 +133,7 @@ Factory.define :weeklyreport_6, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'six'
 end
 
-Factory.define :weeklyreport_7, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_7, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '7'
   w.weeklyReport_1on1SpConv '7'
   w.weeklyReport_1on1GosPres '7'
@@ -154,7 +154,7 @@ Factory.define :weeklyreport_7, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'seven'
 end
 
-Factory.define :weeklyreport_8, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_8, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '8'
   w.weeklyReport_1on1SpConv '8'
   w.weeklyReport_1on1GosPres '8'
@@ -175,7 +175,7 @@ Factory.define :weeklyreport_8, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'eight'
 end
 
-Factory.define :weeklyreport_9, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_9, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '9'
   w.weeklyReport_1on1SpConv '19'
   w.weeklyReport_1on1GosPres '29'
@@ -196,7 +196,7 @@ Factory.define :weeklyreport_9, :class => Weeklyreport, :singleton => true do |w
   w.weeklyReport_notes 'nine'
 end
 
-Factory.define :weeklyreport_10, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_10, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '10'
   w.weeklyReport_1on1SpConv '110'
   w.weeklyReport_1on1GosPres '210'
@@ -222,7 +222,7 @@ end
 # week 4
 #--------
 
-Factory.define :weeklyreport_11, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_11, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '11'
   w.weeklyReport_1on1SpConv '111'
   w.weeklyReport_1on1GosPres '211'
@@ -248,7 +248,7 @@ end
 # week 5, month 2
 #-----------------
 
-Factory.define :weeklyreport_12, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_12, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '12'
   w.weeklyReport_1on1SpConv '112'
   w.weeklyReport_1on1GosPres '212'
@@ -274,7 +274,7 @@ end
 # week 8
 #--------
 
-Factory.define :weeklyreport_13, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_13, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '13'
   w.weeklyReport_1on1SpConv '113'
   w.weeklyReport_1on1GosPres '213'
@@ -300,7 +300,7 @@ end
 # week 9, month 3
 #-----------------
 
-Factory.define :weeklyreport_14, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_14, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '14'
   w.weeklyReport_1on1SpConv '114'
   w.weeklyReport_1on1GosPres '214'
@@ -326,7 +326,7 @@ end
 # week 14, month 5, semester 12
 #-------------------------------
 
-Factory.define :weeklyreport_15, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_15, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '15'
   w.weeklyReport_1on1SpConv '115'
   w.weeklyReport_1on1GosPres '215'
@@ -347,7 +347,7 @@ Factory.define :weeklyreport_15, :class => Weeklyreport, :singleton => true do |
   w.weeklyReport_notes 'fifteen'
 end
 
-Factory.define :weeklyreport_16, :class => Weeklyreport, :singleton => true do |w|
+Factory.define :weeklyreport_16, :class => WeeklyReport, :singleton => true do |w|
   w.weeklyReport_id '16'
   w.weeklyReport_1on1SpConv '116'
   w.weeklyReport_1on1GosPres '216'
