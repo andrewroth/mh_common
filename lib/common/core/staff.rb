@@ -3,6 +3,7 @@ module Common
     module Staff
       def self.included(base)
         base.class_eval do
+          unloadable
         end
       end
     end
