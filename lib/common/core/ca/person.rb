@@ -26,10 +26,10 @@ module Common
 
             belongs_to :title, :foreign_key => :title_id
 
-            belongs_to :state_assoc, :foreign_key => :province_id
-
-            belongs_to :country, :foreign_key => :country_id
-
+            belongs_to :loc_state, :foreign_key => "person_local_province_id", :class_name => "State"
+            belongs_to :loc_country, :foreign_key => "person_local_country_id", :class_name => "Country"
+            belongs_to :perm_state, :foreign_key => :province_id, :class_name => "State"
+            belongs_to :perm_country, :foreign_key => "country_id", :class_name => "Country"
 
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
@@ -225,8 +225,8 @@ module Common
         end
 
         # these will need to be implemented in the utopian CDM using Address
-        def person_local_province() loc_province end
-        def person_province() perm_province end
+        def person_local_province() loc_state end
+        def person_province() perm_state end
         def person_province_id() province_id end
         def person_province_id=(val) self[:province_id] = val end
         def person_local_country() loc_country end
