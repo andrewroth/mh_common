@@ -140,6 +140,10 @@ module Test
     def setup_ministry_involvements
       Factory(:ministryinvolvement_1)
       Factory(:ministryinvolvement_2)
+      Factory(:ministryinvolvement_3)
+      Factory(:ministryinvolvement_4)
+      Factory(:ministryinvolvement_5)
+      Factory(:ministryinvolvement_6)
     end
 
     def setup_school_years
