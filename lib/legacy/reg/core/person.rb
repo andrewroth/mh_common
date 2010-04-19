@@ -36,7 +36,7 @@ module Legacy
                                               :order => "#{__(:id, :assignment)} DESC")
 
           if !assignment then
-            assignment = self.assignments.first(:order => "#{__(:id, :assignment)} DESC")
+            assignment = self.assignments.last
           end
 
           assignment.campus
