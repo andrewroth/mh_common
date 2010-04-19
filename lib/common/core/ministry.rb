@@ -92,12 +92,12 @@ module Common
         return @subministry_campuses
       end
     
-      def unique_ministry_campuses
+      def unique_ministry_campuses(top = true)
         unless @unique_ministry_campuses
           res =  lambda {
             @unique_ministry_campuses = ministry_campuses.clone
             @unique_campuses = campuses.clone
-            subministry_campuses.each do |mc| 
+            subministry_campuses(top).each do |mc|
               @unique_ministry_campuses << mc unless @unique_campuses.include?(mc.campus)
               @unique_campuses << mc.campus
             end
