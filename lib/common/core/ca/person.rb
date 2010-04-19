@@ -31,6 +31,10 @@ module Common
             belongs_to :perm_state, :foreign_key => :province_id, :class_name => "State"
             belongs_to :perm_country, :foreign_key => "country_id", :class_name => "Country"
 
+            def viewer
+              viewers[0]
+            end
+
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
               users.first
