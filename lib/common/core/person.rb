@@ -280,9 +280,11 @@ module Common
       end
       
       def is_staff_somewhere?
+        root_ministry = ::Ministry.first.try(:root)
+        return false unless root_ministry
         ::MinistryInvolvement.find(:first, :conditions =>
            ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
-             id, ::Ministry.first.root.staff_role_ids]).present?
+             id, root_ministry.staff_role_ids]).present?
       end
 
       protected
