@@ -172,12 +172,13 @@ module Common
               return nil
             end
 
-
+            def is_staff_somewhere?
+              super || is_hrdb_staff?
+            end
           end
 
           base.extend PersonClassMethods
         end
-
 
         CIM_MALE_GENDER_ID = 1
         CIM_FEMALE_GENDER_ID = 2
@@ -195,7 +196,7 @@ module Common
           return person_year
         end
 
-        def is_staff?
+        def is_hrdb_staff?
           !cim_hrdb_staff.nil?
         end
 
