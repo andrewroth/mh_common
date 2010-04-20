@@ -279,6 +279,12 @@ module Common
         end
       end
       
+      def is_staff_somewhere?
+        ::MinistryInvolvement.find(:first, :conditions =>
+           ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
+             id, ::Ministry.first.root.staff_role_ids]).present?
+      end
+
       protected
       def update_stamp
         self.updated_at = Time.now
@@ -365,11 +371,6 @@ module Common
         people
       end
 
-      def is_staff_somewhere?
-        MinistryInvolvement.find(:first, :conditions =>
-           ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
-             id, Ministry.first.root.staff_role_ids]).present?
-      end
     end
   end
 end
