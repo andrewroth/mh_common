@@ -31,10 +31,6 @@ module Common
             belongs_to :perm_state, :foreign_key => :province_id, :class_name => "State"
             belongs_to :perm_country, :foreign_key => "country_id", :class_name => "Country"
 
-            def viewer
-              viewers[0]
-            end
-
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
               users.first
@@ -141,7 +137,7 @@ module Common
 
               # look for current assignment first
               if @@current_student_assignment_status_id.nil?
-                @@current_student_assignment_status_id = ::Assignmentstatus.find_by_assignmentstatus_desc("Current Student").id
+                @@current_student_assignment_status_id = ::Assignmentstatus.find_by_assignmentstatus_desc("Current Student").try(:id)
               end
 
               if @@current_student_assignment_status_id
@@ -156,7 +152,7 @@ module Common
 
               # look for unknown assignment
               if @@unknown_assignment_status_id.nil?
-                @@unknown_assignment_status_id = ::Assignmentstatus.find_by_assignmentstatus_desc("Unknown Status").id
+                @@unknown_assignment_status_id = ::Assignmentstatus.find_by_assignmentstatus_desc("Unknown Status").try(:id)
               end
 
               if @@unknown_assignment_status_id
@@ -174,6 +170,90 @@ module Common
 
             def is_staff_somewhere?
               super || is_hrdb_staff?
+            end
+            
+            ######### address helpers
+            # TODO: some of these should use CmtGeo
+
+            def gender_short
+              if self.gender_id == 1 then 'M' elsif self.gender_id == 2 then 'F' else '?' end
+            end
+
+            def legal_first_name
+              self.person_legal_fname
+            end
+
+            def legal_last_name
+              self.person_legal_lname
+            end
+
+            def permanent_phone
+              self.person_phone
+            end
+
+            def permanent_address
+              self.person_addr
+            end
+
+            def permanent_city
+              self.person_city
+            end
+
+            def permanent_province
+              if perm_state then perm_state.province_desc else 'no perm province set' end
+            end
+
+            def permanent_province_short
+              if perm_state then perm_state.province_shortDesc else 'no perm province set' end
+            end
+
+            def permanent_country
+              if perm_country then perm_country.country_desc else 'no perm country set' end
+            end
+
+            def permanent_country_short
+              if perm_country then perm_country.country_shortDesc else 'no perm country set' end
+            end
+
+            def permanent_postal_code
+              self.person_pc
+            end
+
+            def local_phone
+              self.person_local_phone
+            end
+
+            def local_address
+              self.person_local_addr
+            end
+
+            def local_city
+              self.person_local_city
+            end
+
+            def local_postal_code
+              self.person_local_pc
+            end
+
+            def local_province
+              if loc_state then loc_state.province_desc else 'no local province set' end
+            end
+
+            def local_province_short
+              if loc_state then loc_state.province_shortDesc else 'no local province set' end
+            end
+
+            def local_country
+              if loc_country then loc_country.country_desc else 'no local country set' end
+            end
+
+            def local_country_short
+              if loc_country then loc_country.country_shortDesc else 'no local country set' end
+            end
+
+            ######### end address helpers
+
+            def sanify_addresses
             end
           end
 
@@ -469,87 +549,6 @@ module Common
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
         
-        ######### address helpers
-        # TODO: some of these should use CmtGeo
-        
-        def gender
-          if self.gender_id == 1 then 'M' elsif self.gender_id == 2 then 'F' else '?' end
-        end
-
-        def legal_first_name
-          self.person_legal_fname
-        end
-
-        def legal_last_name
-          self.person_legal_lname
-        end
-
-        def permanent_phone
-          self.person_phone
-        end
-
-        def permanent_address
-          self.person_addr
-        end
-
-        def permanent_city
-          self.person_city
-        end
-
-        def permanent_province
-          if perm_province then perm_province.province_desc else 'no perm province set' end
-        end
-
-        def permanent_province_short
-          if perm_province then perm_province.province_shortDesc else 'no perm province set' end
-        end
-
-        def permanent_country
-          if perm_country then perm_country.country_desc else 'no perm country set' end
-        end
-
-        def permanent_country_short
-          if perm_country then perm_country.country_shortDesc else 'no perm country set' end
-        end
-
-        def permanent_postal_code
-          self.person_pc
-        end
-
-        def local_phone
-          self.person_local_phone
-        end
-
-        def local_address
-          self.person_local_addr
-        end
-
-        def local_city
-          self.person_local_city
-        end
-
-        def local_postal_code
-          self.person_local_pc
-        end
-
-        def local_province
-          if loc_province  then loc_province.province_desc else 'no local province set' end
-        end
-
-        def local_province_short
-          if loc_province then loc_province.province_shortDesc else 'no local province set' end
-        end
-
-        def local_country
-          if loc_country then loc_country.country_desc else 'no local country set' end
-        end
-
-        def local_country_short
-          if loc_country then loc_country.country_shortDesc else 'no local country set' end
-        end
-
-        ######### address helpers
-
         module PersonClassMethods
 
           def create_viewer(guid, uid)
