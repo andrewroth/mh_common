@@ -6,8 +6,10 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          has_many :weekly_reports, :class_name => 'WeeklyReport', :foreign_key => _(:id)
+          has_many :weekly_reports, :class_name => 'WeeklyReport', :foreign_key => _(:week_id, :weekly_report)
           belongs_to :campus, :class_name => 'Campus'
+          belongs_to :month, :class_name => 'Month'
+          belongs_to :semester, :class_name => 'Semester'
         end
 
         base.extend StatsClassMethods

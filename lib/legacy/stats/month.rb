@@ -4,7 +4,9 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-
+          belongs_to :year, :class_name => 'Year'
+          belongs_to :semester, :class_name => 'Semester'
+          has_many :weeks, :class_name => 'Week', :foreign_key => _(:month_id, :week)
         end
 
         base.extend StatsClassMethods

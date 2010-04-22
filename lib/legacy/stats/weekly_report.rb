@@ -20,6 +20,18 @@ module Legacy
 
 
       module StatsClassMethods
+
+        # returns a hash of all five stats based on a range of week end dates, inclusive, at a campus
+        def find_all_stats_by_date_range_and_campus(first_week_end_date, last_week_end_date, campus_id)
+          reports = find(:all, :joins => :week, :conditions => ["#{_(:week_endDate)} >= ? AND #{_(:week_endDate)} <= ? AND #{_(:campus_id)} = ?", first_week_end_date, last_week_end_date, campus_id])
+
+          stats = {gos_pres => reports.sum(&gos_pres),
+                   gos_pres_std => reports.sum(&gos_pres_std),
+                   sp_conv => reports.sum(&sp_conv),
+                   sp_conv_std => reports.sum(&sp_conv_std),
+                   hs_pres => reports.sum(&hs_pres)}
+        end
+
         # This method will return all the given stat total during a given month on a given campus
         def find_stats_campus(month_id, campus_id, stat)
           result = find(:all, :joins => :week, :conditions => ["#{_(:campus_id)} = ? AND #{_(:month_id, :week)} = ?",campus_id,month_id] )

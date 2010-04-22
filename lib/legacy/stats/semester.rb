@@ -4,7 +4,9 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          has_many :prc, :class_name => 'Prc', :primary_key => _(:id), :foreign_key => _(:id)
+          has_many :prcs, :class_name => 'Prc', :foreign_key => _(:semester_id, :prc)
+          has_many :weeks, :class_name => 'Week', :foreign_key => _(:semester_id, :week)
+          belongs_to :year, :class_name => 'Year'
         end
 
         base.extend SemesterClassMethods
