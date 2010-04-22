@@ -23,7 +23,7 @@ Factory.define :assignment_4, :class => Assignment, :singleton => true do |c|
   c.assignment_id '4'
   c.person_id '2000'
   c.campus_id '1'
-  c.assignmentstatus_id '0'
+  c.assignmentstatus_id '7'
 end
 
 Factory.define :assignment_5, :class => Assignment, :singleton => true do |c|

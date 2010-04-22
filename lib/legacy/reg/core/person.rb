@@ -15,10 +15,13 @@ module Legacy
               self.province_id == 0 ? ::State.new : self.state_assoc(*args)
             end
 
+            # TODO: commented out by Andrew Roth April 21st, because it was conflicting with
+            # local_province in common/core/ca/person.rb which returns the string province name
+            #
             # handle local_provinces with id of 0
-            def local_province(*args)
-              self.person_local_province_id == 0 ? ::State.new : self.local_province_assoc(*args)
-            end
+            #def local_province(*args)
+            #  self.person_local_province_id == 0 ? ::State.new : self.local_province_assoc(*args)
+            #end
           end
 
         end
@@ -36,7 +39,7 @@ module Legacy
                                               :order => "#{__(:id, :assignment)} DESC")
 
           if !assignment then
-            assignment = self.assignments.first(:order => "#{__(:id, :assignment)} DESC")
+            assignment = self.assignments.last
           end
 
           assignment.campus

@@ -31,7 +31,7 @@ module Common
             def created_at=(v) end
 
             def person
-              persons.first
+              @person ||= persons.first if !persons.empty?
             end
 
           end
