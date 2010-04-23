@@ -282,7 +282,7 @@ module Common
       
       def is_staff_somewhere?
         ::MinistryInvolvement.find(:first, :conditions =>
-           ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
+           ["#{__(:person_id, :ministry_involvement)} = ? AND (#{__(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{__(:end_date, :ministry_involvement)} is null",
              id, ::Ministry.first.root.staff_role_ids]).present?
       end
 
