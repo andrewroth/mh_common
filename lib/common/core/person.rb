@@ -166,7 +166,7 @@ module Common
       end
       
       def full_name
-        first_name.to_s + ' ' + last_name.to_s
+        preferred_first_name.to_s + ' ' + preferred_last_name.to_s
       end
 
       def primary_email
