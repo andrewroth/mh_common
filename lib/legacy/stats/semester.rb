@@ -48,6 +48,12 @@ module Legacy
         def find_semester_year(semester_id)
           find(:first, :conditions => {_(:id) => semester_id})["#{_(:year_id)}"]
         end
+
+        # return the semester that the date belongs to
+        def find_semester_from_date(date)
+          semesters = all(:conditions => ["#{_(:start_date)} <= ?", date], :order => "#{_(:start_date)} asc")
+          return semesters.empty? ? ::Semester.first : semesters.last
+        end
       end
     end
   end
