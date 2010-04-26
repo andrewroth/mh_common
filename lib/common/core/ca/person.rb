@@ -53,6 +53,7 @@ module Common
             def updated_by=(val) person_extra.updated_by = val end
             def save_emerg?() @save_emerg end
             def save_emerg=(val) @save_emerg = val end
+            def initialize_addresses() end
 
             after_update { |record|
               record.person_extra.save!
@@ -63,14 +64,8 @@ module Common
 
             }
 
-            def first_name=(val="")
-              self.person_legal_fname ||= ""
-              self.person_fname = val
-            end
-
-            def last_name=(val="")
-              self.person_legal_lname ||= ""
-              self.person_lname = val
+            def gender
+              gender_.try(:gender_desc)
             end
 
             def user=(val)
@@ -86,17 +81,6 @@ module Common
 
             def created_by=(v) end # don't bother
 
-            def gender()
-              case gender_id
-              when CIM_MALE_GENDER_ID
-                US_MALE_GENDER_ID
-              when CIM_FEMALE_GENDER_ID
-                US_FEMALE_GENDER_ID
-              else
-                nil
-              end
-            end
-
             def gender=(val)
               case val
               when US_MALE_GENDER_ID.to_i, US_MALE_GENDER_ID.to_s, 'M'
@@ -108,6 +92,7 @@ module Common
 
             def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
             def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
+            def emergency_address() nil end
 
             def graduation_date() cim_hrdb_person_years.first.try(:grad_date) end
 
@@ -191,32 +176,28 @@ module Common
               self.person_phone
             end
 
-            def permanent_address
+            def permanent_address_line1
               self.person_addr
+            end
+
+            def permanent_address_line2
+              ""
             end
 
             def permanent_city
               self.person_city
             end
 
-            def permanent_province
-              if perm_state then perm_state.province_desc else 'no perm province set' end
+            def permanent_state
+              permanent_province
             end
 
-            def permanent_province_short
+            def permanent_province
               if perm_state then perm_state.province_shortDesc else 'no perm province set' end
             end
 
             def permanent_country
-              if perm_country then perm_country.country_desc else 'no perm country set' end
-            end
-
-            def permanent_country_short
               if perm_country then perm_country.country_shortDesc else 'no perm country set' end
-            end
-
-            def permanent_postal_code
-              self.person_pc
             end
 
             def local_phone
@@ -236,25 +217,28 @@ module Common
             end
 
             def local_province
-              if loc_state then loc_state.province_desc else 'no local province set' end
-            end
-
-            def local_province_short
               if loc_state then loc_state.province_shortDesc else 'no local province set' end
             end
 
             def local_country
-              if loc_country then loc_country.country_desc else 'no local country set' end
-            end
-
-            def local_country_short
               if loc_country then loc_country.country_shortDesc else 'no local country set' end
             end
 
             ######### end address helpers
 
+            def local_state=(val)
+              self[:person_local_province_id] = ::State.find_by_province_shortDesc(val).try(:id)
+            end
+            def permanent_state=(val)
+              self[:province_id] = ::State.find_by_province_shortDesc(val).try(:id)
+            end
+            def emergency_state=(val)
+              # we have no address for emergency contacts
+            end
+
             def sanify_addresses
             end
+
           end
 
           base.extend PersonClassMethods
