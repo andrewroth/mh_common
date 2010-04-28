@@ -1,12 +1,29 @@
 module Common
   module Core
     module Person
+      ADDRESS_PREFIX_TO_ASSOC = { 
+        "local" => "current_address", 
+        "permanent" => "permanent_address",
+        "emergency" => "emergency_address"
+      }
+
+      ADDRESS_SUFFIX_TO_COLUMN = { 
+        "address1_line" => "address1",
+        "address2_line" => "address2",
+        "city" => "city",
+        "postal_code" => "zip",
+        "phone" => "phone",
+        "valid_until" => "end_date",
+        "country" => "country",
+        "state" => "state"
+      } 
+
       def self.included(base)
         base.class_eval do
           include ActiveRecord::ConnectionAdapters::Quoting
-          
+
           has_many :emails, :class_name => "Email", :foreign_key => "sender_id"
-          
+
           # Campus Relationships
           has_many :involvement_history
           has_many :all_campus_involvements, :class_name => "CampusInvolvement", :foreign_key => _(:person_id), :order => 'end_date DESC' #, :include => [:ministry, :campus]
@@ -41,6 +58,8 @@ module Common
           # Users
           belongs_to :user, :class_name => "User", :foreign_key => _(:user_id)
           
+          # Emergency Information
+          has_one :emerg
           
           has_many :imports
           
@@ -64,11 +83,39 @@ module Common
           before_save :update_stamp
           before_create :create_stamp
 
-        end
+          after_save do |record|
+            record.current_address.save! if record.current_address.present?
+            record.permanent_address.save! if record.permanent_address.present?
+            record.emergency_address.save! if record.emergency_address.present?
+          end
+
+          ADDRESS_PREFIX_TO_ASSOC.each_pair do |method_prefix, assoc|
+            ADDRESS_SUFFIX_TO_COLUMN.each_pair do |method_suffix, column|
+              define_method("#{method_prefix}_#{method_suffix}") do
+                self.send(assoc).send(:try, column)
+              end
+              define_method("#{method_prefix}_#{method_suffix}=") do |val|
+                address = send(assoc) || send("create_#{assoc}")
+                address.send("#{column}=", val)
+              end
+            end
+          end
+
+          def permanent_same_as_local
+            ADDRESS_SUFFIX_TO_COLUMN.keys.each do |column|
+              if send("local_#{column}") != send("permanent_#{column}")
+                return false
+              end
+            end
+            return true
+          end
       
-        base.extend PersonClassMethods
+          base.extend PersonClassMethods
+        end
       end
       
+      def campus(o = {}) primary_campus end
+
       #liquid_methods :first_name, :last_name
       def to_liquid
         { "hisher" => hisher, "himher" => himher, "heshe" => heshe, "first_name" => first_name, "last_name" => last_name, "preferred_name" => preferred_name, "user" => user, "currentaddress" => current_address }
@@ -119,7 +166,7 @@ module Common
       end
       
       def full_name
-        first_name.to_s + ' ' + last_name.to_s
+        preferred_first_name.to_s + ' ' + preferred_last_name.to_s
       end
 
       def primary_email
@@ -277,7 +324,63 @@ module Common
         end
       end
       
+      def is_staff_somewhere?
+        root_ministry = ::Ministry.first.try(:root)
+        return false unless root_ministry
+        ::MinistryInvolvement.find(:first, :conditions =>
+           ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
+             id, root_ministry.staff_role_ids]).present?
+      end
+
+      def get_emerg
+        return @emerg if @emerg 
+        @emerg = emerg
+        return @emerg if @emerg 
+        unless self.new_record?
+          @emerg = create_emerg
+        end
+      end
+
+=begin
+      def permanent_address1_line
+        permanent_address.try(:address1)
+      end
+
+      def permanent_address2_line
+        permanent_address.try(:address1)
+      end
+
+      def local_address1_line
+        current_address.try(:address1)
+      end
+
+      def local_address2_line
+        current_address.try(:address2)
+      end
+
+      def local_city
+        current_address.try(:city)
+      end
+
+      def local_postal_code
+        current_address.try(:zip)
+      end
+
+      def local_phone
+        current_address.try(:phone)
+      end
+
+      def local_valid_until
+        current_address.end_date
+      end
+
+      def permanent_same_as_local
+        # TODO
+        false
+      end
+=end
       protected
+
       def update_stamp
         self.updated_at = Time.now
         self.updated_by = 'MT'
@@ -362,6 +465,7 @@ module Common
 
         people
       end
+
     end
   end
 end
