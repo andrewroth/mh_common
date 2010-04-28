@@ -29,7 +29,6 @@ Factory.define :assignmentstatus_6, :class => Assignmentstatus, :singleton => tr
 end
 
 Factory.define :assignmentstatus_0, :class => Assignmentstatus, :singleton => true do |c|
-  c.id '0'
+  c.id '7'
   c.desc 'Unknown Status'
 end
-
