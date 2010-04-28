@@ -41,6 +41,7 @@ module Common
 
         def login_callback
           person.sync_cim_hrdb
+          v.viewer_isActive = true
         end
 
         def human_is_active()
