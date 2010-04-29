@@ -286,7 +286,64 @@ module Common
              id, ::Ministry.first.root.staff_role_ids]).present?
       end
 
+      def highest_ministry_involvement_with_particular_role(ministry_role)
+        if ministry_role
+          ministry_involvement = ::MinistryInvolvement.all(:first, :joins => :ministry,
+                                                           :conditions => {:person_id => self.id, :ministry_role_id => ministry_role.id, :end_date => nil},
+                                                           :order => "#{::Ministry.table_name}.parent_id ASC")
+          ministry_involvement ? ministry_involvement.first : nil
+        else
+          nil
+        end
+      end
+
+      def ministries_involved_in_with_children(with_ministry_roles = nil)
+        ministries = []
+
+        unless with_ministry_roles.nil?
+          self.ministry_involvements.each do |mi|
+            if with_ministry_roles.include?(mi.ministry_role) then
+              ministries |= mi.ministry.myself_and_descendants
+            end
+          end
+        else
+          self.ministry_involvements.each do |mi|
+            ministries |= mi.ministry.myself_and_descendants
+          end
+        end
+
+        ministries
+      end
+
+      def campuses_under_my_ministries_with_children(with_ministry_roles = nil)
+        ministries = ministries_involved_in_with_children(with_ministry_roles)
+        campuses = []
+
+        ministries.each do |ministry|
+          campuses |= ministry.unique_campuses
+        end
+
+        campuses
+      end
+
+      def has_permission_from_ministry_or_higher(action, controller, ministry)
+        ministry_ids = ministry.ancestors.collect{|m| m.id}
+
+        involvements = ::MinistryInvolvement.all(:conditions => ["#{_(:ministry_id, :ministry_involvement)} IN (?) AND #{_(:person_id, :ministry_involvement)} = ?", ministry_ids, self.id])
+
+        involvements.each do |involvement|
+          mrps = ::MinistryRolePermission.all(:joins => :permission,
+            :conditions => ["#{_(:ministry_role_id, :ministry_role_permission)} = ? AND #{_(:action, :permission)} = ? AND #{_(:controller, :permission)} = ?", involvement.ministry_role_id, action, controller])
+          return true if mrps.any?
+        end
+
+        false
+      end
+
+
+
       protected
+
       def update_stamp
         self.updated_at = Time.now
         self.updated_by = 'MT'
@@ -307,6 +364,7 @@ module Common
           end
         end
       end
+
     end
 
     module PersonClassMethods
