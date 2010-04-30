@@ -379,6 +379,11 @@ module Common
         false
       end
 =end
+      def preferred_name() preferred_first_name end
+      def preferred_name=(val) self[:preferred_first_name] = val end
+      # use last_name for preferred_last_name if none set
+      def preferred_last_name() self[:preferred_last_name] || last_name end
+
       protected
 
       def update_stamp
