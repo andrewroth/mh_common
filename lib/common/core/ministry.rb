@@ -206,7 +206,7 @@ module Common
         end
       end
 
-      def to_hash_with_only_children_person_involved_in(person)
+      def to_hash_with_only_the_children_person_is_involved_in(person)
         base_hash = { 'text' => name, 'id' => id }
 
         children_involved_in = children.select{|c| c.person_involved_at_or_under(person)}
@@ -215,7 +215,7 @@ module Common
           base_hash.merge('leaf' => true)
         else
           base_hash.merge('expanded' => true,
-            'children' => children_involved_in.collect{ |c| c.to_hash_with_only_children_person_involved_in(person) })
+            'children' => children_involved_in.collect{ |c| c.to_hash_with_only_the_children_person_is_involved_in(person) })
         end
       end
 
