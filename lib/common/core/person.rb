@@ -83,7 +83,24 @@ module Common
           before_save :update_stamp
           before_create :create_stamp
 
-          after_save do |record|
+          def gender=(value)
+            if value.present?
+              self[:gender] = (male?(value) ? 1 : 0)
+            end
+          end
+
+          def email
+            self[:email] || primary_email
+          end
+
+          def email=(value)
+            ca = current_address
+            ca ||= self.addresses.new(:address_type => 'current')
+            ca.email = value
+            ca.save
+          end
+          
+          after_update do |record|
             record.current_address.save! if record.current_address.present?
             record.permanent_address.save! if record.permanent_address.present?
             record.emergency_address.save! if record.emergency_address.present?
