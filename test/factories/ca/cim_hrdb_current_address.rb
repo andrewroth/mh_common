@@ -1,3 +1,4 @@
+=begin
 Factory.define :cimhrdbcurrentaddress_1, :class => CimHrdbCurrentAddress, :singleton => true do |p|
   p.person_id '50000'
   p.person_fname 'Josh'
@@ -8,3 +9,4 @@ Factory.define :cimhrdbcurrentaddress_1, :class => CimHrdbCurrentAddress, :singl
   p.person_email 'josh.starcher@uscm.org'
   p.title_id '1'
 end
+=end
