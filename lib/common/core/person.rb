@@ -100,7 +100,7 @@ module Common
             ca.save
           end
           
-          after_save do |record|
+          after_update do |record|
             record.current_address.save! if record.current_address.present?
             record.permanent_address.save! if record.permanent_address.present?
             record.emergency_address.save! if record.emergency_address.present?
@@ -155,6 +155,12 @@ module Common
         ::Person.human_gender(gender)
       end
       
+      def gender=(value)
+        if value.present?
+          self[:gender] = (male?(value) ? 1 : 0)
+        end
+      end
+      
       def male?(value = nil)
         human_gender(value) == 'Male'
       end
@@ -177,13 +183,24 @@ module Common
       end
       
       def full_name
-        preferred_first_name.to_s.capitalize + ' ' + preferred_last_name.to_s.capitalize 
+        preferred_first_name.to_s + ' ' + preferred_last_name.to_s
       end
 
       def primary_email
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
+      end
+      
+      def email
+        self[:email] || primary_email
+      end
+      
+      def email=(value)
+        ca = current_address
+        ca ||= self.addresses.new(:address_type => 'current')
+        ca.email = value
+        ca.save
       end
       
       def ministry_tree
@@ -328,8 +345,8 @@ module Common
         root_ministry = ::Ministry.first.try(:root)
         return false unless root_ministry
         ::MinistryInvolvement.find(:first, :conditions =>
-           ["#{__(:person_id, :ministry_involvement)} = ? AND (#{__(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{__(:end_date, :ministry_involvement)} is null",
-             id, ::Ministry.first.root.staff_role_ids]).present?
+           ["#{_(:person_id, :ministry_involvement)} = ? AND (#{_(:ministry_role_id, :ministry_involvement)} IN (?) OR admin = 1) AND #{_(:end_date, :ministry_involvement)} is null",
+             id, root_ministry.staff_role_ids]).present?
       end
 
       def get_emerg
