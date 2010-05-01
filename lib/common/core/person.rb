@@ -100,7 +100,7 @@ module Common
             ca.save
           end
           
-          after_update do |record|
+          after_save do |record|
             record.current_address.save! if record.current_address.present?
             record.permanent_address.save! if record.permanent_address.present?
             record.emergency_address.save! if record.emergency_address.present?
@@ -396,6 +396,11 @@ module Common
         false
       end
 =end
+      def preferred_name() preferred_first_name end
+      def preferred_name=(val) self[:preferred_first_name] = val end
+      # use last_name for preferred_last_name if none set
+      def preferred_last_name() self[:preferred_last_name] || last_name end
+
       protected
 
       def update_stamp
