@@ -101,6 +101,10 @@ module Common
           end
           
           after_save do |record|
+            record.update_addresses
+          end
+
+          def update_addresses
             record.current_address.save! if record.current_address.present?
             record.permanent_address.save! if record.permanent_address.present?
             record.emergency_address.save! if record.emergency_address.present?
