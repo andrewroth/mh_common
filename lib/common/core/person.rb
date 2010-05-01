@@ -100,7 +100,7 @@ module Common
             ca.save
           end
           
-          after_update do |record|
+          after_save do |record|
             record.current_address.save! if record.current_address.present?
             record.permanent_address.save! if record.permanent_address.present?
             record.emergency_address.save! if record.emergency_address.present?
