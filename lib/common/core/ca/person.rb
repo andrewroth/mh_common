@@ -31,6 +31,7 @@ module Common
             belongs_to :perm_state, :foreign_key => :province_id, :class_name => "State"
             belongs_to :perm_country, :foreign_key => "country_id", :class_name => "Country"
 
+            def update_addresses() end # noop since address info is in person
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
               users.first
