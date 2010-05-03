@@ -242,6 +242,26 @@ module Common
             def sanify_addresses
             end
 
+            def permanent_same_as_local
+              match = %w(city addr pc phone)
+              match << %w(province_id person_local_province_id)
+              for c in match
+                if c.class == Array then
+                  p, l = c      else
+                  p = "person_#{c}"
+                  l = "person_local_#{c}"
+                  end
+
+                lv = send(l)
+                return false if lv.nil?
+                pv = send(p)
+
+                if lv != pv then return false end
+              end
+
+              true
+            end
+
           end
 
           base.extend PersonClassMethods
@@ -273,27 +293,6 @@ module Common
 
         def year_in_school_id
           cim_hrdb_person_years.first.try(:year_id)
-        end
-
-        # will need to be implemented in the utopian CDM using Address
-        def permanent_same_as_local
-          match = %w(city addr pc phone)
-          match << %w(province_id person_local_province_id)
-          for c in match
-            if c.class == Array then
-              p, l = c      else
-              p = "person_#{c}"
-              l = "person_local_#{c}"
-              end
-
-            lv = send(l)
-            return false if lv.nil?
-            pv = send(p)
-
-            if lv != pv then return false end
-          end
-
-          true
         end
 
         # these will need to be implemented in the utopian CDM using Address
