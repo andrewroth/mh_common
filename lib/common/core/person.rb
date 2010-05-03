@@ -105,9 +105,9 @@ module Common
           end
 
           def update_addresses
-            record.current_address.save! if record.current_address.present?
-            record.permanent_address.save! if record.permanent_address.present?
-            record.emergency_address.save! if record.emergency_address.present?
+            current_address.save! if current_address.present?
+            permanent_address.save! if permanent_address.present?
+            emergency_address.save! if emergency_address.present?
           end
 
           ADDRESS_PREFIX_TO_ASSOC.each_pair do |method_prefix, assoc|
