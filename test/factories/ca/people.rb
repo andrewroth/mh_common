@@ -4,17 +4,15 @@ Factory.define :person_1, :class => Person, :singleton => true do |p|
   p.person_legal_fname 'Josh'
   p.last_name 'Starcher'
   p.person_legal_lname 'Starcher'
-=begin
   p.middle_name 'Lee'
   p.preferred_name 'Josh'
   p.major 'Philosophy'
   p.minor 'Computer Science'
   p.birth_date '07/07/1982'
   p.gender_id '1'
+  p.title_id '1'
   p.person_email 'josh.starcher@uscm.org'
-=end
   # address info
-=begin
   p.person_city "JoshCity"
   p.province_id 1
   p.country_id 1
@@ -27,7 +25,6 @@ Factory.define :person_1, :class => Person, :singleton => true do |p|
   p.person_local_phone "000-000-0000"
   p.person_local_pc "ZZZZZZ"
   p.person_local_country_id 2
-=end
   # /opt/local/lib/ruby/gems/1.8/gems/sheldond_fgs-1.2.3/lib/factory_girl/factory.rb:128:in `add_attribute': Attribute already defined: person_local_province_id (Rails::Initializer::Factory::AttributeDefinitionError)
   #p.person_local_province_id 1
 end
