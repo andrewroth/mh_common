@@ -10,6 +10,7 @@ Factory.define :person_1, :class => Person, :singleton => true do |p|
   p.minor 'Computer Science'
   p.birth_date '07/07/1982'
   p.gender_id '1'
+  p.title_id '1'
   p.person_email 'josh.starcher@uscm.org'
   # address info
   p.person_city "JoshCity"
