@@ -96,7 +96,7 @@ module Common
 
             def graduation_date() cim_hrdb_person_years.first.try(:grad_date) end
 
-            def campus() hrdb_student_campus() end
+            def campus(o = {}) hrdb_student_campus(o) end
 
             def self.find_exact(person, address)
               # check based on username first
@@ -317,7 +317,7 @@ module Common
           return @emerg if @emerg
           unless self.new_record?
             # required fields are a bit of a pain
-            @emerg = Emerg.create!(:emerg_birthdate => Time.now, :emerg_contact2Mobile => '', :emerg_contact2Rship => '', :emerg_contact2Home => '', :emerg_passportExpiry => Time.now, :emerg_contact2Work => '', :emerg_contact2Email => '', :emerg_contact2Name => '', :person_id => id)
+            @emerg = ::Emerg.create!(:emerg_birthdate => Time.now, :emerg_contact2Mobile => '', :emerg_contact2Rship => '', :emerg_contact2Home => '', :emerg_passportExpiry => Time.now, :emerg_contact2Work => '', :emerg_contact2Email => '', :emerg_contact2Name => '', :person_id => id)
             @emerg.emerg_passportExpiry = nil
             @emerg.emerg_birthdate = nil
             @emerg.save!
