@@ -224,6 +224,7 @@ module Common
           self.ministry_roles << ::MinistryRole.create(_(:name, :ministry_role) => 'Honourary Member', _(:position, :ministry_role) => 10, :description => 'not a valid student or missionary, but we are giving them limited access anyway')
           self.ministry_roles << ::MinistryRole.create(_(:name, :ministry_role) => 'Admin', _(:position, :ministry_role) => 1)
         end
+        true
       end
     end
   end
