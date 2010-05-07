@@ -4,7 +4,8 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-
+          has_many :months, :class_name => 'Month', :foreign_key => _(:year_id, :month)
+          has_many :semesters, :class_name => 'Semester', :foreign_key => _(:year_id, :semester)
         end
 
         base.extend YearClassMethods

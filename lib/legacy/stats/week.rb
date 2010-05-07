@@ -2,10 +2,14 @@ module Legacy
   module Stats
     module Week
 
+      unloadable
+
       def self.included(base)
         base.class_eval do
-          has_many :weekly_reports, :class_name => 'Weeklyreport', :foreign_key => _(:id)
+          has_many :weekly_reports, :class_name => 'WeeklyReport', :foreign_key => _(:week_id, :weekly_report)
           belongs_to :campus, :class_name => 'Campus'
+          belongs_to :month, :class_name => 'Month'
+          belongs_to :semester, :class_name => 'Semester'
         end
 
         base.extend StatsClassMethods
@@ -20,6 +24,16 @@ module Legacy
           result.sum(&stat) # sum the specific stat
         end
 
+        # This method will return the given stat total associated with a given week id in a given ministry
+        def find_ministry_stats_week(week_id,ministry_id,stat)
+          week = find(:first, :conditions => {_(:id) => week_id})
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+
+          result = week.weekly_reports.find(:all, :joins => :campus, :conditions => [ "#{__(:campus_id, :campus)} IN (?)", campus_ids ])
+
+          result.sum(&stat) # sum the specific stat
+        end
+
         # This method will return the given stat total associated with a given week id in a given region
         def find_stats_week(week_id,region_id,stat)
           week = find(:first, :conditions => {_(:id) => week_id})
@@ -30,6 +44,21 @@ module Legacy
             result = week.weekly_reports.find(:all, :joins => :campus, :conditions => [ "#{__(:region_id, :campus)} = ?", region_id ])
           end
           result.sum(&stat) # sum the specific stat
+        end
+
+        # This method will return the given stat total associated with a given month id in a given ministry
+        def find_ministry_stats_month(month_id,ministry_id,stat)
+          weeks = find(:all, :conditions => {_(:month_id) => month_id})
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+
+          total = 0
+
+          weeks.each do |week| # for each week find the stat and add it to the total
+            result = week.weekly_reports.find(:all, :joins => :campus, :conditions => [ "#{__(:id, :campus)} IN (?)", campus_ids ])
+            total += result.sum(&stat) # sum the specific stat
+          end
+          
+          total
         end
 
         # This method will return the given stat total associated with a given month id in a given region
@@ -70,6 +99,29 @@ module Legacy
           total
         end
 
+        # This method will return the given stat total associated with a given semester and a given ministry
+        def find_stats_semester_ministry(semester_id,ministry_id,stat)
+          weeks = find(:all, :conditions => {_(:semester_id) => semester_id})
+          campus_ids = Ministry.find(ministry_id).unique_campuses.collect {|c| c.id}
+          total = 0
+          weeks.each do |week| # for each week find the stat and add it to the total
+            result = week.weekly_reports.find(:all, :conditions => ["#{_(:campus_id)} IN (?)", campus_ids])
+            total += result.sum(&stat) # sum the specific stat
+          end
+          total
+        end
+
+        def find_stats_semester_campuses(semester_id,campuses,stat)
+          weeks = find(:all, :conditions => {_(:semester_id) => semester_id})
+          campus_ids = campuses.collect {|c| c.id}
+          total = 0
+          weeks.each do |week| # for each week find the stat and add it to the total
+            result = week.weekly_reports.find(:all, :conditions => ["#{_(:campus_id)} IN (?)", campus_ids])
+            total += result.sum(&stat) # sum the specific stat
+          end
+          total
+        end
+
         # This method will return the given stat total associated with a given semester and a given campus
         def find_stats_semester_campus(semester_id,campus_id,stat)
           weeks = find(:all, :conditions => {_(:semester_id) => semester_id})
@@ -83,17 +135,20 @@ module Legacy
 
         # This method will return the week id associated with a given end date
         def find_week_id(end_date)
-          find(:first, :select => _(:id), :conditions => {_(:end_date) => end_date})["#{_(:id)}"]
+          week = find(:first, :select => _(:id), :conditions => {_(:end_date) => end_date})
+          week ? week.id : nil
         end
 
         # This method will return the start date associated with a given week id
         def find_start_date(week_id)
-          find(:first, :select => :week_endDate, :conditions => {_(:id) => (week_id-1)} )["#{_(:end_date)}"]
+          week = find(:first, :select => :week_endDate, :conditions => {_(:id) => (week_id-1)} )
+          week ? week.end_date : nil
         end
 
         # This method will return the end date associated with a given week id
         def find_end_date(week_id)
-          find(:first, :select => :week_endDate, :conditions => {_(:id) => week_id} )["#{_(:end_date)}"]
+          week = find(:first, :select => :week_endDate, :conditions => {_(:id) => week_id} )
+          week ? week.end_date : nil
         end
 
         # This method will return all the weeks associated with a given month id

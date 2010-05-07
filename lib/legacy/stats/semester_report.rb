@@ -1,33 +1,24 @@
 module Legacy
   module Stats
-    module Weeklyreport
+    module SemesterReport
 
       def self.included(base)
+        unloadable
+
         base.class_eval do
           set_primary_key  _(:id)
           load_mappings
-          belongs_to :week, :class_name => 'Week'
+          belongs_to :semester, :class_name => 'Semester'
           belongs_to :campus, :class_name => 'Campus'
+
+          validates_presence_of _(:semester_id), _(:campus_id), _(:average_hours_prayer), _(:average_attendance_weekly_meetings), _(:number_challenged_staff), _(:number_challenged_internships), _(:number_frosh_involved), _(:number_staff_led_dg), _(:number_in_staff_led_dg), _(:number_student_led_dg), _(:number_in_student_led_dg), _(:number_sp_mult_in_staff_led_dg), _(:number_sp_mult_in_student_led_dg)
+          validates_numericality_of _(:semester_id), _(:campus_id), _(:average_hours_prayer), _(:average_attendance_weekly_meetings), _(:number_challenged_staff), _(:number_challenged_internships), _(:number_frosh_involved), _(:number_staff_led_dg), _(:number_in_staff_led_dg), _(:number_student_led_dg), _(:number_in_student_led_dg), _(:number_sp_mult_in_staff_led_dg), _(:number_sp_mult_in_student_led_dg)
         end
 
         base.extend StatsClassMethods
       end
 
-
       module StatsClassMethods
-        # This method will return all the given stat total during a given month on a given campus
-        def find_stats_campus(month_id, campus_id, stat)
-          result = find(:all, :joins => :week, :conditions => ["#{_(:campus_id)} = ? AND #{_(:month_id, :week)} = ?",campus_id,month_id] )
-          total = result.sum(&stat) # sum the specific stat
-          total
-        end
-
-        # This method will return the staff id(s) that have submitted stats during the given semester
-        def find_staff(semester_id, campus_id, staff_id = nil)
-          conditions = "#{__(:semester_id, :week)} = #{semester_id} AND #{_(:campus_id)} = #{campus_id}"
-          conditions += " AND #{:staff_id} = #{staff_id}" if staff_id
-          find(:all, :joins => :week, :select => 'DISTINCT staff_id', :conditions => conditions)
-        end
 
         # This method is used to check whether a staff has submitted stats for a specific week
         def check_submitted(week_id, staff_id, campus_id)
@@ -49,7 +40,7 @@ module Legacy
           end
         end
       end
-      
+
     end
   end
 end

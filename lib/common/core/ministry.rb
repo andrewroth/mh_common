@@ -131,7 +131,14 @@ module Common
         end
         @campus_ids
       end
-      
+
+      def myself_and_descendants
+        unless @myself_and_descendants
+          @myself_and_descendants = [self] | descendants
+        end
+        return @myself_and_descendants
+      end
+
       def descendants
         unless @descendants
           @offspring = self.children.find(:all, :include => :children)
@@ -197,6 +204,29 @@ module Common
           base_hash.merge('expanded' => true, 
             'children' => children.collect(&:to_hash_with_children))
         end
+      end
+
+      def to_hash_with_only_the_children_person_is_involved_in(person)
+        base_hash = { 'text' => name, 'id' => id }
+
+        children_involved_in = children.select{|c| c.person_involved_at_or_under(person)}
+
+        if children_involved_in.empty?
+          base_hash.merge('leaf' => true)
+        else
+          base_hash.merge('expanded' => true,
+            'children' => children_involved_in.collect{ |c| c.to_hash_with_only_the_children_person_is_involved_in(person) })
+        end
+      end
+
+      def person_involved_at_or_under(person)
+        involved_ministries = person.ministry_involvements.collect{|mi| mi.ministry}
+
+        self.myself_and_descendants.each do |m|
+          return true if involved_ministries.include?(m)
+        end
+
+        false
       end
       
       def before_destroy

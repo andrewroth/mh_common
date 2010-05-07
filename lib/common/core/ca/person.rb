@@ -534,6 +534,9 @@ module Common
         def is_student
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
+
+
+
         
         module PersonClassMethods
 

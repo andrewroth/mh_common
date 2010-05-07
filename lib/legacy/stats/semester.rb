@@ -4,11 +4,21 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-          has_many :prc, :class_name => 'Prc', :primary_key => _(:id), :foreign_key => _(:id)
+          has_many :prcs, :class_name => 'Prc', :foreign_key => _(:semester_id, :prc)
+          has_many :weeks, :class_name => 'Week', :foreign_key => _(:semester_id, :week)
+          has_many :semester_reports, :class_name => 'SemesterReport'
+          belongs_to :year, :class_name => 'Year'
         end
 
         base.extend SemesterClassMethods
       end
+
+      def find_stats_semester_campuses(campuses, stat)
+        campus_ids = campuses.collect {|c| c.id}
+        semester_reports.sum(_(stat, :semester_report), :conditions => ["#{_(:campus_id, :semester_report)} IN (?)", campus_ids])
+      end
+
+
 
       module SemesterClassMethods
 
@@ -46,6 +56,23 @@ module Legacy
         def find_semester_year(semester_id)
           find(:first, :conditions => {_(:id) => semester_id})["#{_(:year_id)}"]
         end
+
+        # return the semester that the date belongs to
+        #   if for_week = true will take into account that weeks with more days in the previous semester belong to that semester
+        def find_semester_from_date(date, for_week = false)
+          date = Date.parse(date.to_s)
+
+          # months 1, 5, and 9 are the beginning of semesters
+          # Saturday is day 6 of the week, week end dates are always Saturdays
+          if for_week == true && date.wday == 6 && date.day <= 3 && (date.month == 1 || date.month == 5 || date.month == 9)
+            date = date << 1 # get the previous month
+          end
+
+          semesters = all(:conditions => ["#{_(:start_date)} <= ?", date], :order => "#{_(:start_date)} asc")
+
+          return semesters.empty? ? ::Semester.first : semesters.last
+        end
+
       end
     end
   end

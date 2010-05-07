@@ -4,7 +4,9 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
-
+          belongs_to :year, :class_name => 'Year'
+          belongs_to :semester, :class_name => 'Semester'
+          has_many :weeks, :class_name => 'Week', :foreign_key => _(:month_id, :week)
         end
 
         base.extend StatsClassMethods
@@ -60,6 +62,20 @@ module Legacy
         # This method will return an array of all the months leading up to and including the current month id
         def find_months(current_id)
           find(:all, :conditions => ["#{_(:id)} <= ?",current_id]).collect{ |m| [m.description]}
+        end
+
+        # return the month that the date belongs to
+        #   if for_week = true will take into account that weeks with more days in the previous month belong to that month
+        def find_month_from_date(date, for_week = false)
+          date = Date.parse(date.to_s)
+
+          # Saturday is day 6 of the week, week end dates are always Saturdays
+          if for_week == true && date.wday == 6 && date.day <= 3
+            date = date << 1 # get the previous month
+          end
+
+          months = ::Month.all(:conditions => {_(:description) => "#{Date::MONTHNAMES[date.month]} #{date.year}"})
+          months.any? ? months.first : nil
         end
       end
 
