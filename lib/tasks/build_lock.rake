@@ -1,3 +1,9 @@
+class CustomLogger < Logger
+  def format_message(severity, timestamp, progname, msg)
+    "#{msg}\n"
+  end
+end
+
 namespace :test do
   namespace :mh_common do
     task :lock do
