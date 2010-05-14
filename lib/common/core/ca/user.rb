@@ -34,6 +34,7 @@ module Common
               @person ||= persons.first if !persons.empty?
             end
 
+            def to_liquid() {} end
           end
 
           base.extend UserClassMethods
