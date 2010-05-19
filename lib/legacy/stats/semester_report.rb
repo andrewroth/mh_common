@@ -11,8 +11,42 @@ module Legacy
           belongs_to :semester, :class_name => 'Semester'
           belongs_to :campus, :class_name => 'Campus'
 
-          validates_presence_of _(:semester_id), _(:campus_id), _(:average_hours_prayer), _(:average_attendance_weekly_meetings), _(:number_challenged_staff), _(:number_challenged_internships), _(:number_frosh_involved), _(:number_staff_led_dg), _(:number_in_staff_led_dg), _(:number_student_led_dg), _(:number_in_student_led_dg), _(:number_sp_mult_in_staff_led_dg), _(:number_sp_mult_in_student_led_dg)
-          validates_numericality_of _(:semester_id), _(:campus_id), _(:average_hours_prayer), _(:average_attendance_weekly_meetings), _(:number_challenged_staff), _(:number_challenged_internships), _(:number_frosh_involved), _(:number_staff_led_dg), _(:number_in_staff_led_dg), _(:number_student_led_dg), _(:number_in_student_led_dg), _(:number_sp_mult_in_staff_led_dg), _(:number_sp_mult_in_student_led_dg)
+          validates_presence_of _(:semester_id), 
+                                _(:campus_id), 
+                                _(:average_hours_prayer), 
+                                _(:average_attendance_weekly_meetings), 
+                                _(:number_challenged_staff), 
+                                _(:number_challenged_internships), 
+                                _(:number_frosh_involved), 
+                                _(:number_staff_led_dg), 
+                                _(:number_in_staff_led_dg), 
+                                _(:number_student_led_dg), 
+                                _(:number_in_student_led_dg), 
+                                _(:number_sp_mult_in_staff_led_dg), 
+                                _(:number_sp_mult_in_student_led_dg), 
+                                _(:total_graduating_students_to_non_ministry), 
+                                _(:total_graduating_students_to_full_time_c4c_staff), 
+                                _(:total_graduating_students_to_full_time_p2c_non_c4c), 
+                                _(:total_graduating_students_to_one_year_internship), 
+                                _(:total_graduating_students_to_other_ministry)
+          validates_numericality_of _(:semester_id), 
+                                    _(:campus_id), 
+                                    _(:average_hours_prayer), 
+                                    _(:average_attendance_weekly_meetings), 
+                                    _(:number_challenged_staff), 
+                                    _(:number_challenged_internships), 
+                                    _(:number_frosh_involved), 
+                                    _(:number_staff_led_dg), 
+                                    _(:number_in_staff_led_dg), 
+                                    _(:number_student_led_dg), 
+                                    _(:number_in_student_led_dg), 
+                                    _(:number_sp_mult_in_staff_led_dg), 
+                                    _(:number_sp_mult_in_student_led_dg), 
+                                    _(:total_graduating_students_to_non_ministry), 
+                                    _(:total_graduating_students_to_full_time_c4c_staff), 
+                                    _(:total_graduating_students_to_full_time_p2c_non_c4c), 
+                                    _(:total_graduating_students_to_one_year_internship), 
+                                    _(:total_graduating_students_to_other_ministry)
         end
 
         base.extend StatsClassMethods
