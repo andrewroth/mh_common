@@ -6,6 +6,7 @@ module Legacy
         base.class_eval do
           has_many :prcs, :class_name => 'Prc', :foreign_key => _(:semester_id, :prc)
           has_many :weeks, :class_name => 'Week', :foreign_key => _(:semester_id, :week)
+          has_many :months, :class_name => 'Month', :foreign_key => _(:semester_id, :month)
           has_many :semester_reports, :class_name => 'SemesterReport'
           belongs_to :year, :class_name => 'Year'
         end
@@ -13,9 +14,20 @@ module Legacy
         base.extend SemesterClassMethods
       end
 
-      def find_stats_semester_campuses(campuses, stat)
-        campus_ids = campuses.collect {|c| c.id}
+      def find_stats_semester_campuses(campus_ids, stat)
         semester_reports.sum(_(stat, :semester_report), :conditions => ["#{_(:campus_id, :semester_report)} IN (?)", campus_ids])
+      end
+
+      def find_weekly_stats_campuses(campus_ids, stat)
+        total = 0
+        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat) }
+        total
+      end
+
+      def find_monthly_stats_campuses(campus_ids, stat)
+        total = 0
+        months.each { | month | total += month.find_monthly_stats_campuses(campus_ids, stat) }
+        total
       end
 
 

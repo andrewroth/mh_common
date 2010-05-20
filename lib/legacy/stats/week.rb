@@ -15,6 +15,11 @@ module Legacy
         base.extend StatsClassMethods
       end
 
+      # This method will return the given stat total associated with the given campus ids
+      def sum_stat_for_campuses(campus_ids, stat)
+        weekly_reports.sum(_(stat, :weekly_reports), :conditions => ["#{_(:campus_id, :weekly_reports)} IN (?)", campus_ids])
+      end
+
       module StatsClassMethods
 
         # This method will return the given stat total associated with a given staff id

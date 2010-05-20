@@ -4,6 +4,7 @@ module Legacy
 
       def self.included(base)
         base.class_eval do
+          has_many :monthly_reports, :class_name => 'MonthlyReport', :foreign_key => _(:month_id, :monthly_report)
           belongs_to :year, :class_name => 'Year'
           belongs_to :semester, :class_name => 'Semester'
           has_many :weeks, :class_name => 'Week', :foreign_key => _(:month_id, :week)
@@ -12,6 +13,15 @@ module Legacy
         base.extend StatsClassMethods
       end
 
+      def find_weekly_stats_campuses(campus_ids, stat)
+        total = 0
+        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat) }
+        total
+      end
+
+      def find_monthly_stats_campuses(campus_ids, stat)
+        monthly_reports.sum(_(stat, :monthly_report), :conditions => ["#{_(:campus_id, :monthly_report)} IN (?)", campus_ids])
+      end
 
       module StatsClassMethods
         # This method will return the start date of a given month id
