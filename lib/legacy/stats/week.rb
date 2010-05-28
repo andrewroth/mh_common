@@ -20,6 +20,17 @@ module Legacy
         weekly_reports.sum(_(stat, :weekly_reports), :conditions => ["#{_(:campus_id, :weekly_reports)} IN (?)", campus_ids])
       end
 
+      def evaluate_stat(campus_ids, stat_hash)
+        evaluation = 0
+        if stat_hash[:column_type] == :database_column
+          if stat_hash[:collected] == :weekly
+            evaluation = sum_stat_for_campuses(campus_ids, stat_hash[:column])
+          end
+        end
+        evaluation
+      end
+
+
       module StatsClassMethods
 
         # This method will return the given stat total associated with a given staff id

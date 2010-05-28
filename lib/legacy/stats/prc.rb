@@ -18,7 +18,6 @@ module Legacy
         self.integrated_believer == 1 ? 'yes' : 'no'
       end
 
-
       module PrcClassMethods
 
         # This method will return the amount of indicated decisions that occurred between a given start and end date in a given ministry
@@ -27,6 +26,7 @@ module Legacy
           result = self.count(:all, :joins => :campus, :conditions => ["#{__(:campus_id, :campus)} IN (?) AND #{_(:date)} <= ? AND #{_(:date)} > ?",campus_ids,end_date,start_date])
           result
         end
+
 
         # This method will return the amount of indicated decisions that occurred between a given start and end date in a given region
         def count_by_date(start_date,end_date,region_id)

@@ -14,6 +14,20 @@ module Legacy
         base.extend SemesterClassMethods
       end
 
+      def evaluate_stat(campus_ids, stat_hash)
+        evaluation = 0
+        if stat_hash[:column_type] == :database_column
+          if stat_hash[:collected] == :semesterly
+            evaluation = find_stats_semester_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :monthly
+            evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :weekly
+            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column])
+          end
+        end
+        evaluation
+      end
+
       def find_stats_semester_campuses(campus_ids, stat)
         semester_reports.sum(_(stat, :semester_report), :conditions => ["#{_(:campus_id, :semester_report)} IN (?)", campus_ids])
       end

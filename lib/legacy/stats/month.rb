@@ -13,6 +13,20 @@ module Legacy
         base.extend StatsClassMethods
       end
 
+      def evaluate_stat(campus_ids, stat_hash)
+        evaluation = 0
+        if stat_hash[:column_type] == :database_column
+          if stat_hash[:collected] == :monthly
+            evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :weekly
+            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :prc
+            evaluation = find_prcs_campuses(campus_ids)
+          end
+        end
+        evaluation
+      end
+
       def find_weekly_stats_campuses(campus_ids, stat)
         total = 0
         weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat) }
@@ -22,6 +36,16 @@ module Legacy
       def find_monthly_stats_campuses(campus_ids, stat)
         monthly_reports.sum(_(stat, :monthly_report), :conditions => ["#{_(:campus_id, :monthly_report)} IN (?)", campus_ids])
       end
+
+      def find_prcs_campuses(campus_ids)
+        str_month = "#{number}".rjust(2, "0")
+        start_date = "#{calendar_year}-#{str_month}-00"
+        end_date = "#{calendar_year}-#{str_month}-31"
+        result = semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > #{start_date} AND #{_(:date, :prc)} <= #{end_date}", campus_ids])#, :conditions => ["#{_(:campus_id)} IN (?)",campus_ids])
+        test = "test"
+        result
+      end
+      
 
       module StatsClassMethods
         # This method will return the start date of a given month id
@@ -33,7 +57,7 @@ module Legacy
           startdate = "#{curYear}-#{monthNum}-#{00}" # Note: 00 is what we want.
           startdate
         end
-
+  
         # This method will return the end date of a given month id
         def find_end_date(month_id)
           result = find(:first, :select => "#{_(:number)}, #{_(:calendar_year)}", :conditions => {_(:id) => month_id} )
