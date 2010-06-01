@@ -41,9 +41,7 @@ module Legacy
         str_month = "#{number}".rjust(2, "0")
         start_date = "#{calendar_year}-#{str_month}-00"
         end_date = "#{calendar_year}-#{str_month}-31"
-        result = semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > #{start_date} AND #{_(:date, :prc)} <= #{end_date}", campus_ids])#, :conditions => ["#{_(:campus_id)} IN (?)",campus_ids])
-        test = "test"
-        result
+        semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > '#{start_date}' AND #{_(:date, :prc)} <= '#{end_date}'", campus_ids])#, :conditions => ["#{_(:campus_id)} IN (?)",campus_ids])
       end
       
 

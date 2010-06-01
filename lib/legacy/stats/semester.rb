@@ -23,6 +23,8 @@ module Legacy
             evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :weekly
             evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :prc
+            evaluation = find_prcs_campuses(campus_ids)
           end
         end
         evaluation
@@ -44,6 +46,9 @@ module Legacy
         total
       end
 
+      def find_prcs_campuses(campus_ids)
+        prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?)", campus_ids])
+      end
 
 
       module SemesterClassMethods

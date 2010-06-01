@@ -25,11 +25,20 @@ module Legacy
         if stat_hash[:column_type] == :database_column
           if stat_hash[:collected] == :weekly
             evaluation = sum_stat_for_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :prc
+            evaluation = find_prcs_campuses(campus_ids)
           end
         end
         evaluation
       end
 
+      def start_date
+        end_date - 7
+      end
+      
+      def find_prcs_campuses(campus_ids)
+        semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > '#{start_date.strftime('%Y-%m-%d')}' AND #{_(:date, :prc)} <= '#{end_date.strftime('%Y-%m-%d')}'", campus_ids])
+      end
 
       module StatsClassMethods
 
