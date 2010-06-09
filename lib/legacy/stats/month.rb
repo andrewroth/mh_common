@@ -13,13 +13,13 @@ module Legacy
         base.extend StatsClassMethods
       end
 
-      def evaluate_stat(campus_ids, stat_hash)
+      def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
         evaluation = 0
         if stat_hash[:column_type] == :database_column
           if stat_hash[:collected] == :monthly
             evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :weekly
-            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column])
+            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
           elsif stat_hash[:collected] == :prc
             evaluation = find_prcs_campuses(campus_ids)
           end
@@ -27,14 +27,16 @@ module Legacy
         evaluation
       end
 
-      def find_weekly_stats_campuses(campus_ids, stat)
+      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
         total = 0
-        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat) }
+        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat, staff_id) }
         total
       end
 
       def find_monthly_stats_campuses(campus_ids, stat)
-        monthly_reports.sum(_(stat, :monthly_report), :conditions => ["#{_(:campus_id, :monthly_report)} IN (?)", campus_ids])
+#        monthly_reports.sum(_(stat, :monthly_report), :conditions => ["#{_(:campus_id, :monthly_report)} IN (?)", campus_ids])
+        result = get_stat_sums_for(campus_ids)["#{stat}"]
+        result.nil? ? 0 : result
       end
 
       def find_prcs_campuses(campus_ids)
@@ -44,6 +46,30 @@ module Legacy
         semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > '#{start_date}' AND #{_(:date, :prc)} <= '#{end_date}'", campus_ids])#, :conditions => ["#{_(:campus_id)} IN (?)",campus_ids])
       end
       
+      def get_database_columns(report)
+        stats_reports[report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
+      end
+      
+      def get_monthly_report_columns
+        @monthly_report_columns ||= get_database_columns(:monthly_report) + get_database_columns(:monthly_p2c_special)
+      end
+
+      def get_hash(campus_ids)
+        campus_ids.nil? ? "nil" : campus_ids.hash
+      end
+
+      def get_stat_sums_for(campus_ids)
+        @result_sums ||= Hash.new
+        @result_sums[get_hash(campus_ids)] ||= execute_stat_sums_for(campus_ids)
+      end
+
+      def execute_stat_sums_for(campus_ids)
+        select = get_monthly_report_columns.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :monthly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        monthly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+      end
+
 
       module StatsClassMethods
         # This method will return the start date of a given month id

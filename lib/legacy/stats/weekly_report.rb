@@ -10,6 +10,8 @@ module Legacy
           load_mappings
           belongs_to :week, :class_name => 'Week'
           belongs_to :campus, :class_name => 'Campus'
+          belongs_to :staff, :class_name => 'CimHrdbStaff'
+          has_one :person, :through => :staff, :class_name => 'Person'
 
           validates_presence_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)
           validates_numericality_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)

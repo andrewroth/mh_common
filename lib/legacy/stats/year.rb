@@ -11,6 +11,14 @@ module Legacy
         base.extend YearClassMethods
       end
 
+      def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
+        #debugger if stat_hash[:column] == :weeklyReport_1on1HsPres
+        total = 0
+        semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }
+        total
+      end
+
+
       module YearClassMethods
 
         # This method will return the year id associated with a given description

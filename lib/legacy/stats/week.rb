@@ -15,16 +15,39 @@ module Legacy
         base.extend StatsClassMethods
       end
 
-      # This method will return the given stat total associated with the given campus ids
-      def sum_stat_for_campuses(campus_ids, stat)
-        weekly_reports.sum(_(stat, :weekly_reports), :conditions => ["#{_(:campus_id, :weekly_reports)} IN (?)", campus_ids])
+      def get_weekly_report_columns
+        @weekly_report_columns ||= stats_reports[:weekly_report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
       end
 
-      def evaluate_stat(campus_ids, stat_hash)
+      def get_hash(campus_ids, staff_id)
+        [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")
+      end
+
+      def get_stat_sums_for(campus_ids, staff_id)
+         @result_sums ||= Hash.new
+        @result_sums[get_hash(campus_ids, staff_id)] ||= execute_stat_sums_for(campus_ids, staff_id)
+      end
+
+      def execute_stat_sums_for(campus_ids, staff_id)
+        select = get_weekly_report_columns.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :weekly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
+        weekly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+      end
+
+      # This method will return the given stat total associated with the given campus ids
+      def sum_stat_for_campuses(campus_ids, stat, staff_id)
+        #weekly_reports.sum(_(stat, :weekly_reports), :conditions => ["#{_(:campus_id, :weekly_reports)} IN (?)", campus_ids])
+        result = get_stat_sums_for(campus_ids, staff_id)["#{stat}"]
+        result.nil? ? 0 : result
+      end
+
+      def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
         evaluation = 0
         if stat_hash[:column_type] == :database_column
           if stat_hash[:collected] == :weekly
-            evaluation = sum_stat_for_campuses(campus_ids, stat_hash[:column])
+            evaluation = sum_stat_for_campuses(campus_ids, stat_hash[:column], staff_id)
           elsif stat_hash[:collected] == :prc
             evaluation = find_prcs_campuses(campus_ids)
           end

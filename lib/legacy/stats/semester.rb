@@ -14,7 +14,8 @@ module Legacy
         base.extend SemesterClassMethods
       end
 
-      def evaluate_stat(campus_ids, stat_hash)
+      def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
+        #debugger if staff_id == 336 && stat_hash[:column] == :weeklyReport_1on1HsPres
         evaluation = 0
         if stat_hash[:column_type] == :database_column
           if stat_hash[:collected] == :semesterly
@@ -22,7 +23,7 @@ module Legacy
           elsif stat_hash[:collected] == :monthly
             evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :weekly
-            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column])
+            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
           elsif stat_hash[:collected] == :prc
             evaluation = find_prcs_campuses(campus_ids)
           end
@@ -31,12 +32,15 @@ module Legacy
       end
 
       def find_stats_semester_campuses(campus_ids, stat)
-        semester_reports.sum(_(stat, :semester_report), :conditions => ["#{_(:campus_id, :semester_report)} IN (?)", campus_ids])
+        #semester_reports.sum(_(stat, :semester_report), :conditions => ["#{_(:campus_id, :semester_report)} IN (?)", campus_ids])
+        result = get_stat_sums_for(campus_ids)["#{stat}"]
+        result.nil? ? 0 : result
       end
 
-      def find_weekly_stats_campuses(campus_ids, stat)
+      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
+        #debugger if staff_id == 336 && stat == :weeklyReport_1on1HsPres
         total = 0
-        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat) }
+        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat, staff_id) }
         total
       end
 
@@ -49,6 +53,31 @@ module Legacy
       def find_prcs_campuses(campus_ids)
         prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?)", campus_ids])
       end
+
+      def get_database_columns(report)
+        stats_reports[report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
+      end
+      
+      def get_semester_report_columns
+        @monthly_report_columns ||= get_database_columns(:semester_report)
+      end
+
+      def get_hash(campus_ids)
+        campus_ids.nil? ? "nil" : campus_ids.hash
+      end
+
+      def get_stat_sums_for(campus_ids)
+        @result_sums ||= Hash.new
+        @result_sums[get_hash(campus_ids)] ||= execute_stat_sums_for(campus_ids)
+      end
+
+      def execute_stat_sums_for(campus_ids)
+        select = get_semester_report_columns.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :semester_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        semester_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+      end
+
 
 
       module SemesterClassMethods
