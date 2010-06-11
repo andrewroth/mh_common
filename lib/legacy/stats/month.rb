@@ -28,15 +28,37 @@ module Legacy
       end
 
       def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
-        total = 0
-        weeks.each { | week | total += week.sum_stat_for_campuses(campus_ids, stat, staff_id) }
-        total
+        @weekly_sums ||= {}
+        
+        @weekly_sums[get_hash(campus_ids, staff_id)] ||= ::WeeklyReport.get_weekly_stats_sums_over_period(self, campus_ids, staff_id)
+        result = @weekly_sums[get_hash(campus_ids, staff_id)][stat]
+        result.nil? ? 0 : result
       end
 
       def find_monthly_stats_campuses(campus_ids, stat)
-#        monthly_reports.sum(_(stat, :monthly_report), :conditions => ["#{_(:campus_id, :monthly_report)} IN (?)", campus_ids])
         result = get_stat_sums_for(campus_ids)["#{stat}"]
         result.nil? ? 0 : result
+      end
+
+      def start_date
+        Time.local(calendar_year, number, 1)
+      end
+
+      def end_date
+        is_leap =
+          case
+          when calendar_year % 400 == 0
+              true
+          when calendar_year % 100 == 0
+              false
+          else
+              calendar_year % 4 == 0
+          end
+        
+        end_day_hash = { 1 => 31, 2 => is_leap ? 29 : 28, 3 => 31,
+                         4 => 30, 5 => 31, 6 => 30, 7 => 31, 8 => 31,
+                         9 => 30, 10 => 31, 11 => 30, 12 => 31}
+        Time.local(calendar_year, number, end_day_hash[number])
       end
 
       def find_prcs_campuses(campus_ids)
@@ -54,8 +76,8 @@ module Legacy
         @monthly_report_columns ||= get_database_columns(:monthly_report) + get_database_columns(:monthly_p2c_special)
       end
 
-      def get_hash(campus_ids)
-        campus_ids.nil? ? "nil" : campus_ids.hash
+      def get_hash(campus_ids, staff_id = nil)
+        [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")
       end
 
       def get_stat_sums_for(campus_ids)

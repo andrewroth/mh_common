@@ -11,13 +11,37 @@ module Legacy
         base.extend YearClassMethods
       end
 
+      def start_date
+        months.first.start_date
+      end
+      
+      def end_date
+        months.last.end_date
+      end
+
       def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
-        #debugger if stat_hash[:column] == :weeklyReport_1on1HsPres
         total = 0
-        semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }
+        if stat_hash[:column_type] == :database_column
+          if stat_hash[:collected] == :weekly
+            total = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
+          else
+            semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }         
+          end
+        end
         total
       end
 
+      def get_hash(campus_ids, staff_id = nil)
+        [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")
+      end
+      
+      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
+        @weekly_sums ||= {}
+        
+        @weekly_sums[get_hash(campus_ids, staff_id)] ||= ::WeeklyReport.get_weekly_stats_sums_over_period(self, campus_ids, staff_id)
+        result = @weekly_sums[get_hash(campus_ids, staff_id)][stat]
+        result.nil? ? 0 : result
+      end
 
       module YearClassMethods
 

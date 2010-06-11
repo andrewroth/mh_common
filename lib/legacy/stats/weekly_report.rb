@@ -23,6 +23,30 @@ module Legacy
 
       module StatsClassMethods
 
+        def get_weekly_stats_sums_over_period(period, campus_ids, staff_id = nil)
+          start_week_id = 0
+          end_week_id = 0
+          if period.is_a?(Week)
+            start_week_id = period.id
+            end_week_id = period.id
+          elsif period.is_a?(Year)
+            start_week_id = period.semesters.first.weeks.first.id
+            end_week_id = period.semesters.last.weeks.last.id
+          else
+            start_week_id = period.weeks.first.id
+            end_week_id = period.weeks.last.id           
+          end
+
+          select = stats_reports[:weekly_report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+          conditions = []
+          conditions += ["#{_(:campus_id, :weekly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+          conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
+          conditions += ["#{_(:week_id, :weekly_reports)} >= (#{start_week_id})", 
+                         "#{_(:week_id, :weekly_reports)} <= (#{end_week_id})"]
+          find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        end
+
+
         # returns a hash of all five stats based on a range of week end dates at a campus
         def find_all_stats_by_date_range_and_campus(first_week_end_date, last_week_end_date, campus_id)
           reports = find(:all, :joins => :week, :conditions => ["#{_(:week_endDate, :week)} >= ? AND #{_(:week_endDate, :week)} <= ? AND #{_(:campus_id, :weekly_report)} = ?", first_week_end_date, last_week_end_date, campus_id])
