@@ -34,12 +34,25 @@ module Legacy
       def get_hash(campus_ids, staff_id = nil)
         [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")
       end
+
+      def run_weekly_stats_request(campus_ids, staff_id = nil)
+        @weekly_sums ||= {}        
+        @weekly_sums[get_hash(campus_ids, staff_id)] ||= ::WeeklyReport.get_weekly_stats_sums_over_period(self, campus_ids, staff_id)        
+      end
+      
+      def no_weekly_data(campus_ids, staff_id = nil)
+        stat = ''
+        stats_reports[:weekly_report].each do |k,v|
+          if v[:column_type] == :database_column
+            stat = v[:column]
+            break
+          end
+        end
+        run_weekly_stats_request(campus_ids, staff_id)[stat].nil? ? true : false
+      end
       
       def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
-        @weekly_sums ||= {}
-        
-        @weekly_sums[get_hash(campus_ids, staff_id)] ||= ::WeeklyReport.get_weekly_stats_sums_over_period(self, campus_ids, staff_id)
-        result = @weekly_sums[get_hash(campus_ids, staff_id)][stat]
+        result = run_weekly_stats_request(campus_ids, staff_id)[stat]
         result.nil? ? 0 : result
       end
 

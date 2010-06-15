@@ -58,6 +58,23 @@ module Legacy
       def start_date
         end_date - 7
       end
+
+      def run_weekly_stats_request(campus_ids, staff_id = nil)
+        @weekly_sums ||= {}        
+        @weekly_sums[get_hash(campus_ids, staff_id)] ||= ::WeeklyReport.get_weekly_stats_sums_over_period(self, campus_ids, staff_id)        
+      end
+      
+      def no_weekly_data(campus_ids, staff_id = nil)
+        stat = ''
+        stats_reports[:weekly_report].each do |k,v|
+          if v[:column_type] == :database_column
+            stat = v[:column]
+            break
+          end
+        end
+        run_weekly_stats_request(campus_ids, staff_id)[stat].nil? ? true : false
+      end
+            
       
       def find_prcs_campuses(campus_ids)
         semester.prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?) AND #{_(:date, :prc)} > '#{start_date.strftime('%Y-%m-%d')}' AND #{_(:date, :prc)} <= '#{end_date.strftime('%Y-%m-%d')}'", campus_ids])
