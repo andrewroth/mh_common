@@ -460,6 +460,16 @@ module Common
       # use last_name for preferred_last_name if none set
       def preferred_last_name() self[:preferred_last_name] || last_name end
 
+      def archive_all_student_ministry_involvements
+        campus_involvements.each do |ci|
+          if mi = ci.find_ministry_involvement
+            ci.new_student_history.save!
+            mi.end_date = Date.today
+            mi.save!
+          end
+        end
+      end
+
       protected
 
       def update_stamp

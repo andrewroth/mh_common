@@ -33,12 +33,17 @@ module Common
         ministry_campus.try(:ministry)
       end
 
+      def find_ministry_involvement
+        return @ministry_involvement if @ministry_involvement
+        @derived_ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || ::Ministry.first
+        @ministry_involvement = @derived_ministry.ministry_involvements.find :first, :conditions => [ "person_id = ? AND end_date IS NULL", person_id ]
+      end
+
       def find_or_create_ministry_involvement
         return @ministry_involvement if @ministry_involvement
-        ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || ::Ministry.first
-        mi = ministry.ministry_involvements.find :first, :conditions => [ "person_id = ? AND end_date IS NULL", person_id ]
+        mi = find_ministry_involvement
         if mi.nil?
-          mi = ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
+          mi = @derived_ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
         elsif mi.ministry_role_id.nil?
           mi.ministry_role_id = ::MinistryRole.default_student_role.id
           mi.save
