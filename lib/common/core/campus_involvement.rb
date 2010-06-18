@@ -33,12 +33,17 @@ module Common
         ministry_campus.try(:ministry)
       end
 
+      def find_ministry_involvement
+        return @ministry_involvement if @ministry_involvement
+        @derived_ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || ::Ministry.first
+        @ministry_involvement = @derived_ministry.ministry_involvements.find :first, :conditions => [ "person_id = ? AND end_date IS NULL", person_id ]
+      end
+
       def find_or_create_ministry_involvement
         return @ministry_involvement if @ministry_involvement
-        ministry = derive_ministry || Cmt::CONFIG[:default_ministry] || ::Ministry.first
-        mi = ministry.ministry_involvements.find :first, :conditions => [ "person_id = ? AND end_date IS NULL", person_id ]
+        mi = find_ministry_involvement
         if mi.nil?
-          mi = ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
+          mi = @derived_ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
         elsif mi.ministry_role_id.nil?
           mi.ministry_role_id = ::MinistryRole.default_student_role.id
           mi.save
@@ -47,6 +52,10 @@ module Common
           logger.info "Making person #{mi.person.id} (#{mi.person.full_name}) ministry involvement #{mi.inspect} to a student role.  Trace: #{caller.join("\n")}"
         end
         @ministry_involvement = mi
+      end
+
+      def new_student_history
+        ::StudentInvolvementHistory.new :person_id => person_id, :campus_id => campus_id, :school_year_id => school_year_id, :end_date => Date.today, :ministry_role_id => find_or_create_ministry_involvement.ministry_role_id, :start_date => (last_history_update_date || start_date), :campus_involvement_id => id
       end
     end
   end

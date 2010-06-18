@@ -29,9 +29,14 @@ module Common
     
       def archived?() end_date.present? end
 
+      def new_staff_history
+        ::StaffInvolvementHistory.new :person_id => person_id, :end_date => Date.today, :ministry_role_id => ministry_role_id, :start_date => (last_history_update_date || start_date), :ministry_involvement_id => id, :ministry_id => ministry_id
+      end
 
       module MinistryInvolvementMethods
 
+        # This method appears to be in the c4c.* branches but not utopian.  If that's the case,
+        # it should be in Common::Core::Ca::MinistryInvolvement module, not here. -AR June 18, 2010
         def build_highest_ministry_involvement_possible(person = nil)
           mi = ::MinistryInvolvement.new
           mi.person_id = person.nil? ? nil : person.id
