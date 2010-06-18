@@ -405,6 +405,9 @@ module Common
       # use last_name for preferred_last_name if none set
       def preferred_last_name() self[:preferred_last_name] || last_name end
 
+      # Just realized this would be better implemented by looping all
+      # ministry involvements with student roles.  Don't have time to do
+      # it now.  -AR June 18, 2010.
       def archive_all_student_ministry_involvements
         campus_involvements.each do |ci|
           if mi = ci.find_ministry_involvement
