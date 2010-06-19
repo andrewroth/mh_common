@@ -196,13 +196,28 @@ module Common
         self.name <=> ministry.name
       end
       
-      def to_hash_with_children
+      def campus_to_hash(campus)
+        base_hash = { 'text' => campus.campus_shortDesc, 'id' => "#{id}_#{campus.id}" , 'leaf' => true }
+      end
+      
+      def leaf_merge(show_campuses)
+        leaf_hash = {}
+        if show_campuses && campuses.count > 1
+          leaf_hash.merge!('expanded' => true, 
+            'children' => campuses.collect{|c| campus_to_hash(c)})
+        else
+          leaf_hash.merge!('leaf' => true)
+        end
+        leaf_hash
+      end
+      
+      def to_hash_with_children(show_campuses = false)
         base_hash = { 'text' => name, 'id' => id }
         if children.empty?
-          base_hash.merge('leaf' => true)
+          base_hash.merge(leaf_merge(show_campuses))
         else
           base_hash.merge('expanded' => true, 
-            'children' => children.collect(&:to_hash_with_children))
+            'children' => children.collect{|c| c.to_hash_with_children(show_campuses)})
         end
       end
 
@@ -214,9 +229,9 @@ module Common
         if children_involved_in.empty?
           if show_ministries_under_involvement && involved_ministries(person).include?(self)
             base_hash.merge('expanded' => true, 
-            'children' => children.collect(&:to_hash_with_children))
+            'children' => children.collect{|c| c.to_hash_with_children(show_ministries_under_involvement)})
           else
-            base_hash.merge('leaf' => true)
+            base_hash.merge(leaf_merge(show_ministries_under_involvement))
           end
         else
           base_hash.merge('expanded' => true,
