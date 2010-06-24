@@ -93,11 +93,22 @@ module Common
             self[:email] || primary_email
           end
 
+          # Note that since the email is stored in address, the email can't be set on a new
+          # record.  Actually, it can get set and get, it's just not saved to the db after
+          # the record is created.  This is because after_create callback is done in the 
+          # transaction, so the foreign key for address back to person can't be determined.
+          # So we need to create the person objects first, then save the email after.
+          # Cdn schema is different and does have email in person.
+          # -AR June 24
           def email=(value)
-            ca = current_address
-            ca ||= self.addresses.new(:address_type => 'current')
-            ca.email = value
-            ca.save
+            if new_record?
+              @primary_email = value
+            else
+              ca = current_address
+              ca ||= self.addresses.new(:address_type => 'current')
+              ca.email = value
+              ca.save
+            end
           end
           
           after_save do |record|
@@ -191,6 +202,7 @@ module Common
       end
 
       def primary_email
+        return @primary_email if @primary_email.present?
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
