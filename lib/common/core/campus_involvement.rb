@@ -4,7 +4,7 @@ module Common
       def self.included(base)
         base.class_eval do
 
-          validates_presence_of :campus_id, :person_id, :ministry_id, :school_year_id
+          validates_presence_of :campus_id, :person_id, :ministry_id
 
           belongs_to :school_year
           belongs_to :campus

@@ -200,18 +200,27 @@ module Common
         guid = att_from_receipt(atts, 'ssoGuid')
         first_name = att_from_receipt(atts, 'firstName')
         last_name = att_from_receipt(atts, 'lastName')
-        u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
+        find_or_create_from_guid_or_email(guid, email, first_name, last_name)
+      end
+
+      def find_or_create_from_guid_or_email(guid, email, first_name, last_name)
+        if guid
+          u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
+        else
+          u = nil
+        end
+
         # if we have a user by this method, great! update the email address if it doesn't match
         if u
-          u.username = receipt.user
+          u.username = email
         else
           # If we didn't find a user with the guid, do it by email address and stamp the guid
-          u = ::User.find(:first, :conditions => _(:username, :user) + " = '#{receipt.user}'")
+          u = ::User.find(:first, :conditions => _(:username, :user) + " = '#{email}'")
           if u
             u.guid = guid
           else
             # If we still don't have a user in SSM, we need to create one.
-            u = ::User.create!(:username => receipt.user, :guid => guid)
+            u = ::User.create!(:username => email, :guid => guid)
           end
         end
         # Update the password to match their gcx password too. This will save a round-trip later
@@ -219,19 +228,27 @@ module Common
         u.save(false)
         # make sure we have a person
         unless u.person
-          # Try to find a person with the same email address who doesn't already have a user account
-          address = ::CurrentAddress.find(:first, :conditions => _(:email, :address) + " = '#{u.username}'")
-          person = address.person if address && address.person.user.nil?
+          # Try to find a person with the same email address.  If multiple people are found, use
+          # the one who's logged in most recently
+          address = ::CurrentAddress.find(:first, 
+                                          :joins => { :person => :user },
+                                          :conditions => _(:email, :address) + " = '#{email}'",
+                                          :order => "#{_(:last_login, :user)} DESC"
+                                         )
+          person = address.try(:person)
 
           # Attach the found person to the user, or create a new person
-          new_person = first_name ? ::Person.new(:first_name => first_name, :last_name => last_name) : ::Person.new
-          u.person = person || new_person
+          u.person = person || Person.create!(:user_id => u.id, :first_name => first_name,
+                                              :last_name => last_name)
 
           # Create a current address record if we don't already have one.
-          u.person.current_address ||= ::CurrentAddress.new(:email => receipt.user)
+          u.person.current_address ||= ::CurrentAddress.create!(:person_id => u.person.id, :email => email)
           u.person.save(false)
         end
         u
+      end
+
+      def find_from_email(email)
       end
 
       protected
