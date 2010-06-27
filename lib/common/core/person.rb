@@ -22,6 +22,8 @@ module Common
         base.class_eval do
           include ActiveRecord::ConnectionAdapters::Quoting
 
+          attr_accessor :just_created
+
           has_many :emails, :class_name => "Email", :foreign_key => "sender_id"
 
           # Campus Relationships
@@ -82,6 +84,7 @@ module Common
           
           before_save :update_stamp
           before_create :create_stamp
+          after_create do |person| person.just_created = true end
 
           def gender=(value)
             if value.present?

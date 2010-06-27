@@ -10,6 +10,7 @@ module Common
 
           # Virtual attribute for the unencrypted password
           attr_accessor :plain_password, :password_confirmation
+          attr_accessor :just_created
 
           # validates_format_of       :username, :message => "must be an email address", :with => /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
           validates_length_of       _(:username), :within => 6..40
@@ -17,7 +18,7 @@ module Common
           before_save :encrypt_password
           before_save :register_user_to_fb if ::Cmt::CONFIG[:facebook_connectivity_enabled]
           before_create :stamp_created_on
-
+          after_create do |user| puts "HOOKHERE #{user.object_id}"; user.just_created = true end
 
           has_one :person, :class_name => 'Person', :foreign_key => _(:user_id, :person)
 
@@ -239,7 +240,7 @@ module Common
           person = address.try(:person)
 
           # Attach the found person to the user, or create a new person
-          u.person = person || Person.create!(:user_id => u.id, :first_name => first_name,
+          u.person = person || ::Person.create!(:user_id => u.id, :first_name => first_name,
                                               :last_name => last_name)
 
           # Create a current address record if we don't already have one.
