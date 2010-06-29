@@ -18,9 +18,10 @@ module Common
           before_save :encrypt_password
           before_save :register_user_to_fb if ::Cmt::CONFIG[:facebook_connectivity_enabled]
           before_create :stamp_created_on
-          after_create do |user| puts "HOOKHERE #{user.object_id}"; user.just_created = true end
+          after_create do |user| user.just_created = true end
 
           has_one :person, :class_name => 'Person', :foreign_key => _(:user_id, :person)
+          has_one :user_code
 
           # prevents a user from submitting a crafted form that bypasses activation
           # anything else you want your user to change should be added here.
@@ -127,6 +128,17 @@ module Common
         return !fb_user_id.nil? && fb_user_id > 0
       end
 
+      def find_or_create_user_code(pass = {})
+        if new_record?
+          raise "Can't create a user_code for a new record."
+        elsif !user_code
+          ::UserCode.create! :user_id => self.id, :code => ::UserCode.new_code, :pass => Marshal.dump(pass)
+        else
+          user_code.pass = Marshal.dump(pass)
+          user_code.save!
+          return user_code
+        end
+      end
 
       protected
         # before filter
