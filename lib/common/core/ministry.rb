@@ -227,7 +227,7 @@ module Common
         children_involved_in = children.select{|c| c.person_involved_at_or_under(person)}
 
         if children_involved_in.empty?
-          if show_ministries_under_involvement && involved_ministries(person).include?(self)
+          if show_ministries_under_involvement && involved_ministries(person).include?(self) && !(children.empty?)
             base_hash.merge('expanded' => true, 
             'children' => children.collect{|c| c.to_hash_with_children(show_ministries_under_involvement)})
           else
