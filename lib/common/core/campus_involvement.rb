@@ -26,11 +26,7 @@ module Common
       def archived?() end_date.present? end
 
       def derive_ministry
-        # look for the latest MC, under the assumption it will be the most nested
-        # if staff start wanting to have staff-only groups with campuses, we'll have to
-        # rethink this
-        ministry_campus = ::MinistryCampus.find :last, :conditions => { :campus_id => campus_id }
-        ministry_campus.try(:ministry)
+        campus.try(:derive_ministry)
       end
 
       def find_ministry_involvement
