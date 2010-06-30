@@ -262,9 +262,6 @@ module Common
         u
       end
 
-      def find_from_email(email)
-      end
-
       protected
         # not sure why but cas sometimes sends the extra attributes as underscored
         def att_from_receipt(atts, key)

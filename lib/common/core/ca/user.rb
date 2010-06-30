@@ -34,6 +34,12 @@ module Common
               @person ||= persons.first if !persons.empty?
             end
 
+            # set person in-ememory, not fully implemented to stick to db.
+            # useful to keep the in-memory just_created flag
+            def person=(v) 
+              @person = v
+            end
+
             def to_liquid() {} end
           end
 

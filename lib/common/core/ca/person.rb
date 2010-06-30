@@ -34,9 +34,9 @@ module Common
             def update_addresses() end # noop since address info is in person
             def created_at=(v) end # noop since it would have set the id to the timestamp
             def user
-              users.first
+              @user ||= users.first
             end
-
+            def user=(v) @user = v end # fake setting the user, so that just_created memory-only flag will stick
             def person_extra()
               @person_extra ||= person_extra_ref || ::PersonExtra.new(:person_id => id)
             end
@@ -67,10 +67,6 @@ module Common
 
             def gender
               gender_.try(:gender_desc)
-            end
-
-            def user=(val)
-              throw "not implemented"
             end
 
             def birth_date() get_emerg ? get_emerg.emerg_birthdate : nil; end
@@ -510,6 +506,8 @@ module Common
 
         def create_user_and_access_only(guid, uid)
           v = ::Person.create_viewer(guid, uid)
+          self.user = v
+          self.user.person = self
           self.setup_and_create_access(v)
         end
 
@@ -562,6 +560,7 @@ module Common
             # first and last names can't be nil
             fn ||= ''
             ln ||= ''
+            guid ||= ''
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
               :person_legal_fname => '', :person_legal_lname => '',
               :birth_date => nil, :person_email => uid
