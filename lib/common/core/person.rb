@@ -22,6 +22,8 @@ module Common
         base.class_eval do
           include ActiveRecord::ConnectionAdapters::Quoting
 
+          attr_accessor :just_created
+
           has_many :emails, :class_name => "Email", :foreign_key => "sender_id"
 
           # Campus Relationships
@@ -82,6 +84,7 @@ module Common
           
           before_save :update_stamp
           before_create :create_stamp
+          after_create do |person| person.just_created = true end
 
           def gender=(value)
             if value.present?
@@ -93,11 +96,22 @@ module Common
             self[:email] || primary_email
           end
 
+          # Note that since the email is stored in address, the email can't be set on a new
+          # record.  Actually, it can get set and get, it's just not saved to the db after
+          # the record is created.  This is because after_create callback is done in the 
+          # transaction, so the foreign key for address back to person can't be determined.
+          # So we need to create the person objects first, then save the email after.
+          # Cdn schema is different and does have email in person.
+          # -AR June 24
           def email=(value)
-            ca = current_address
-            ca ||= self.addresses.new(:address_type => 'current')
-            ca.email = value
-            ca.save
+            if new_record?
+              @primary_email = value
+            else
+              ca = current_address
+              ca ||= self.addresses.new(:address_type => 'current')
+              ca.email = value
+              ca.save
+            end
           end
           
           after_save do |record|
@@ -191,6 +205,7 @@ module Common
       end
 
       def primary_email
+        return @primary_email if @primary_email.present?
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
@@ -460,6 +475,9 @@ module Common
       # use last_name for preferred_last_name if none set
       def preferred_last_name() self[:preferred_last_name] || last_name end
 
+      # Just realized this would be better implemented by looping all
+      # ministry involvements with student roles.  Don't have time to do
+      # it now.  -AR June 18, 2010.
       def archive_all_student_ministry_involvements
         campus_involvements.each do |ci|
           if mi = ci.find_ministry_involvement
