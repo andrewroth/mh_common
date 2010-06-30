@@ -207,6 +207,10 @@ module Common
               self.person_local_phone
             end
 
+            def local_phone=(v)
+              self.person_local_phone = v
+            end
+
             def local_address
               self.person_local_addr
             end
