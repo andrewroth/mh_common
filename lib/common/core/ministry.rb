@@ -21,8 +21,8 @@ module Common
           has_many :campus_involvements
           # has_many :people, :through => :campus_involvements
           has_many :people, :through => :ministry_involvements
-          has_many :ministry_campuses, :include => :campus, :dependent => :destroy, :order => ::Campus.table_name + '.' + _(:name, :campus)
-          has_many :campuses, :through => :ministry_campuses, :order => _(:name, 'campus')
+          has_many :ministry_campuses, :include => :campus, :dependent => :destroy, :order => __(:name, :campus)
+          has_many :campuses, :through => :ministry_campuses, :order => __(:name, :campus)
           has_many :ministry_involvements, :dependent => :destroy, :dependent => :destroy
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
