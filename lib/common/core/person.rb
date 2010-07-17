@@ -13,6 +13,7 @@ module Common
         "city" => "city",
         "postal_code" => "zip",
         "phone" => "phone",
+        "alternate_phone" => "alternate_phone",
         "valid_until" => "end_date",
         "country" => "country",
         "state" => "state"
@@ -21,6 +22,8 @@ module Common
       def self.included(base)
         base.class_eval do
           include ActiveRecord::ConnectionAdapters::Quoting
+
+          attr_accessor :just_created
 
           has_many :emails, :class_name => "Email", :foreign_key => "sender_id"
 
@@ -82,6 +85,7 @@ module Common
           
           before_save :update_stamp
           before_create :create_stamp
+          after_create do |person| person.just_created = true end
 
           def gender=(value)
             if value.present?
@@ -93,11 +97,22 @@ module Common
             self[:email] || primary_email
           end
 
+          # Note that since the email is stored in address, the email can't be set on a new
+          # record.  Actually, it can get set and get, it's just not saved to the db after
+          # the record is created.  This is because after_create callback is done in the 
+          # transaction, so the foreign key for address back to person can't be determined.
+          # So we need to create the person objects first, then save the email after.
+          # Cdn schema is different and does have email in person.
+          # -AR June 24
           def email=(value)
-            ca = current_address
-            ca ||= self.addresses.new(:address_type => 'current')
-            ca.email = value
-            ca.save
+            if new_record?
+              @primary_email = value
+            else
+              ca = current_address
+              ca ||= self.addresses.new(:address_type => 'current')
+              ca.email = value
+              ca.save
+            end
           end
           
           after_save do |record|
@@ -191,6 +206,7 @@ module Common
       end
 
       def primary_email
+        return @primary_email if @primary_email.present?
         @primary_email = current_address.try(:email)
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
@@ -400,6 +416,61 @@ module Common
         false
       end
 =end
+
+      def highest_ministry_involvement_with_particular_role(ministry_role)
+        if ministry_role
+          ministry_involvement = ::MinistryInvolvement.all(:first, :joins => :ministry,
+                                                           :conditions => {:person_id => self.id, :ministry_role_id => ministry_role.id, :end_date => nil},
+                                                           :order => "#{::Ministry.table_name}.parent_id ASC")
+          ministry_involvement ? ministry_involvement.first : nil
+        else
+          nil
+        end
+      end
+
+      def ministries_involved_in_with_children(with_ministry_roles = nil)
+        ministries = []
+
+        unless with_ministry_roles.nil?
+          self.ministry_involvements.each do |mi|
+            if with_ministry_roles.include?(mi.ministry_role) then
+              ministries |= mi.ministry.myself_and_descendants
+            end
+          end
+        else
+          self.ministry_involvements.each do |mi|
+            ministries |= mi.ministry.myself_and_descendants
+          end
+        end
+
+        ministries
+      end
+
+      def campuses_under_my_ministries_with_children(with_ministry_roles = nil)
+        ministries = ministries_involved_in_with_children(with_ministry_roles)
+        campuses = []
+
+        ministries.each do |ministry|
+          campuses |= ministry.unique_campuses
+        end
+
+        campuses
+      end
+
+      def has_permission_from_ministry_or_higher(action, controller, ministry)
+        ministry_ids = ministry.ancestors.collect{|m| m.id}
+
+        involvements = ::MinistryInvolvement.all(:conditions => ["#{_(:ministry_id, :ministry_involvement)} IN (?) AND #{_(:person_id, :ministry_involvement)} = ?", ministry_ids, self.id])
+
+        involvements.each do |involvement|
+          mrps = ::MinistryRolePermission.all(:joins => :permission,
+            :conditions => ["#{_(:ministry_role_id, :ministry_role_permission)} = ? AND #{_(:action, :permission)} = ? AND #{_(:controller, :permission)} = ?", involvement.ministry_role_id, action, controller])
+          return true if mrps.any?
+        end
+
+        false
+      end
+
       def preferred_name() preferred_first_name end
       def preferred_name=(val) self[:preferred_first_name] = val end
       # use last_name for preferred_last_name if none set
@@ -440,6 +511,7 @@ module Common
           end
         end
       end
+
     end
 
     module PersonClassMethods
