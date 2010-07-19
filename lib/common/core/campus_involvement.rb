@@ -41,7 +41,7 @@ module Common
 
       def find_or_create_ministry_involvement
         return @ministry_involvement if @ministry_involvement
-        mi = find_ministry_involvement
+        mi = find_ministry_involvement # TODO: this depends on a side effect of @derived_ministry ; refactor line that sets @derived_ministry to get_derived_ministry and use get_derived_minsitry here.
         if mi.nil?
           mi = @derived_ministry.ministry_involvements.create :person => person, :ministry_role => ::MinistryRole.default_student_role
         elsif mi.ministry_role_id.nil?

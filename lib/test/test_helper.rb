@@ -144,6 +144,7 @@ module Test
       Factory(:ministryinvolvement_4)
       Factory(:ministryinvolvement_5)
       Factory(:ministryinvolvement_6)
+      Factory(:ministryinvolvement_7)
     end
 
     def setup_school_years
@@ -210,6 +211,7 @@ module Test
       reset_people_sequences
       Factory(:person_1)
       Factory(:person_3)
+      Factory(:person_5)
       Factory(:person_111)
     end
 
