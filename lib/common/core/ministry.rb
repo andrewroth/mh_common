@@ -50,6 +50,12 @@ module Common
         end
       end
 
+      def staff_involvements
+        @staff_involvements ||= ministry_involvements.find(:all, 
+            :conditions => [ "ministry_role_id in (?)", staff_role_ids ]
+        )
+      end
+
       def staff
         @staff ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} = ?", staff_role_ids, self.id], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
