@@ -13,6 +13,7 @@ module Common
         "city" => "city",
         "postal_code" => "zip",
         "phone" => "phone",
+        "alternate_phone" => "alternate_phone",
         "valid_until" => "end_date",
         "country" => "country",
         "state" => "state"
