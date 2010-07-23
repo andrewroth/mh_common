@@ -217,7 +217,7 @@ module Common
         find_or_create_from_guid_or_email(guid, email, first_name, last_name)
       end
 
-      def find_or_create_from_guid_or_email(guid, email, first_name, last_name)
+      def find_or_create_from_guid_or_email(guid, email, first_name, last_name, secure = true)
         if guid
           u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
         else
@@ -239,7 +239,7 @@ module Common
         end
         # Update the password to match their gcx password too. This will save a round-trip later
         # u.plain_password = params[:plain_password]
-        u.save(false)
+        u.save(false) if secure
         # make sure we have a person
         unless u.person
           # Try to find a person with the same email address.  If multiple people are found, use
