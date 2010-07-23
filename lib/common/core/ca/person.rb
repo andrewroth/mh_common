@@ -533,6 +533,8 @@ module Common
           self.cim_hrdb_person_years.each {|c| c.try(:destroy)}
         end
 
+        # TODO: I think this is redundant -- we should use !is_staff_somewhere? and 
+        # it should be in utopian, not ca
         def is_student
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
