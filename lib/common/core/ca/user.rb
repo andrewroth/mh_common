@@ -91,7 +91,7 @@ module Common
             return u
           end
 
-          def find_or_create_from_guid_or_email(guid, email, first_name, last_name)
+          def find_or_create_from_guid_or_email(guid, email, first_name, last_name, secure = true)
             if guid
               u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
             else
@@ -103,26 +103,34 @@ module Common
               u.person.email = email
             else
               # If we didn't find a user with the guid, do it by email address and stamp the guid
-              u = ::User.find(:first, :conditions => {
-                _(:username, :user) => [ email.upcase, email.downcase ],
-                _(:guid, :user) => "" # check for hijacking
-              })
+              if secure
+                u = ::User.find(:first, :conditions => {
+                  _(:username, :user) => [ email.upcase, email.downcase ],
+                  _(:guid, :user) => "" # check for hijacking
+                })
+              else
+                u = ::User.find(:first, :conditions => {
+                  _(:username, :user) => [ email.upcase, email.downcase ],
+                })
+              end
 
               unless u
                 # try by person email
                 p = ::Person.find(:first, :conditions => "#{_(:email, :person)} = '#{email.upcase}' or #{_(:email, :person)} = '#{email.downcase}'")
                 #p = Person.find(:all).select{|p| p.email == reciept.user.upcase || p.email == reciept.user.downcase}.first
                 u = p.user if p
-                u = nil unless u && u.guid = "" # check for hijacking
+                if secure
+                  u = nil unless u && u.guid = "" # check for hijacking
+                end
               end
 
-              if u
+              if u && secure
                 u.viewer_userID = email        # force longer usernames by using their email
                                                # instead of silly short usernames; this is ok because
                                                # we don't support the accountadmin_viewer logins anymore
                 u.guid = guid
                 u.save!
-              else
+              elsif u.nil?
                 # If we still don't have a user in SSM, we need to create one.
                 #u = User.create!(:username => receipt.user, :guid => guid)
                 u = ::Person.create_new_cim_hrdb_account guid, first_name,
