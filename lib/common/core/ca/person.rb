@@ -152,8 +152,8 @@ module Common
               return nil
             end
 
-            def is_staff_somewhere?
-              super || is_hrdb_staff?
+            def is_staff_somewhere?(skip_hrdb_check = false)
+              super() || (!skip_hrdb_check && is_hrdb_staff?)
             end
             
             ######### address helpers
