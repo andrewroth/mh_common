@@ -28,6 +28,14 @@ module Common
       def to_liquid
         { "name" => name }
       end
+
+      def derive_ministry
+        # look for the latest MC, under the assumption it will be the most nested        
+        # if staff start wanting to have staff-only groups with campuses, we'll have to
+        # rethink this
+        ministry_campus = ::MinistryCampus.find :last, :conditions => { :campus_id => self.id }
+        ministry_campus.try(:ministry)
+      end
     end
   end
 end

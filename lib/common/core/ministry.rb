@@ -28,8 +28,6 @@ module Common
           has_many :ministry_involvements, :dependent => :destroy, :dependent => :destroy
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
-          has_many :group_types
-          
           
           validates_presence_of _(:name)
           
@@ -48,7 +46,11 @@ module Common
           # Training questions including all the questions higher up on the tree
           #protected
         
-          # TODO this should use the seed instead of recreating it inline here
+          def self.default_ministry
+            return @default_ministry if @default_ministry.present?
+            @default_ministry = ::Ministry.find(:first, :conditions => { :name => Cmt::CONFIG[:default_ministry_name] })
+            @default_ministry ||= ::Ministry.first
+          end
         end
       end
 
@@ -217,6 +219,7 @@ module Common
         end
       end
       
+      # TODO this should use the seed instead of recreating it inline here
       # Create a default view for this ministry
       # Training categories including all the categories higher up on the tree
       # Training questions including all the questions higher up on the tree

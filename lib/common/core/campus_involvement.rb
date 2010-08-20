@@ -4,7 +4,7 @@ module Common
       def self.included(base)
         base.class_eval do
 
-          validates_presence_of :campus_id, :person_id, :ministry_id, :school_year_id
+          validates_presence_of :campus_id, :person_id, :ministry_id
 
           belongs_to :school_year
           belongs_to :campus
@@ -26,11 +26,7 @@ module Common
       def archived?() end_date.present? end
 
       def derive_ministry
-        # look for the latest MC, under the assumption it will be the most nested
-        # if staff start wanting to have staff-only groups with campuses, we'll have to
-        # rethink this
-        ministry_campus = ::MinistryCampus.find :last, :conditions => { :campus_id => campus_id }
-        ministry_campus.try(:ministry)
+        campus.try(:derive_ministry)
       end
 
       def find_ministry_involvement
@@ -56,6 +52,48 @@ module Common
 
       def new_student_history
         ::StudentInvolvementHistory.new :person_id => person_id, :campus_id => campus_id, :school_year_id => school_year_id, :end_date => Date.today, :ministry_role_id => find_or_create_ministry_involvement.ministry_role_id, :start_date => (last_history_update_date || start_date), :campus_involvement_id => id
+      end
+
+      def update_student_campus_involvement(flash, my_role, ministry_role_id, school_year_id, campus_id)
+        @campus_ministry_involvement = self.find_or_create_ministry_involvement
+
+        # restrict students to making ministry involvements of their role or less
+        if ministry_role_id
+          requested_role = ::MinistryRole.find(ministry_role_id) || ::MinistryRole.default_student_role
+          ministry_role_id = requested_role.id
+
+          # note that get_my_role sets @ministry_involvement as a side effect
+          if !(my_role.is_a?(::StaffRole) && requested_role.is_a?(::StudentRole)) &&
+            requested_role.position < get_my_role.position
+            flash[:notice] = "You can only set ministry roles of less than or equal to your current role"
+            ministry_role_being_updated = false
+            ministry_role_id = @campus_ministry_involvement.ministry_role_id.to_s
+          end
+        else
+          ministry_role_id = ::MinistryRole.default_student_role.id
+        end
+
+        # record history
+        record_history = !self.new_record? &&
+          (self.school_year_id.to_s != school_year_id.to_s ||
+           @campus_ministry_involvement.ministry_role_id.to_s != ministry_role_id.to_s ||
+           self.campus_id.to_s != campus_id.to_s)
+        if record_history
+          @history = self.new_student_history
+          @history.ministry_role_id = @campus_ministry_involvement.ministry_role_id
+        end
+
+        # update the records
+        self.update_attributes :school_year_id => school_year_id,
+          :campus_id => campus_id
+        if ministry_role_being_updated # update role
+          @campus_ministry_involvement.ministry_role = requested_role
+          @campus_ministry_involvement.save!
+        end
+        if record_history && self.errors.empty? && @campus_ministry_involvement.errors.empty?
+          @history.save!
+          self.update_attributes :last_history_update_date => Date.today
+        end
       end
     end
   end
