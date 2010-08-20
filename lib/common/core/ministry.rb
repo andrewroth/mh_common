@@ -3,7 +3,7 @@ module Common
     module Ministry
       def self.included(base)
         base.class_eval do
-          TYPES = [ "activity", "team", "region" ]
+          set_inheritance_column "asdf"
 
           # acts_as_tree :order => _(:name), :counter_cache => true
           has_many :children, :class_name => "Ministry", :foreign_key => _(:parent_id), 
@@ -238,6 +238,10 @@ module Common
         end
         true
       end
+    end
+
+    module MinistryRoleClassMethods
+      TYPES = [ "activity", "team", "region" ]
     end
   end
 end
