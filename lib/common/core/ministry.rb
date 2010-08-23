@@ -1,3 +1,7 @@
+class Ministry
+  TYPES = [ "activity", "team", "region" ]
+end
+
 module Common
   module Core
     module Ministry
@@ -106,7 +110,7 @@ module Common
         return @subministry_campuses
       end
     
-      def unique_ministry_campuses
+      def unique_ministry_campuses(params = {})
         unless @unique_ministry_campuses
           res =  lambda {
             @unique_ministry_campuses = ministry_campuses.clone
@@ -241,10 +245,6 @@ module Common
         end
         true
       end
-    end
-
-    module MinistryRoleClassMethods
-      TYPES = [ "activity", "team", "region" ]
     end
   end
 end
