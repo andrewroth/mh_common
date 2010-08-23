@@ -1,8 +1,14 @@
+class Ministry
+  TYPES = [ "activity", "team", "region" ]
+end
+
 module Common
   module Core
     module Ministry
       def self.included(base)
         base.class_eval do
+          set_inheritance_column "asdf"
+
           # acts_as_tree :order => _(:name), :counter_cache => true
           has_many :children, :class_name => "Ministry", :foreign_key => _(:parent_id), 
             :order => "#{::Ministry.table_name}.`#{_(:ministries_count)}` DESC, #{::Ministry.table_name}.`#{_(:name)}"
@@ -50,6 +56,12 @@ module Common
             @default_ministry ||= ::Ministry.first
           end
         end
+      end
+
+      def staff_involvements
+        @staff_involvements ||= ministry_involvements.find(:all, 
+            :conditions => [ "ministry_role_id in (?)", staff_role_ids ]
+        )
       end
 
       def staff
