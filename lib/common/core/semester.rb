@@ -8,7 +8,8 @@ module Common
           def self.current
             # find the latest semester with the latest start_date still before the current date
             # any semester with a start date later than today is surely not the current one
-            semesters = ::Semester.all(:order => "start_date ASC", :conditions => [ "start_date <= ?", Date.today ] ) 
+            sd_column = ::Semester._(:start_date)
+            semesters = ::Semester.all(:order => "#{sd_column} ASC", :conditions => [ "#{sd_column} <= ?", Date.today ] ) 
             semesters.inject(nil) do |best, curr|
               if best.nil?
                 curr
