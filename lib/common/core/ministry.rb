@@ -110,12 +110,12 @@ module Common
         return @subministry_campuses
       end
     
-      def unique_ministry_campuses(params = {})
+      def unique_ministry_campuses(top = true)
         unless @unique_ministry_campuses
           res =  lambda {
             @unique_ministry_campuses = ministry_campuses.clone
             @unique_campuses = campuses.clone
-            subministry_campuses.each do |mc| 
+            subministry_campuses(top).each do |mc|
               @unique_ministry_campuses << mc unless @unique_campuses.include?(mc.campus)
               @unique_campuses << mc.campus
             end
@@ -149,7 +149,14 @@ module Common
         end
         @campus_ids
       end
-      
+
+      def myself_and_descendants
+        unless @myself_and_descendants
+          @myself_and_descendants = [self] | descendants
+        end
+        return @myself_and_descendants
+      end
+
       def descendants
         unless @descendants
           @offspring = self.children.find(:all, :include => :children)
@@ -207,14 +214,60 @@ module Common
         self.name <=> ministry.name
       end
       
-      def to_hash_with_children
+      def campus_to_hash(campus)
+        base_hash = { 'text' => campus.campus_shortDesc, 'id' => "#{id}_#{campus.id}" , 'leaf' => true }
+      end
+      
+      def leaf_merge(show_campuses)
+        leaf_hash = {}
+        if show_campuses && campuses.count > 1
+          leaf_hash.merge!('expanded' => true, 
+            'children' => campuses.collect{|c| campus_to_hash(c)})
+        else
+          leaf_hash.merge!('leaf' => true)
+        end
+        leaf_hash
+      end
+      
+      def to_hash_with_children(show_campuses = false)
         base_hash = { 'text' => name, 'id' => id }
         if children.empty?
-          base_hash.merge('leaf' => true)
+          base_hash.merge(leaf_merge(show_campuses))
         else
           base_hash.merge('expanded' => true, 
-            'children' => children.collect(&:to_hash_with_children))
+            'children' => children.collect{|c| c.to_hash_with_children(show_campuses)})
         end
+      end
+
+      def to_hash_with_only_the_children_person_is_involved_in(person, show_ministries_under_involvement = false)
+        base_hash = { 'text' => name, 'id' => id }
+
+        children_involved_in = children.select{|c| c.person_involved_at_or_under(person)}
+
+        if children_involved_in.empty?
+          if show_ministries_under_involvement && involved_ministries(person).include?(self) && !(children.empty?)
+            base_hash.merge('expanded' => true, 
+            'children' => children.collect{|c| c.to_hash_with_children(show_ministries_under_involvement)})
+          else
+            base_hash.merge(leaf_merge(show_ministries_under_involvement))
+          end
+        else
+          base_hash.merge('expanded' => true,
+            'children' => children_involved_in.collect{ |c| c.to_hash_with_only_the_children_person_is_involved_in(person, show_ministries_under_involvement) })
+        end
+      end
+
+      def involved_ministries(person)
+        person.ministry_involvements.collect{|mi| mi.ministry}
+      end
+
+      def person_involved_at_or_under(person)
+
+        self.myself_and_descendants.each do |m|
+          return true if involved_ministries(person).include?(m)
+        end
+
+        false
       end
       
       def before_destroy
@@ -243,7 +296,7 @@ module Common
           self.ministry_roles << ::MinistryRole.create(_(:name, :ministry_role) => 'Honourary Member', _(:position, :ministry_role) => 10, :description => 'not a valid student or missionary, but we are giving them limited access anyway')
           self.ministry_roles << ::MinistryRole.create(_(:name, :ministry_role) => 'Admin', _(:position, :ministry_role) => 1)
         end
-        true
+        true # otherwise subsequent after_create calls will fail
       end
     end
   end
