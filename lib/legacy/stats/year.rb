@@ -6,6 +6,7 @@ module Legacy
         base.class_eval do
           has_many :months, :class_name => 'Month', :foreign_key => _(:year_id, :month)
           has_many :semesters, :class_name => 'Semester', :foreign_key => _(:year_id, :semester)
+          has_many :annual_goals_reports, :class_name => 'AnnualGoalsReport'
         end
 
         base.extend YearClassMethods
@@ -22,7 +23,9 @@ module Legacy
       def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
         total = 0
         if stat_hash[:column_type] == :database_column
-          if stat_hash[:collected] == :weekly
+          if stat_hash[:collected] == :yearly
+            total = find_stats_year_campuses(campus_ids, stat_hash[:column])
+          elsif stat_hash[:collected] == :weekly
             total = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
           else
             semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }         
@@ -30,6 +33,36 @@ module Legacy
         end
         total
       end
+
+      def find_stats_year_campuses(campus_ids, stat)
+        result = get_stat_sums_for(campus_ids)["#{stat}"]
+        result.nil? ? 0 : result
+      end
+
+      def get_database_columns(report)
+        stats_reports[report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
+      end
+      
+      def get_annual_goal_report_columns
+        @annual_goal_report_columns ||= get_database_columns(:annual_goals_report)
+      end
+
+      def get_stat_sums_for(campus_ids)
+        @result_sums ||= Hash.new
+        @result_sums[get_hash(campus_ids)] ||= execute_stat_sums_for(campus_ids)
+      end
+
+      def execute_stat_sums_for(campus_ids)
+        select = get_annual_goal_report_columns.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :annual_goals_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        unless conditions.empty?
+          annual_goals_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          annual_goals_reports.find(:all, :select => select).first
+        end
+      end
+
 
       def get_hash(campus_ids, staff_id = nil)
         [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")

@@ -73,7 +73,11 @@ module Legacy
       end
 
       def find_prcs_campuses(campus_ids)
-        prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?)", campus_ids])
+        if campus_ids.nil?
+          prcs.count(:all)
+        else
+          prcs.count(:all, :conditions => ["#{_(:campus_id, :prc)} IN (?)", campus_ids])
+        end
       end
 
       def get_database_columns(report)
@@ -97,7 +101,11 @@ module Legacy
         select = get_semester_report_columns.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
         conditions = []
         conditions += ["#{_(:campus_id, :semester_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
-        semester_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        unless conditions.empty?
+          semester_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          semester_reports.find(:all, :select => select).first
+        end
       end
 
 
