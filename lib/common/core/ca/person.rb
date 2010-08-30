@@ -87,6 +87,15 @@ module Common
               end
             end
 
+            def gender_us_id
+              case gender_id
+              when CIM_MALE_GENDER_ID
+                US_MALE_GENDER_ID.to_s
+              when CIM_FEMALE_GENDER_ID
+                US_FEMALE_GENDER_ID.to_s
+              end
+            end
+
             def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
             def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
             def emergency_address() nil end
