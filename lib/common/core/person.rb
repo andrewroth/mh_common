@@ -236,7 +236,7 @@ module Common
           if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
             self.campuses
           else
-            self.ministries.collect {|ministry| ministry.campuses.find(:all)}.flatten.uniq
+            self.ministries.collect {|ministry| ministry.unique_campuses }.flatten.uniq
           end
         }
         Rails.env.production? ? Rails.cache.fetch([self, 'campus_list', ministry_involvement]) {res.call} : res.call
