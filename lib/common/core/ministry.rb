@@ -307,7 +307,11 @@ module Common
       end
       
       def descendants_condition
-        "#{_(:lft, :ministry)} >= #{lft} AND #{_(:rgt, :ministry)} <= #{rgt}"
+        "#{__(:lft, :ministry)} >= #{lft} AND #{__(:rgt, :ministry)} <= #{rgt}"
+      end
+
+      def descendants_with_names
+        ::Ministry.find(:all, :select => "#{::Ministry.__(:name)} as name, parents_#{::Ministry.table_name.gsub('.','_')}.#{::Ministry._(:name)} as parent_name", :joins => :parent, :conditions => descendants_condition)
       end
 
       # TODO this should use the seed instead of recreating it inline here
