@@ -87,6 +87,15 @@ module Common
               end
             end
 
+            def gender_us_id
+              case gender_id
+              when CIM_MALE_GENDER_ID
+                US_MALE_GENDER_ID.to_s
+              when CIM_FEMALE_GENDER_ID
+                US_FEMALE_GENDER_ID.to_s
+              end
+            end
+
             def current_address() id ? ::CimHrdbCurrentAddress.find(id) : ::CimHrdbCurrentAddress.new  end
             def permanent_address() id ? ::CimHrdbPermanentAddress.find(id) : ::CimHrdbPermanentAddress.new end
             def emergency_address() nil end
@@ -152,8 +161,8 @@ module Common
               return nil
             end
 
-            def is_staff_somewhere?
-              super || is_hrdb_staff?
+            def is_staff_somewhere?(skip_hrdb_check = false)
+              super() || (!skip_hrdb_check && is_hrdb_staff?)
             end
             
             ######### address helpers
