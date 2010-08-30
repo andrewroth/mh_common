@@ -12,11 +12,6 @@ module Common
           acts_as_nested_set
 
           # acts_as_tree :order => _(:name), :counter_cache => true
-          has_many :children, :class_name => "Ministry", :foreign_key => _(:parent_id), 
-            :order => "#{::Ministry.table_name}.`#{_(:ministries_count)}` DESC, #{::Ministry.table_name}.`#{_(:name)}"
-          
-          belongs_to :parent, :class_name => "Ministry", :foreign_key => _(:parent_id),
-            :counter_cache => :ministries_count
           
           has_many :permissions, :through => :ministry_roles, :source => :ministry_role_permissions
           # note - dependent is removed since these role methods are overridden
@@ -307,7 +302,11 @@ module Common
       end
       
       def descendants_condition
-        "#{_(:lft, :ministry)} >= #{lft} AND #{_(:rgt, :ministry)} <= #{rgt}"
+        "#{__(:lft, :ministry)} >= #{lft} AND #{__(:rgt, :ministry)} <= #{rgt}"
+      end
+
+      def descendants_with_names
+        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_#{::Ministry.table_name.gsub('.','_')}.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN `uscm`.`sn_ministries` parents_uscm_sn_ministries ON `parents_uscm_sn_ministries`.id = `uscm`.`sn_ministries`.parent_id", :conditions => descendants_condition, :order => ::Ministry.__(:name))
       end
 
       # TODO this should use the seed instead of recreating it inline here
