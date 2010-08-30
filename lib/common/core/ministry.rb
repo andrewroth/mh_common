@@ -306,7 +306,7 @@ module Common
       end
 
       def descendants_with_names
-        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_#{::Ministry.table_name.gsub('.','_')}.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN `uscm`.`sn_ministries` parents_uscm_sn_ministries ON `parents_uscm_sn_ministries`.id = `uscm`.`sn_ministries`.parent_id", :conditions => descendants_condition, :order => ::Ministry.__(:name))
+        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_ministries.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN #{::Ministry.table_name} parents_ministries ON parents_ministries.#{::Ministry._(:id)} = #{::Ministry.__(:parent_id)}", :conditions => descendants_condition, :order => ::Ministry.__(:name))
       end
 
       # TODO this should use the seed instead of recreating it inline here
