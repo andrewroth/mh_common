@@ -94,7 +94,7 @@ module Common
           end
 
           def email
-            self[:email] || primary_email
+            self[:email] || self[:"#{::Person._(:email)}"] || primary_email
           end
 
           # Note that since the email is stored in address, the email can't be set on a new
