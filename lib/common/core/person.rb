@@ -93,6 +93,10 @@ module Common
             end
           end
 
+          def gender_us_id
+            gender
+          end
+
           def email
             self[:email] || self[:"#{::Person._(:email)}"] || primary_email
           end

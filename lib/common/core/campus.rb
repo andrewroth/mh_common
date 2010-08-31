@@ -3,12 +3,16 @@ module Common
     module Campus
       def self.included(base)
         base.class_eval do
+          set_inheritance_column "asdf"
+          
           has_many :campus_involvements
           has_many :people, :through => :campus_involvements
           has_many :groups
           # has_many :bible_studies
           has_many :ministry_campuses, :include => :ministry
           has_many :ministries, :through => :ministry_campuses, :order => ::Ministry.table_name+'.'+_(:name, :ministry)
+          has_many :events, :through => :event_campuses
+          has_many :event_campuses, :include => :event
           has_many :dorms
         end
       end
