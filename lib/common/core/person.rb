@@ -98,7 +98,7 @@ module Common
           end
 
           def email
-            self[:email] || primary_email
+            self[:email] || self[:"#{::Person._(:email)}"] || primary_email
           end
 
           # Note that since the email is stored in address, the email can't be set on a new
@@ -235,17 +235,18 @@ module Common
         Rails.env.production? ? Rails.cache.fetch([self, 'ministry_tree']) {res.call} : res.call
       end
       
-      def campus_list(ministry_involvement)
-        res =  lambda {
-          if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
-            self.campuses
+      def campus_list(ministry_involvement, for_ministry = :all)
+        if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
+          self.campuses
+        else
+          if for_ministry == :all
+            self.ministries.collect {|ministry| ministry.unique_campuses }.flatten.uniq
           else
-            self.ministries.collect {|ministry| ministry.campuses.find(:all)}.flatten.uniq
+            for_ministry.unique_campuses.flatten.uniq
           end
-        }
-        Rails.env.production? ? Rails.cache.fetch([self, 'campus_list', ministry_involvement]) {res.call} : res.call
+        end
       end
-      
+
       def role(ministry)
         @roles ||= {}
         unless @roles[ministry]

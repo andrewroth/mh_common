@@ -9,12 +9,9 @@ module Common
         base.class_eval do
           set_inheritance_column "asdf"
 
+          acts_as_nested_set
+
           # acts_as_tree :order => _(:name), :counter_cache => true
-          has_many :children, :class_name => "Ministry", :foreign_key => _(:parent_id), 
-            :order => "#{::Ministry.table_name}.`#{_(:ministries_count)}` DESC, #{::Ministry.table_name}.`#{_(:name)}"
-          
-          belongs_to :parent, :class_name => "Ministry", :foreign_key => _(:parent_id),
-            :counter_cache => :ministries_count
           
           has_many :permissions, :through => :ministry_roles, :source => :ministry_role_permissions
           # note - dependent is removed since these role methods are overridden
@@ -43,7 +40,7 @@ module Common
           #alias_method :my_staff_roles, :staff_roles
           #alias_method :my_student_roles, :student_roles
           #alias_method :my_other_roles, :other_roles
-          alias_method :campus_ids, :campus_ids2
+          #alias_method :campus_ids, :campus_ids2
           
           # Create a default view for this ministry
           # Training categories including all the categories higher up on the tree
@@ -93,6 +90,12 @@ module Common
       end
       
       def unique_campuses
+        # it's faster to uniq this in rails than try to do it in sql
+        ::Campus.all(:joins => :ministries, :conditions => descendants_condition).uniq
+      end
+
+      ##### replaced by subministry_campuses using the new nested set
+      def unique_campuses_old
         unless @unique_campuses
           res =  lambda {::Campus.find(campus_ids)}
           @unique_campuses = (Rails.env.production? ? Rails.cache.fetch([self, 'unique_campuses']) {res.call} : res.call)
@@ -100,7 +103,14 @@ module Common
         return @unique_campuses
       end
       
-      def subministry_campuses(top = true)
+      def subministry_campuses(skip_self = true)
+        conditions = descendants_condition
+        conditions += " AND #{::MinistryCampus._(:ministry_id)} != #{self.id}" if skip_self
+        ::MinistryCampus.all(:joins => :ministry, :conditions => "#{conditions}")
+      end
+
+      ##### replaced by subministry_campuses using the new nested set
+      def subministry_campuses_old(top = true)
         unless @subministry_campuses
           @subministry_campuses = top ? [] : self.ministry_campuses
           self.children.each do |ministry|
@@ -110,7 +120,15 @@ module Common
         return @subministry_campuses
       end
     
-      def unique_ministry_campuses(top = true)
+      def unique_ministry_campuses(skip_self = true)
+        conditions = descendants_condition
+        conditions += " AND #{::MinistryCampus._(:ministry_id)} != #{self.id}" if skip_self
+        @unique_ministry_campuses ||= ::MinistryCampus.all(:joins => :ministry, :conditions => conditions)
+        @unique_campuses = ::Campus.all(:joins => :ministries, :conditions => conditions).uniq
+      end
+
+      ##### replaced by subministry_campuses using the new nested set
+      def unique_ministry_campuses_old(top = true)
         unless @unique_ministry_campuses
           res =  lambda {
             @unique_ministry_campuses = ministry_campuses.clone
@@ -126,6 +144,7 @@ module Common
         return @unique_ministry_campuses
       end
       
+=begin
       def ancestors
         unless @ancestors
           @ancestors = parent ? [self, parent.ancestors] : [self]
@@ -133,12 +152,13 @@ module Common
         end
         @ancestors
       end
+=end
       
       def ancestor_ids
-        @ancestor_ids ||= ancestors.collect(&:id)
+        @ancestor_ids ||= self_and_ancestors.collect(&:id)
       end
       
-      def campus_ids2
+      def campus_ids2_old # TODO: make this _old once awesome nested set is used everywhere
         unless @campus_ids
           res =  lambda {
             ministry_ids = self_plus_descendants.collect(&:id)
@@ -150,13 +170,17 @@ module Common
         @campus_ids
       end
 
+      def myself_and_descendants() self_plus_descendants end
+=begin
       def myself_and_descendants
         unless @myself_and_descendants
           @myself_and_descendants = [self] | descendants
         end
         return @myself_and_descendants
       end
+=end
 
+=begin
       def descendants
         unless @descendants
           @offspring = self.children.find(:all, :include => :children)
@@ -168,6 +192,7 @@ module Common
         end
         return @descendants
       end
+=end
       
       def root
         @root ||= self.parent_id ? self.parent.root : self
@@ -276,6 +301,14 @@ module Common
         end
       end
       
+      def descendants_condition
+        "#{__(:lft, :ministry)} >= #{lft} AND #{__(:rgt, :ministry)} <= #{rgt}"
+      end
+
+      def descendants_with_names
+        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_ministries.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN #{::Ministry.table_name} parents_ministries ON parents_ministries.#{::Ministry._(:id)} = #{::Ministry.__(:parent_id)}", :conditions => descendants_condition, :order => ::Ministry.__(:name))
+      end
+
       # TODO this should use the seed instead of recreating it inline here
       # Create a default view for this ministry
       # Training categories including all the categories higher up on the tree
@@ -298,6 +331,7 @@ module Common
         end
         true # otherwise subsequent after_create calls will fail
       end
+
     end
   end
 end
