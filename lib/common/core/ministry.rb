@@ -309,6 +309,18 @@ module Common
         ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_#{::Ministry.table_name.gsub('.','_')}.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN `uscm`.`sn_ministries` parents_uscm_sn_ministries ON `parents_uscm_sn_ministries`.id = `uscm`.`sn_ministries`.parent_id", :conditions => descendants_condition, :order => ::Ministry.__(:name))
       end
 
+      def descendants_staff_count_hash
+        return @descendants_staff_count_hash if @descendants_staff_count_hash
+        ms = Ministry.find(:all, :select => "#{Ministry.__(:id)}, (COUNT(*)) as num_staff", :joins => "INNER JOIN #{MinistryInvolvement.table_name} ON #{MinistryInvolvement.__(:ministry_id)} = #{Ministry.__(:id)}", :conditions => self.descendants_condition + " AND ministry_role_id IN (#{self.staff_role_ids.join(',')})", :group => Ministry.__(:id))
+        @descendants_staff_count_hash = Hash[ms.collect{ |m| [ m.id, m.num_staff ] }]
+      end
+
+      def descendants_groups_count_hash
+        return @descendants_groups_count_hash if @descendants_groups_count_hash
+        ms = Ministry.find(:all, :select => "#{Ministry.__(:id)}, (COUNT(*)) as num_groups", :joins => "INNER JOIN #{Group.table_name} ON #{Group.__(:ministry_id)} = #{Ministry.__(:id)}", :conditions => self.descendants_condition, :group => Ministry.__(:id))
+        @descendants_groups_count_hash = Hash[ms.collect{ |m| [ m.id, m.num_groups ] }]
+      end
+
       # TODO this should use the seed instead of recreating it inline here
       # Create a default view for this ministry
       # Training categories including all the categories higher up on the tree
