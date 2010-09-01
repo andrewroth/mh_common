@@ -535,11 +535,11 @@ module Common
         def full_destroy
           # must destroy person and access before user can be destroyed because of validates_no_association_data
           uid = self.user.id
-          self.destroy
           self.access.try(:destroy)
           ::User.find(uid).try(:destroy)
           self.emerg.try(:destroy)
           self.cim_hrdb_person_years.each {|c| c.try(:destroy)}
+          self.destroy
         end
 
         # TODO: I think this is redundant -- we should use !is_staff_somewhere? and 
@@ -569,12 +569,21 @@ module Common
 
           def create_new_cim_hrdb_account(guid, fn, ln, uid)
             # first and last names can't be nil
-            fn ||= ''
-            ln ||= ''
+            # rails insists on putting null into columns with emptry strings
+            hack_fn = fn.nil?
+            fn = 'fn' if hack_fn
+            hack_ln = ln.nil?
+            ln = 'ln' if hack_ln
             guid ||= ''
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
-              :person_legal_fname => '', :person_legal_lname => '',
+              :person_legal_fname => 'lfn', :person_legal_lname => 'lln',
               :birth_date => nil, :person_email => uid
+            p.person_fname = '' if hack_fn
+            p.person_lname = '' if hack_ln
+            p.person_legal_fname = ''
+            p.person_legal_lname = ''
+            p.save(false)
+
             p.create_user_and_access_only(guid, uid)
 
             p.user
