@@ -93,6 +93,10 @@ module Common
             end
           end
 
+          def gender_us_id
+            gender
+          end
+
           def email
             self[:email] || self[:"#{::Person._(:email)}"] || primary_email
           end
@@ -255,7 +259,7 @@ module Common
       
       def admin?(ministry)
         mi = ::MinistryInvolvement.find(:first, :conditions => "#{_(:person_id, :ministry_involvement)} = #{self.id} AND
-                                                              #{_(:ministry_id, :ministry_involvement)} IN (#{ministry.ancestor_ids.join(',')}) AND
+                                                              #{_(:ministry_id, :ministry_involvement)} IN (#{(ministry.ancestor_ids << ministry.id).join(',')}) AND
                                                               #{_(:admin, :ministry_involvement)} = 1")
         return !mi.nil?
       end
