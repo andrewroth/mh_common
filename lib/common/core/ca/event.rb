@@ -10,8 +10,7 @@ module Common
           def all_attendees_from_campus(campus)
             attendees = []
 
-            EventBright.setup(EventBright::KEYS[:api], true)
-            @eventbrite_user = EventBright::User.new(EventBright::KEYS[:user])
+            @eventbrite_user = EventBright.setup_from_initializer()
 
             eb_event = EventBright::Event.new(@eventbrite_user, {:id => self.eventbrite_id})
 
