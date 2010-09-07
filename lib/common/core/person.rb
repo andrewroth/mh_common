@@ -98,7 +98,13 @@ module Common
           end
 
           def email
-            self[:email] || self[:"#{::Person._(:email)}"] || primary_email
+            e1 = self[:email]
+            return e1 if e1.present?
+
+            e2 = self[:"#{::Person._(:email)}"]
+            return e2 if e2.present?
+
+            return primary_email
           end
 
           # Note that since the email is stored in address, the email can't be set on a new
