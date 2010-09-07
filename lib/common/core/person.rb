@@ -241,17 +241,18 @@ module Common
         Rails.env.production? ? Rails.cache.fetch([self, 'ministry_tree']) {res.call} : res.call
       end
       
-      def campus_list(ministry_involvement)
-        res =  lambda {
-          if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
-            self.campuses
-          else
+      def campus_list(ministry_involvement, for_ministry = :all)
+        if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
+          self.campuses
+        else
+          if for_ministry == :all
             self.ministries.collect {|ministry| ministry.unique_campuses }.flatten.uniq
+          else
+            for_ministry.unique_campuses.flatten.uniq
           end
-        }
-        Rails.env.production? ? Rails.cache.fetch([self, 'campus_list', ministry_involvement]) {res.call} : res.call
+        end
       end
-      
+
       def role(ministry)
         @roles ||= {}
         unless @roles[ministry]
