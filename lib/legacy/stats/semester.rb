@@ -22,6 +22,10 @@ module Legacy
         months.last.end_date
       end
 
+      def stats_available
+        [:semesterly, :monthly, :weekly, :prc]
+      end
+
       def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
         evaluation = 0
         if stat_hash[:column_type] == :database_column
