@@ -15,6 +15,10 @@ module Legacy
         base.extend StatsClassMethods
       end
 
+      def stats_available
+        [:weekly, :prc]
+      end
+
       def get_weekly_report_columns
         @weekly_report_columns ||= stats_reports.collect{|k, v| stats_reports[k].collect{|k, c| (c[:column_type] == :database_column && c[:collected] == :weekly) ? c[:column] : nil}.compact }.flatten.compact
       end
