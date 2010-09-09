@@ -13,6 +13,11 @@ module Legacy
         base.extend StatsClassMethods
       end
 
+      def stats_available
+        [:monthly, :weekly, :prc]
+      end
+
+
       def evaluate_stat(campus_ids, stat_hash, staff_id = nil)
         evaluation = 0
         if stat_hash[:column_type] == :database_column
