@@ -15,6 +15,34 @@ module Common
             def country=(val) '' end
             def enrollment() '' end
           end
+
+          base.extend CampusClassMethods
+        end
+
+
+        def matches_eventbrite_campus(eb_campus_string)
+          match = false
+          
+          desc = eb_campus_string.slice(0, eb_campus_string.rindex("(")-1)
+          short_desc = eb_campus_string.slice(eb_campus_string.rindex("(")+1, eb_campus_string.rindex(")")-eb_campus_string.rindex("(")-1)
+
+          match = true if (desc == self.desc || short_desc == self.short_desc)
+          
+          match
+        end
+
+
+        module CampusClassMethods
+          def find_campus_from_eventbrite(eb_campus_string)
+            # eb_campus_string should be in format "campus.desc (campus.short_desc)"
+            desc = eb_campus_string.slice(0, eb_campus_string.rindex("(")-1)
+            short_desc = eb_campus_string.slice(eb_campus_string.rindex("(")+1, eb_campus_string.rindex(")")-eb_campus_string.rindex("(")-1)
+
+            ::Campus.first(:conditions => ["#{::Campus.table_name}.#{_(:campus_desc, :campus)} = '#{desc}' OR #{::Campus.table_name}.#{_(:short_desc, :campus)} = '#{short_desc}'"])
+
+#            ::Campus.first(:conditions => {:campus_desc => eb_campus_string.slice(0, eb_campus_string.rindex("(")-1),
+#                :campus_shortDesc => eb_campus_string.slice(eb_campus_string.rindex("(")+1, eb_campus_string.rindex(")")-eb_campus_string.rindex("(")-1) })
+          end
         end
 
       end
