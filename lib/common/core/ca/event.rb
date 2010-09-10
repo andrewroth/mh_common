@@ -26,11 +26,6 @@ module Common
                 if campus.matches_eventbrite_campus(answer)
                   attendees << attendee
                 end
-#                  if answer.slice(answer.rindex("("), answer.rindex(")")) == "(#{campus.short_desc})" ||
-#                     answer.slice(0, answer.rindex("(") - 1) == "#{campus.desc}"
-#
-#                      attendees << attendee
-#                  end
               end
             end
           end
