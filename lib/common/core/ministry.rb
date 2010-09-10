@@ -94,7 +94,7 @@ module Common
       
       def unique_campuses
         # it's faster to uniq this in rails than try to do it in sql
-        ::Campus.all(:joins => :ministries, :conditions => descendants_condition).uniq
+        ::Campus.all(:joins => :ministries, :conditions => descendants_condition, :order => ::Campus._(:name)).uniq
       end
 
       ##### replaced by subministry_campuses using the new nested set
