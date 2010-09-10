@@ -38,10 +38,7 @@ module Common
             desc = eb_campus_string.slice(0, eb_campus_string.rindex("(")-1)
             short_desc = eb_campus_string.slice(eb_campus_string.rindex("(")+1, eb_campus_string.rindex(")")-eb_campus_string.rindex("(")-1)
 
-            ::Campus.first(:conditions => ["#{::Campus.table_name}.#{_(:campus_desc, :campus)} = '#{desc}' OR #{::Campus.table_name}.#{_(:short_desc, :campus)} = '#{short_desc}'"])
-
-#            ::Campus.first(:conditions => {:campus_desc => eb_campus_string.slice(0, eb_campus_string.rindex("(")-1),
-#                :campus_shortDesc => eb_campus_string.slice(eb_campus_string.rindex("(")+1, eb_campus_string.rindex(")")-eb_campus_string.rindex("(")-1) })
+            ::Campus.first(:conditions => ["#{::Campus.table_name}.#{_(:campus_desc, :campus)} = \"#{desc}\" OR #{::Campus.table_name}.#{_(:short_desc, :campus)} = \"#{short_desc}\""])
           end
         end
 
