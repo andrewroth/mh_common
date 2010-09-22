@@ -44,7 +44,11 @@ module Common
             def major=(val) person_extra.major = val end
             def minor() person_extra.minor end
             def minor=(val) person_extra.minor = val end
-            def url() person_extra.major end
+            def curr_dorm() person_extra.curr_dorm end
+            def curr_dorm=(val) person_extra.curr_dorm = val end
+            def perm_dorm() person_extra.perm_dorm end
+            def perm_dorm=(val) person_extra.perm_dorm = val end
+            def url() person_extra.url end
             def url=(val) person_extra.url = val end
             def staff_notes() person_extra.staff_notes end
             def staff_notes=(val) person_extra.staff_notes = val end
@@ -55,6 +59,7 @@ module Common
             def save_emerg?() @save_emerg end
             def save_emerg=(val) @save_emerg = val end
             def initialize_addresses() end
+            def primary_campus() most_recent_involvement.try(:campus) end
 
             after_update { |record|
               record.person_extra.save!
