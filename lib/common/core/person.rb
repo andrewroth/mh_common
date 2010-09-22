@@ -16,7 +16,8 @@ module Common
         "alternate_phone" => "alternate_phone",
         "valid_until" => "end_date",
         "country" => "country",
-        "state" => "state"
+        "state" => "state",
+        "dorm" => "dorm"
       } 
 
       def self.included(base)
