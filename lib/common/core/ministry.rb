@@ -61,16 +61,19 @@ module Common
         )
       end
 
-      def staff
-        @staff ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} = ?", staff_role_ids, self.id], :joins => :ministry_involvements, :order => _(:first_name, :person))
+      def staff(subs = false)
+        @staff ||= {}
+        @staff[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", staff_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
       
-      def leaders
-        @leaders ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} = ?", leader_role_ids, self.id], :joins => :ministry_involvements, :order => _(:first_name, :person))
+      def leaders(subs = false)
+        @leaders ||= {}
+        @leaders ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", leader_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
       
-      def students
-        @leaders ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} = ?", student_role_ids, self.id], :joins => :ministry_involvements, :order => _(:first_name, :person))
+      def student(subs = false)
+        @students ||= {}
+        @students ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", student_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
 
       def ministry_roles
@@ -91,7 +94,7 @@ module Common
       
       def unique_campuses
         # it's faster to uniq this in rails than try to do it in sql
-        ::Campus.all(:joins => :ministries, :conditions => descendants_condition).uniq
+        ::Campus.all(:joins => :ministries, :conditions => descendants_condition, :order => ::Campus._(:name)).uniq
       end
 
       ##### replaced by subministry_campuses using the new nested set
