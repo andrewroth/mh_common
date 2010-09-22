@@ -62,6 +62,8 @@ module Common
             def save_emerg?() @save_emerg end
             def save_emerg=(val) @save_emerg = val end
             def initialize_addresses() end
+            def most_recent_involvement() campus_involvements.last end
+            def primary_campus_involvement() most_recent_involvement end
             def primary_campus() most_recent_involvement.try(:campus) end
 
             after_update { |record|
