@@ -40,6 +40,9 @@ module Common
             def person_extra()
               @person_extra ||= person_extra_ref || ::PersonExtra.new(:person_id => id)
             end
+            def clear_extra_ref
+              @person_extra = nil
+            end
             def major() person_extra.major end
             def major=(val) person_extra.major = val end
             def minor() person_extra.minor end
