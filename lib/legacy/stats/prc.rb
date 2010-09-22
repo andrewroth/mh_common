@@ -9,6 +9,8 @@ module Legacy
           belongs_to :campus, :class_name => 'Campus', :foreign_key => _(:id, :campus)
           belongs_to :prcMethod, :class_name => 'Prcmethod', :primary_key => _(:id, :prcmethod), :foreign_key => _(:id, :prcmethod)
           belongs_to :semester, :class_name => 'Semester', :primary_key => _(:id, :semester), :foreign_key => _(:id, :semester)
+
+          validates_presence_of _(:date)
         end
 
         base.extend PrcClassMethods
