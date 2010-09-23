@@ -49,8 +49,12 @@ module Common
             def minor=(val) person_extra.minor = val end
             def curr_dorm() person_extra.curr_dorm end
             def curr_dorm=(val) person_extra.curr_dorm = val end
+            def local_dorm() person_extra.curr_dorm end
+            def local_dorm=(val) person_extra.curr_dorm = val end
             def perm_dorm() person_extra.perm_dorm end
             def perm_dorm=(val) person_extra.perm_dorm = val end
+            def permanent_dorm() person_extra.perm_dorm end
+            def permanent_dorm=(val) person_extra.perm_dorm = val end
             def url() person_extra.url end
             def url=(val) person_extra.url = val end
             def staff_notes() person_extra.staff_notes end
