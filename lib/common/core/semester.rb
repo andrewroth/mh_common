@@ -5,6 +5,14 @@ module Common
         base.class_eval do
           belongs_to :semester
 
+          def next_semester
+            ::Semester.all(:order => "#{::Semester._(:start_date)} ASC", :conditions => [ "#{::Semester._(:start_date)} > ?", self.start_date ]).first
+          end
+
+          def previous_semester
+            ::Semester.all(:order => "#{::Semester._(:start_date)} DESC", :conditions => [ "#{::Semester._(:start_date)} < ?", self.start_date ]).first
+          end
+
           def self.current
             # find the latest semester with the latest start_date still before the current date
             # any semester with a start date later than today is surely not the current one
