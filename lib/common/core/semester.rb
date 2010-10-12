@@ -6,11 +6,11 @@ module Common
           belongs_to :semester
 
           def next_semester
-            ::Semester.all(:order => "#{::Semester._(:start_date)} ASC", :conditions => [ "#{::Semester._(:start_date)} > ?", self.start_date ]).first
+            ::Semester.first(:order => "#{::Semester._(:start_date)} ASC", :conditions => [ "#{::Semester._(:start_date)} > ?", self.start_date ])
           end
 
           def previous_semester
-            ::Semester.all(:order => "#{::Semester._(:start_date)} DESC", :conditions => [ "#{::Semester._(:start_date)} < ?", self.start_date ]).first
+            ::Semester.first(:order => "#{::Semester._(:start_date)} DESC", :conditions => [ "#{::Semester._(:start_date)} < ?", self.start_date ])
           end
 
           def self.current
