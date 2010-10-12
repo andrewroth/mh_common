@@ -309,7 +309,7 @@ module Common
       end
 
       def descendants_with_names
-        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_ministries.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN #{::Ministry.table_name} parents_ministries ON parents_ministries.#{::Ministry._(:id)} = #{::Ministry.__(:parent_id)}", :conditions => descendants_condition, :order => ::Ministry.__(:name))
+        ::Ministry.find(:all, :select => "#{::Ministry.__(:id)} as id, #{::Ministry.__(:name)} as name, parents_sn_ministries.#{::Ministry._(:name)} as parent_name", :joins => "LEFT OUTER JOIN #{::Ministry.table_name} parents_sn_ministries ON `parents_sn_ministries`.id = #{::Ministry.table_name}.parent_id", :conditions => descendants_condition, :order => ::Ministry.__(:name))
       end
 
       def descendants_staff_count_hash
