@@ -13,6 +13,7 @@ module Common
 
             def type=(val) '' end
             def country=(val) '' end
+            def country() region.country end
             def enrollment() '' end
           end
 
