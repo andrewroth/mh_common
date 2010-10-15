@@ -39,6 +39,12 @@ module Test
       }
     end
 
+    # credit: http://devblog.famundo.com/articles/2007/02/13/testing-drying-the-asserting-of-array-similarity
+    def assert_array_similarity(expected, actual, message=nil)
+      full_message = build_message(message, "<?> expected but was\n<?>.\n", expected, actual)
+      assert_block(full_message) { (expected.size ==  actual.size) && (expected - actual == []) }
+    end
+
     def setup_prcs
       Factory(:prc_1)
       Factory(:prc_2)
