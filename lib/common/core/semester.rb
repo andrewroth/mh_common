@@ -52,7 +52,7 @@ module Common
                 unless year.semesters.size == 3
 
                   # create fall semester
-                  unless year.semesters.all(:conditions => {:desc => "Fall #{year.desc[0..3]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Fall #{year.desc[0..3]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Fall #{year.desc[0..3]}",
                                                         :start_date => "#{year.desc[0..3]}-09-01")
@@ -61,7 +61,7 @@ module Common
                   end
 
                   # create winter semester
-                  unless year.semesters.all(:conditions => {:desc => "Winter #{year.desc[-4..-1]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Winter #{year.desc[-4..-1]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Winter #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-01-01")
@@ -70,7 +70,7 @@ module Common
                   end
 
                   # create summer semester
-                  unless year.semesters.all(:conditions => {:desc => "Summer #{year.desc[-4..-1]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Summer #{year.desc[-4..-1]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Summer #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-05-01")
