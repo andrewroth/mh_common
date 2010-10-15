@@ -44,7 +44,7 @@ module Common
                    # the initialization case anyways so it should only happen once.
               end
               new_year.desc = "#{last_year_year} - #{last_year_year+1}"
-              puts "Adding year #{new_year.desc}"
+              puts "Adding year #{new_year.desc}" unless Rails.env.test?
               new_year.save
 
                 # for each year, if there are not 3 semesters, add them
@@ -56,7 +56,7 @@ module Common
 
                     new_semester = year.semesters.build(:desc => "Fall #{year.desc[0..3]}",
                                                         :start_date => "#{year.desc[0..3]}-09-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
 
@@ -65,7 +65,7 @@ module Common
 
                     new_semester = year.semesters.build(:desc => "Winter #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-01-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
 
@@ -74,7 +74,7 @@ module Common
 
                     new_semester = year.semesters.build(:desc => "Summer #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-05-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
                 end # year == 3
