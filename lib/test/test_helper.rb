@@ -114,6 +114,12 @@ module Test
       Factory(:title_5)
     end
 
+    # credit: http://devblog.famundo.com/articles/2007/02/13/testing-drying-the-asserting-of-array-similarity
+    def assert_array_similarity(expected, actual, message=nil)
+      full_message = build_message(message, "<?> expected but was\n<?>.\n", expected, actual)
+      assert_block(full_message) { (expected.size == actual.size) && (expected - actual == []) }
+    end
+
     def setup_users
       Factory(:user_1)
       Factory(:user_3)
@@ -293,6 +299,8 @@ module Test
       Factory(:grouptype_1)
       Factory(:grouptype_2)
       Factory(:grouptype_3)
+
+      Factory(:semester_10)
 
       Factory(:group_1)
       Factory(:group_2)

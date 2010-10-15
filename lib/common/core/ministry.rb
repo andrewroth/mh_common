@@ -24,8 +24,8 @@ module Common
           has_many :campus_involvements
           # has_many :people, :through => :campus_involvements
           has_many :people, :through => :ministry_involvements
-          has_many :ministry_campuses, :include => :campus, :dependent => :destroy, :order => __(:name, :campus)
-          has_many :campuses, :through => :ministry_campuses, :order => __(:name, :campus)
+          has_many :ministry_campuses, :include => :campus, :dependent => :destroy, :order => ::Campus.__(:name)
+          has_many :campuses, :through => :ministry_campuses, :order => ::Campus.__(:name)
           has_many :ministry_involvements, :dependent => :destroy, :dependent => :destroy
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
@@ -68,12 +68,12 @@ module Common
       
       def leaders(subs = false)
         @leaders ||= {}
-        @leaders ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", leader_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
+        @leaders[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", leader_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
       
       def student(subs = false)
         @students ||= {}
-        @students ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", student_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
+        @students[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", student_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
 
       def ministry_roles
@@ -305,7 +305,7 @@ module Common
       end
       
       def descendants_condition
-        "#{__(:lft, :ministry)} >= #{lft} AND #{__(:rgt, :ministry)} <= #{rgt}"
+        "#{::Ministry.__(:lft)} >= #{lft} AND #{::Ministry.__(:rgt)} <= #{rgt}"
       end
 
       def descendants_with_names

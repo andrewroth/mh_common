@@ -44,7 +44,7 @@ module Common
                    # the initialization case anyways so it should only happen once.
               end
               new_year.desc = "#{last_year_year} - #{last_year_year+1}"
-              puts "Adding year #{new_year.desc}"
+              puts "Adding year #{new_year.desc}" unless Rails.env.test?
               new_year.save
 
                 # for each year, if there are not 3 semesters, add them
@@ -52,29 +52,29 @@ module Common
                 unless year.semesters.size == 3
 
                   # create fall semester
-                  unless year.semesters.all(:conditions => {:desc => "Fall #{year.desc[0..3]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Fall #{year.desc[0..3]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Fall #{year.desc[0..3]}",
                                                         :start_date => "#{year.desc[0..3]}-09-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
 
                   # create winter semester
-                  unless year.semesters.all(:conditions => {:desc => "Winter #{year.desc[-4..-1]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Winter #{year.desc[-4..-1]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Winter #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-01-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
 
                   # create summer semester
-                  unless year.semesters.all(:conditions => {:desc => "Summer #{year.desc[-4..-1]}"}).any?
+                  unless year.semesters.all(:conditions => ["#{::Semester.__(:desc)} = 'Summer #{year.desc[-4..-1]}'"]).any?
 
                     new_semester = year.semesters.build(:desc => "Summer #{year.desc[-4..-1]}",
                                                         :start_date => "#{year.desc[-4..-1]}-05-01")
-                    puts "Adding semester #{new_semester.desc}"
+                    puts "Adding semester #{new_semester.desc}" unless Rails.env.test?
                     new_semester.save
                   end
                 end # year == 3
