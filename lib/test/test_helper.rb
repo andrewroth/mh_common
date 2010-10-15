@@ -175,8 +175,6 @@ module Test
       Factory(:grouptype_2)
       Factory(:grouptype_3)
 
-      Factory(:semester_10)
-
       Factory(:group_1)
       Factory(:group_2)
       Factory(:group_3)
