@@ -141,6 +141,9 @@ module Test
       Factory(:region_1)
       Factory(:region_2)
       Factory(:region_3)
+      Factory(:region_4)
+      Factory(:region_5)
+      Factory(:region_6)
     end
 
     def setup_addresses
