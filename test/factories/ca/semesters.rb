@@ -26,3 +26,16 @@ Factory.define :semester_13, :class => Semester, :singleton => true do |p|
   p.year_id '2'
 end
 
+Factory.define :current, :class => Semester, :singleton => true do |p|
+  p.semester_id '14'
+  p.semester_desc 'Current Semester'
+  p.semester_startDate Date.today
+  p.year_id '2'
+end
+
+Factory.define :next, :class => Semester, :singleton => true do |p|
+  p.semester_id '15'
+  p.semester_desc 'Next Semester'
+  p.semester_startDate 1.month.from_now
+  p.year_id '2'
+end
