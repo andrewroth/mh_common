@@ -310,6 +310,7 @@ module Test
       Factory(:grouptype_1)
       Factory(:grouptype_2)
       Factory(:grouptype_3)
+      Factory(:grouptype_4)
 
       Factory(:semester_10)
 
