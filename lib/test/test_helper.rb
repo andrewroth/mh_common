@@ -68,8 +68,8 @@ module Test
       Factory(:semester_11)
       Factory(:semester_12)
       Factory(:semester_13)
-      Factory(:current)
-      Factory(:next)
+      Factory(:current_semester)
+      Factory(:next_semester)
     end
 
     def setup_years
