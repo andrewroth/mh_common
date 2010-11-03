@@ -68,6 +68,7 @@ module Common
           has_many :imports
           
           has_one :timetable, :class_name => "Timetable", :foreign_key => _(:person_id, :timetable)
+          has_many :updated_timetables, :class_name => "Timetable", :foreign_key => _(:updated_by_person_id, :timetable)
           has_many :free_times, :through => :timetable, :order => "#{_(:day_of_week, :free_times)}, #{_(:start_time, :free_times)}"
           
           # Searches
