@@ -109,6 +109,11 @@ module Legacy
         def find_years(current_id)
           find(:all, :conditions => ["#{_(:id)} <= ?",current_id]).collect{ |y| [y.description] }
         end
+
+        # return the current year
+        def current
+          ::Month.find(:first, :conditions => {:month_calendaryear => Time.now.year, :month_number => Time.now.month}).year
+        end
       end
 
     end
