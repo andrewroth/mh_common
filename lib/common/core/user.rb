@@ -199,7 +199,7 @@ module Common
           u.facebook_hash = fb_user.email_hashes.first
           u.fb_user_id = fb_user.uid
         else
-          u = ::User.create(_(:username) => username || fb_user.email_hashes.first, _(:last_login) => Time.zone.now, _(:fb_user_id) => fb_user.uid, _(:facebook_hash) => fb_user.email_hashes.first)
+          u = ::User.create(_(:username) => username || fb_user.email_hashes.first, _(:last_login) => Time.now.utc, _(:fb_user_id) => fb_user.uid, _(:facebook_hash) => fb_user.email_hashes.first)
         end
         u.create_person_from_fb(fb_user) unless u.person
         u.save(false)
