@@ -11,7 +11,7 @@ module Legacy
           belongs_to :semester, :class_name => 'Semester', :primary_key => _(:id, :semester), :foreign_key => _(:id, :semester)
 
           validates_presence_of :prc_date, :prc_firstName, :prc_witnessName, :prc_notes
-          validates_date :date
+          #validates_date :date
         end
 
         base.extend PrcClassMethods
