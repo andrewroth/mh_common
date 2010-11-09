@@ -28,7 +28,11 @@ module Legacy
                                 _(:total_graduating_students_to_full_time_c4c_staff), 
                                 _(:total_graduating_students_to_full_time_p2c_non_c4c), 
                                 _(:total_graduating_students_to_one_year_internship), 
-                                _(:total_graduating_students_to_other_ministry)
+                                _(:total_graduating_students_to_other_ministry),
+                                :semesterreport_studentsSummit,
+                                :semesterreport_studentsWC,
+                                :semesterreport_studentsProjects,
+                                :message => "can't be blank, enter 0 if nothing happened during this period."
           validates_numericality_of _(:semester_id), 
                                     _(:campus_id), 
                                     _(:average_hours_prayer), 
@@ -46,7 +50,11 @@ module Legacy
                                     _(:total_graduating_students_to_full_time_c4c_staff), 
                                     _(:total_graduating_students_to_full_time_p2c_non_c4c), 
                                     _(:total_graduating_students_to_one_year_internship), 
-                                    _(:total_graduating_students_to_other_ministry)
+                                    _(:total_graduating_students_to_other_ministry),
+                                    :semesterreport_studentsSummit,
+                                    :semesterreport_studentsWC,
+                                    :semesterreport_studentsProjects, 
+                                    :message => 'should be a number'
         end
 
         base.extend StatsClassMethods

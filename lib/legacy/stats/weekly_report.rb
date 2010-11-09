@@ -13,8 +13,24 @@ module Legacy
           belongs_to :staff, :class_name => 'CimHrdbStaff'
           has_one :person, :through => :staff, :class_name => 'Person'
 
-          validates_presence_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)
-          validates_numericality_of _(:week_id), _(:campus_id), _(:spiritual_conversations), _(:spiritual_conversations_student), _(:gospel_presentations), _(:gospel_presentations_student), _(:holyspirit_presentations)
+          validates_presence_of _(:week_id), 
+                                _(:campus_id), 
+                                _(:spiritual_conversations), 
+                                _(:spiritual_conversations_student), 
+                                _(:gospel_presentations), 
+                                _(:gospel_presentations_student), 
+                                _(:holyspirit_presentations), 
+                                _(:weeklyReport_p2c_numCommitFilledHS), 
+                                :message => "can't be blank, enter 0 if nothing happened during this period."
+          validates_numericality_of _(:week_id), 
+                                    _(:campus_id), 
+                                    _(:spiritual_conversations), 
+                                    _(:spiritual_conversations_student), 
+                                    _(:gospel_presentations), 
+                                    _(:gospel_presentations_student), 
+                                    _(:holyspirit_presentations), 
+                                    _(:weeklyReport_p2c_numCommitFilledHS), 
+                                    :message => 'should be a number'
         end
 
         base.extend StatsClassMethods
