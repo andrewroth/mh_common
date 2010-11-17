@@ -32,9 +32,9 @@ module Legacy
           if stat_hash[:collected] == :semesterly
             evaluation = find_stats_semester_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :monthly
-            evaluation = find_monthly_stats_campuses(campus_ids, stat_hash[:column])
+            evaluation = find_monthly_stats_campuses(campus_ids, stat_hash)
           elsif stat_hash[:collected] == :weekly
-            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
+            evaluation = find_weekly_stats_campuses(campus_ids, stat_hash, staff_id)
           elsif stat_hash[:collected] == :prc
             evaluation = find_prcs_campuses(campus_ids)
           end
@@ -64,15 +64,29 @@ module Legacy
         run_weekly_stats_request(campus_ids, staff_id)[stat].nil? ? true : false
       end
       
-      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
-        result = run_weekly_stats_request(campus_ids, staff_id)[stat]
+      def find_weekly_stats_campuses(campus_ids, stat_hash, staff_id = nil)
+        result = nil
+        
+        if stat_hash[:grouping_method] == :last_non_zero
+          result = ::WeeklyReport.get_last_non_zero_weekly_stats_over_period(self, stat_hash[:column], campus_ids, staff_id)
+        else
+          result = run_weekly_stats_request(campus_ids, staff_id)[stat_hash[:column]]
+        end
+        
         result.nil? ? 0 : result
       end
 
 
-      def find_monthly_stats_campuses(campus_ids, stat)
+      def find_monthly_stats_campuses(campus_ids, stat_hash)
         total = 0
-        months.each { | month | total += month.find_monthly_stats_campuses(campus_ids, stat) }
+        if stat_hash[:grouping_method] == :last_non_zero
+          months.each do | month | 
+            res = month.find_monthly_stats_campuses(campus_ids, stat_hash)
+            total = res if res != 0
+          end
+        else
+          months.each { | month | total += month.find_monthly_stats_campuses(campus_ids, stat_hash) }
+        end
         total
       end
 
