@@ -3,7 +3,7 @@ module Legacy
     module Week
 
       unloadable
-
+            
       def self.included(base)
         base.class_eval do
           has_many :weekly_reports, :class_name => 'WeeklyReport', :foreign_key => _(:week_id, :weekly_report)

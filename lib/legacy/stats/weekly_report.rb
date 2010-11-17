@@ -39,27 +39,69 @@ module Legacy
 
       module StatsClassMethods
 
-        def get_weekly_stats_sums_over_period(period, campus_ids, staff_id = nil)
+        def get_start_week_id(period)
           start_week_id = 0
-          end_week_id = 0
           if period.is_a?(Week)
             start_week_id = period.id
-            end_week_id = period.id
           elsif period.is_a?(Year)
             start_week_id = period.semesters.first.weeks.first.id
-            end_week_id = period.semesters.last.weeks.last.id
           else
             start_week_id = period.weeks.first.id
+          end
+          start_week_id
+        end
+
+        def get_end_week_id(period)
+          end_week_id = 0
+          if period.is_a?(Week)
+            end_week_id = period.id
+          elsif period.is_a?(Year)
+            end_week_id = period.semesters.last.weeks.last.id
+          else
             end_week_id = period.weeks.last.id           
           end
+          end_week_id    
+        end
 
-          select = stats_reports.collect{|k, v| stats_reports[k].collect{|k, c| (c[:column_type] == :database_column && c[:collected] == :weekly) ? c[:column] : nil}.compact }.flatten.compact.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+        def get_weekly_stats_sums_over_period(period, campus_ids, staff_id = nil)
+          start_week_id = get_start_week_id(period)
+          end_week_id = get_end_week_id(period)
+
+          select = stats_reports.collect{|k, v| stats_reports[k].collect{|k, c| (c[:column_type] == :database_column && c[:collected] == :weekly && c[:grouping_method] == :sum) ? c[:column] : nil}.compact }.flatten.compact.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
           conditions = []
           conditions += ["#{_(:campus_id, :weekly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
           conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
           conditions += ["#{_(:week_id, :weekly_reports)} >= (#{start_week_id})", 
                          "#{_(:week_id, :weekly_reports)} <= (#{end_week_id})"]
           find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        end
+
+        def get_last_non_zero_weekly_stats_over_period(period, stat, campus_ids, staff_id = nil)
+          start_week_id = get_start_week_id(period)
+          end_week_id = get_end_week_id(period)
+          
+          result = 0
+          
+          unless campus_ids.nil?
+            campus_ids.each do |c_id|
+              conditions = []
+              conditions += ["#{_(:campus_id, :weekly_reports)} = #{c_id}"]
+              conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
+              conditions += ["#{_(:week_id, :weekly_reports)} >= (#{start_week_id})", 
+                             "#{_(:week_id, :weekly_reports)} <= (#{end_week_id})"]
+              conditions += ["#{stat} <> 0"]
+              wr = find(:last, :select => stat, :conditions => [conditions.join(' AND ')], :order => ["#{_(:week_id, :weekly_reports)}"])
+              result += wr[stat] unless wr.nil?
+            end
+          else
+              conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
+              conditions += ["#{_(:week_id, :weekly_reports)} >= (#{start_week_id})", 
+                             "#{_(:week_id, :weekly_reports)} <= (#{end_week_id})"]
+              conditions += ["#{stat} <> 0"]
+              wr = find(:last, :select => stat, :conditions => [conditions.join(' AND ')], :order => ["#{_(:week_id, :weekly_reports)}"])
+              result += wr[stat] unless wr.nil?
+          end
+          result
         end
 
 
