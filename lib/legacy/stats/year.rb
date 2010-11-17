@@ -30,9 +30,16 @@ module Legacy
           if stat_hash[:collected] == :yearly
             total = find_stats_year_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :weekly
-            total = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
+            total = find_weekly_stats_campuses(campus_ids, stat_hash, staff_id)
           else
-            semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }         
+            if stat_hash[:grouping_method] == :last_non_zero
+              semesters.each do | semester | 
+                res = semester.evaluate_stat(campus_ids, stat_hash, staff_id)
+                total = res if res != 0
+              end
+            else          
+              semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }
+            end
           end
         end
         total
@@ -88,8 +95,15 @@ module Legacy
         run_weekly_stats_request(campus_ids, staff_id)[stat].nil? ? true : false
       end
       
-      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
-        result = run_weekly_stats_request(campus_ids, staff_id)[stat]
+      def find_weekly_stats_campuses(campus_ids, stat_hash, staff_id = nil)
+        result = nil
+        
+        if stat_hash[:grouping_method] == :last_non_zero
+          result = ::WeeklyReport.get_last_non_zero_weekly_stats_over_period(self, stat_hash[:column], campus_ids, staff_id)
+        else
+          result = run_weekly_stats_request(campus_ids, staff_id)[stat_hash[:column]]
+        end
+        
         result.nil? ? 0 : result
       end
 
