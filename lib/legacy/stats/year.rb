@@ -33,10 +33,7 @@ module Legacy
             total = find_weekly_stats_campuses(campus_ids, stat_hash, staff_id)
           else
             if stat_hash[:grouping_method] == :last_non_zero
-              semesters.each do | semester | 
-                res = semester.evaluate_stat(campus_ids, stat_hash, staff_id)
-                total = res if res != 0
-              end
+              total = find_stats_lnz_year_campuses(campus_ids, stat_hash[:column])
             else          
               semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }
             end
@@ -49,6 +46,13 @@ module Legacy
         result = get_stat_sums_for(campus_ids)["#{stat}"]
         result.nil? ? 0 : result
       end
+
+      def find_stats_lnz_year_campuses(campus_ids, stat)
+        result = get_stat_lnz_for(campus_ids)[stat]
+        result = result.nil? ? 0 : result
+        result.to_i
+      end
+
 
       def get_database_columns(report)
         stats_reports[report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
@@ -72,6 +76,30 @@ module Legacy
         else
           annual_goals_reports.find(:all, :select => select).first
         end
+      end
+
+      def get_lnz_lines
+        @lnz_lines ||= stats_reports.collect{|sr| sr[1].collect{|sc| sc[1][:grouping_method] == :last_non_zero ? sc[1] : nil}}.flatten.compact
+      end
+
+      def get_stat_lnz_for(campus_ids)
+        @result_lnz ||= Hash.new
+        @result_lnz[get_hash(campus_ids)] ||= execute_stat_lnz_for(campus_ids)
+      end
+
+      def execute_stat_lnz_for(campus_ids)
+        res = nil
+        select = get_lnz_lines.collect{|c| "sum(#{c[:lnz_correspondance][:annual_report]}) as #{c[:column]}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :annual_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        unless conditions.empty?
+          res = annual_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          res = annual_reports.find(:all, :select => select).first
+        end
+        final = {}
+        get_lnz_lines.each{|c| final[c[:column]] = res[c[:column]]}
+        final
       end
 
 
