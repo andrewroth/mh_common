@@ -47,6 +47,12 @@ module Legacy
         result.nil? ? 0 : result
       end
 
+      def find_stats_lnz_semester_campuses(campus_ids, stat)
+        result = get_stat_lnz_for(campus_ids)[stat]
+        result = result.nil? ? 0 : result
+        result.to_i
+      end
+
 
       def run_weekly_stats_request(campus_ids, staff_id = nil)
         @weekly_sums ||= {}        
@@ -76,14 +82,10 @@ module Legacy
         result.nil? ? 0 : result
       end
 
-
       def find_monthly_stats_campuses(campus_ids, stat_hash)
         total = 0
         if stat_hash[:grouping_method] == :last_non_zero
-          months.each do | month | 
-            res = month.find_monthly_stats_campuses(campus_ids, stat_hash)
-            total = res if res != 0
-          end
+          total = find_stats_lnz_semester_campuses(campus_ids, stat_hash[:column])
         else
           months.each { | month | total += month.find_monthly_stats_campuses(campus_ids, stat_hash) }
         end
@@ -126,7 +128,29 @@ module Legacy
         end
       end
 
+      def get_lnz_lines
+        @lnz_lines ||= stats_reports.collect{|sr| sr[1].collect{|sc| sc[1][:grouping_method] == :last_non_zero ? sc[1] : nil}}.flatten.compact
+      end
 
+      def get_stat_lnz_for(campus_ids)
+        @result_lnz ||= Hash.new
+        @result_lnz[get_hash(campus_ids)] ||= execute_stat_lnz_for(campus_ids)
+      end
+
+      def execute_stat_lnz_for(campus_ids)
+        res = nil
+        select = get_lnz_lines.collect{|c| "sum(#{c[:lnz_correspondance][:semester_report]}) as #{c[:column]}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :semester_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        unless conditions.empty?
+          res = semester_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          res = semester_reports.find(:all, :select => select).first
+        end
+        final = {}
+        get_lnz_lines.each{|c| final[c[:column]] = res[c[:column]]}
+        final
+      end
 
       module SemesterClassMethods
 

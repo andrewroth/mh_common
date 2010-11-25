@@ -25,7 +25,7 @@ module Legacy
                                 :annualGoalsReport_prcTotal,
                                 :annualGoalsReport_integBelievers,
                                 :annualGoalsReport_lrgEventAttend,
-                                :message => "can't be blank, enter 0 if nothing happened during this period."
+                                :message => "can't be blank, enter 0 if there is no goal for this period."
                                 
           validates_numericality_of :campus_id,
                                     :year_id,
