@@ -178,8 +178,15 @@ module Common
           end
         }
       end
-
-
+      
+      def campus_or_team
+        if is_staff_somewhere?
+          most_nested_ministry.try(:name)
+        else
+          primary_campus_involvement.try(:campus).try(:abbrv)
+        end
+      end
+      
       # wrapper to make gender display nicely with crusade tables
       def human_gender(value = nil)
         gender = value || self.gender
