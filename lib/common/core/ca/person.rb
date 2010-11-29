@@ -536,13 +536,13 @@ module Common
 
         def setup_and_create_access(v)
           #ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
-          ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
+          #ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
           #if ag_st
           #  ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
           #end
-          if ag_all
-            ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
-          end
+          #if ag_all
+          #  ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
+          #end
           ::Access.create :viewer_id => v.id, :person_id => self.id
         end
 

@@ -312,8 +312,6 @@ module Test
       Factory(:grouptype_3)
       Factory(:grouptype_4)
 
-      Factory(:semester_10)
-
       Factory(:group_1)
       Factory(:group_2)
       Factory(:group_3)
