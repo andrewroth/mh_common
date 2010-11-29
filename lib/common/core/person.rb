@@ -586,11 +586,11 @@ module Common
         lname = name.sub(/.+ +/i, '') if name.include? " "
         if !lname.nil?
           people = ::Person.find(:all,
-                               :conditions => ["#{_(:first_name, :person)} like ? AND #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{lname}%"],
+                               :conditions => ["(#{_(:first_name, :person)} like ? AND #{_(:last_name, :person)} like ?) OR (#{_(:preferred_first_name, :person)} like ? AND #{_(:preferred_last_name, :person)} like ?)", "%#{fname}%", "%#{lname}%", "%#{fname}%", "%#{lname}%"],
                                :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
         else
           people = ::Person.find(:all,
-                               :conditions => ["#{_(:first_name, :person)} like ? OR #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{fname}%"],
+                               :conditions => ["(#{_(:first_name, :person)} like ? OR #{_(:last_name, :person)} like ?) OR (#{_(:preferred_first_name, :person)} like ? OR #{_(:preferred_last_name, :person)} like ?)", "%#{fname}%", "%#{fname}%", "%#{fname}%", "%#{fname}%"],
                                :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
         end
 
