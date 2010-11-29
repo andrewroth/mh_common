@@ -363,12 +363,11 @@ module Common
       
       # for students, use their campuse involvements; for staff, use ministry teams
       def working_campuses(ministry_involvement)
-        return @working_campuses if @working_campuses
         return [] unless ministry_involvement
         if ministry_involvement.ministry_role.is_a?(::StudentRole)
-          @working_campuses = campuses
+          campuses
         elsif ministry_involvement.ministry_role.is_a?(::StaffRole)
-          @working_campuses = ministry_involvement.ministry.campuses
+          ministry_involvement.ministry.campuses
         end
       end
 
