@@ -29,6 +29,10 @@ module Common
       def human_name
         self.name.underscore.humanize
       end
+
+      def human_name_plural
+        self.name.underscore.humanize.pluralize
+      end
     
       def default_student_role
         sr = ::StudentRole.find_by_name %w(Student student)
