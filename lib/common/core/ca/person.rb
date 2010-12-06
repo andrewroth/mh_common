@@ -283,6 +283,14 @@ module Common
               true
             end
 
+            def local_valid_until
+              self[:local_valid_until]
+            end
+
+            def local_valid_until=(val)
+              self[:local_valid_until] = val
+            end
+
           end
 
           base.extend PersonClassMethods
