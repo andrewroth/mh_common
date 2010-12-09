@@ -37,7 +37,11 @@ module Legacy
         conditions = []
         conditions += ["#{_(:campus_id, :weekly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
         conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
-        weekly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        unless conditions.empty?
+          weekly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          weekly_reports.find(:all, :select => select).first
+        end
       end
 
       # This method will return the given stat total associated with the given campus ids

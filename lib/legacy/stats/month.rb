@@ -145,8 +145,12 @@ module Legacy
         select = get_columns(:sum).collect{|c| "sum(#{c}) as #{c}"}.join(', ')
         conditions = []
         conditions += ["#{_(:campus_id, :monthly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
-        monthly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
-      end
+        unless conditions.empty?
+          monthly_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          monthly_reports.find(:all, :select => select).first
+        end
+       end
 
 
       module StatsClassMethods
