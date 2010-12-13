@@ -116,8 +116,6 @@ module Common
 
             def graduation_date() cim_hrdb_person_years.first.try(:grad_date) end
 
-            def campus(o = {}) hrdb_student_campus(o) end
-
             def self.find_exact(person, address)
               # check based on username first
               user = ::User.find(:first, :conditions => ["#{_(:username, :user)} = ?", address.email])
@@ -283,6 +281,14 @@ module Common
               end
 
               true
+            end
+
+            def local_valid_until
+              self[:local_valid_until]
+            end
+
+            def local_valid_until=(val)
+              self[:local_valid_until] = val
             end
 
           end
