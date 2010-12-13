@@ -283,6 +283,14 @@ module Common
               true
             end
 
+            def local_valid_until
+              self[:local_valid_until]
+            end
+
+            def local_valid_until=(val)
+              self[:local_valid_until] = val
+            end
+
           end
 
           base.extend PersonClassMethods
@@ -579,7 +587,7 @@ module Common
             v
           end
 
-          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+          def create_new_cim_hrdb_person(fn, ln, email)
             # first and last names can't be nil
             # rails insists on putting null into columns with emptry strings
             hack_fn = fn.nil?
@@ -589,15 +597,18 @@ module Common
             guid ||= ''
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
               :person_legal_fname => 'lfn', :person_legal_lname => 'lln',
-              :birth_date => nil, :person_email => uid
+              :birth_date => nil, :person_email => email
             p.person_fname = '' if hack_fn
             p.person_lname = '' if hack_ln
             p.person_legal_fname = ''
             p.person_legal_lname = ''
             p.save(false)
+            return p
+          end
 
+          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+            p = create_new_cim_hrdb_person(fn, ln, uid)
             p.create_user_and_access_only(guid, uid)
-
             p.user
           end
 

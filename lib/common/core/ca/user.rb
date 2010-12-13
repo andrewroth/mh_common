@@ -7,15 +7,10 @@ module Common
           base.class_eval do
             has_one :access, :foreign_key => :viewer_id
             has_many :persons, :through => :access
-            has_many :accountadmin_accessgroups, :through => :accountadmin_vieweraccessgroups, :class_name => 'AccountadminAccessgroup'
-            has_many :accountadmin_vieweraccessgroups, :foreign_key => :viewer_id, :class_name => 'AccountadminVieweraccessgroup'
-            has_many :accountadmin_accountadminaccesses, :foreign_key => :viewer_id
-            belongs_to :accountadmin_accountgroup, :foreign_key => :accountgroup_id
-            belongs_to :accountadmin_language, :foreign_key => :language_id
 
             validates_uniqueness_of _(:username), :case_sensitive => false, :message => "(username) has already been taken"
 
-            validates_no_association_data :access, :persons, :accountadmin_accessgroups, :accountadmin_vieweraccessgroups, :accountadmin_accountadminaccesses
+            validates_no_association_data :access, :persons
 
             def username=(val)
               # don't let username= be set to viewer_userID
@@ -100,6 +95,10 @@ module Common
 
             # if we have a user by this method, great! update the email address if it doesn't match
             if u
+              unless u.person
+                p = ::Person.create_new_cim_hrdb_person first_name, last_name, email
+                p.setup_and_create_access(u)
+              end
               u.person.email = email
             else
               # If we didn't find a user with the guid, do it by email address and stamp the guid
