@@ -7,6 +7,7 @@ module Legacy
           has_many :months, :class_name => 'Month', :foreign_key => _(:year_id, :month)
           has_many :semesters, :class_name => 'Semester', :foreign_key => _(:year_id, :semester)
           has_many :annual_goals_reports, :class_name => 'AnnualGoalsReport'
+          has_many :annual_reports, :class_name => 'AnnualReport'
         end
 
         base.extend YearClassMethods
