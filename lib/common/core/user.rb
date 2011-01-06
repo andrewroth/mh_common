@@ -131,12 +131,8 @@ module Common
       def find_or_create_user_code(pass = {})
         if new_record?
           raise "Can't create a user_code for a new record."
-        elsif !user_code
-          ::UserCode.create! :user_id => self.id, :code => ::UserCode.new_code, :pass => Marshal.dump(pass)
         else
-          user_code.pass = Marshal.dump(pass)
-          user_code.save!
-          return user_code
+          ::UserCode.create! :user_id => self.id, :code => ::UserCode.new_code, :pass => Marshal.dump(pass)
         end
       end
 
