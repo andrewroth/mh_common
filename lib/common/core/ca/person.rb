@@ -248,6 +248,14 @@ module Common
               if loc_country then loc_country.country_shortDesc else 'no local country set' end
             end
 
+            def local_country=(val)
+              self.loc_country = ::Country.find_by_country_shortDesc(val)
+            end
+
+            def permanent_country=(val)
+              self.perm_country = ::Country.find_by_country_shortDesc(val)
+            end
+
             ######### end address helpers
 
             def local_state=(val)
