@@ -58,7 +58,7 @@ module Common
         @campus_ministry_involvement = self.find_or_create_ministry_involvement
 
         # restrict students to making ministry involvements of their role or less
-        if ministry_role_id
+        if ministry_role_id && ministry_role_id != :same
           requested_role = ::MinistryRole.find(ministry_role_id) || ::MinistryRole.default_student_role
           ministry_role_id = requested_role.id
 
@@ -69,6 +69,8 @@ module Common
             ministry_role_being_updated = false
             ministry_role_id = @campus_ministry_involvement.ministry_role_id.to_s
           end
+        elsif ministry_role_id == :same
+          ministry_role_id = @campus_ministry_involvement.ministry_role_id
         else
           ministry_role_id = ::MinistryRole.default_student_role.id
         end

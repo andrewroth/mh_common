@@ -7,6 +7,7 @@ module Legacy
           has_many :months, :class_name => 'Month', :foreign_key => _(:year_id, :month)
           has_many :semesters, :class_name => 'Semester', :foreign_key => _(:year_id, :semester)
           has_many :annual_goals_reports, :class_name => 'AnnualGoalsReport'
+          has_many :annual_reports, :class_name => 'AnnualReport'
         end
 
         base.extend YearClassMethods
@@ -30,9 +31,13 @@ module Legacy
           if stat_hash[:collected] == :yearly
             total = find_stats_year_campuses(campus_ids, stat_hash[:column])
           elsif stat_hash[:collected] == :weekly
-            total = find_weekly_stats_campuses(campus_ids, stat_hash[:column], staff_id)
+            total = find_weekly_stats_campuses(campus_ids, stat_hash, staff_id)
           else
-            semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }         
+            if stat_hash[:grouping_method] == :last_non_zero
+              total = find_stats_lnz_year_campuses(campus_ids, stat_hash[:column])
+            else          
+              semesters.each { | semester | total += semester.evaluate_stat(campus_ids, stat_hash, staff_id) }
+            end
           end
         end
         total
@@ -42,6 +47,13 @@ module Legacy
         result = get_stat_sums_for(campus_ids)["#{stat}"]
         result.nil? ? 0 : result
       end
+
+      def find_stats_lnz_year_campuses(campus_ids, stat)
+        result = get_stat_lnz_for(campus_ids)[stat]
+        result = result.nil? ? 0 : result
+        result.to_i
+      end
+
 
       def get_database_columns(report)
         stats_reports[report].collect{|k, c| c[:column_type] == :database_column ? c[:column] : nil}.compact
@@ -67,6 +79,30 @@ module Legacy
         end
       end
 
+      def get_lnz_lines
+        @lnz_lines ||= stats_reports.collect{|sr| sr[1].collect{|sc| sc[1][:grouping_method] == :last_non_zero ? sc[1] : nil}}.flatten.compact
+      end
+
+      def get_stat_lnz_for(campus_ids)
+        @result_lnz ||= Hash.new
+        @result_lnz[get_hash(campus_ids)] ||= execute_stat_lnz_for(campus_ids)
+      end
+
+      def execute_stat_lnz_for(campus_ids)
+        res = nil
+        select = get_lnz_lines.collect{|c| "sum(#{c[:lnz_correspondance][:annual_report]}) as #{c[:column]}"}.join(', ')
+        conditions = []
+        conditions += ["#{_(:campus_id, :annual_report)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
+        unless conditions.empty?
+          res = annual_reports.find(:all, :select => select, :conditions => [conditions.join(' AND ')]).first
+        else
+          res = annual_reports.find(:all, :select => select).first
+        end
+        final = {}
+        get_lnz_lines.each{|c| final[c[:column]] = res[c[:column]]}
+        final
+      end
+
 
       def get_hash(campus_ids, staff_id = nil)
         [campus_ids.nil? ? nil : campus_ids.hash, staff_id].compact.join("_")
@@ -88,8 +124,15 @@ module Legacy
         run_weekly_stats_request(campus_ids, staff_id)[stat].nil? ? true : false
       end
       
-      def find_weekly_stats_campuses(campus_ids, stat, staff_id = nil)
-        result = run_weekly_stats_request(campus_ids, staff_id)[stat]
+      def find_weekly_stats_campuses(campus_ids, stat_hash, staff_id = nil)
+        result = nil
+        
+        if stat_hash[:grouping_method] == :last_non_zero
+          result = ::WeeklyReport.get_last_non_zero_weekly_stats_over_period(self, stat_hash[:column], campus_ids, staff_id)
+        else
+          result = run_weekly_stats_request(campus_ids, staff_id)[stat_hash[:column]]
+        end
+        
         result.nil? ? 0 : result
       end
 

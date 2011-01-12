@@ -312,8 +312,6 @@ module Test
       Factory(:grouptype_3)
       Factory(:grouptype_4)
 
-      Factory(:semester_10)
-
       Factory(:group_1)
       Factory(:group_2)
       Factory(:group_3)
@@ -338,6 +336,13 @@ module Test
       Factory(:ministrycampus_3)
     end
 
+    def setup_months
+      Factory(:month_1)
+      Factory(:month_2)
+      Factory(:month_3)
+      Factory(:month_4)
+      Factory(:month_5)
+    end
 
     protected
 

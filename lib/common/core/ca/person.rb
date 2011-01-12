@@ -116,8 +116,6 @@ module Common
 
             def graduation_date() cim_hrdb_person_years.first.try(:grad_date) end
 
-            def campus(o = {}) hrdb_student_campus(o) end
-
             def self.find_exact(person, address)
               # check based on username first
               user = ::User.find(:first, :conditions => ["#{_(:username, :user)} = ?", address.email])
@@ -250,6 +248,14 @@ module Common
               if loc_country then loc_country.country_shortDesc else 'no local country set' end
             end
 
+            def local_country=(val)
+              self.loc_country = ::Country.find_by_country_shortDesc(val)
+            end
+
+            def permanent_country=(val)
+              self.perm_country = ::Country.find_by_country_shortDesc(val)
+            end
+
             ######### end address helpers
 
             def local_state=(val)
@@ -283,6 +289,14 @@ module Common
               end
 
               true
+            end
+
+            def local_valid_until
+              self[:local_valid_until]
+            end
+
+            def local_valid_until=(val)
+              self[:local_valid_until] = val
             end
 
           end
@@ -536,13 +550,13 @@ module Common
 
         def setup_and_create_access(v)
           #ag_st = AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_student]' #this returns nil currently. This is where we get an error
-          ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
+          #ag_all = ::AccountadminAccessgroup.find_by_accessgroup_key '[accessgroup_key1]'
           #if ag_st
           #  ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_st.id
           #end
-          if ag_all
-            ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
-          end
+          #if ag_all
+          #  ::AccountadminVieweraccessgroup.create! :viewer_id => v.id, :accessgroup_id => ag_all.id
+          #end
           ::Access.create :viewer_id => v.id, :person_id => self.id
         end
 
@@ -581,7 +595,7 @@ module Common
             v
           end
 
-          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+          def create_new_cim_hrdb_person(fn, ln, email)
             # first and last names can't be nil
             # rails insists on putting null into columns with emptry strings
             hack_fn = fn.nil?
@@ -591,15 +605,18 @@ module Common
             guid ||= ''
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
               :person_legal_fname => 'lfn', :person_legal_lname => 'lln',
-              :birth_date => nil, :person_email => uid
+              :birth_date => nil, :person_email => email
             p.person_fname = '' if hack_fn
             p.person_lname = '' if hack_ln
             p.person_legal_fname = ''
             p.person_legal_lname = ''
             p.save(false)
+            return p
+          end
 
+          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+            p = create_new_cim_hrdb_person(fn, ln, uid)
             p.create_user_and_access_only(guid, uid)
-
             p.user
           end
 

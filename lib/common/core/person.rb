@@ -178,8 +178,15 @@ module Common
           end
         }
       end
-
-
+      
+      def campus_or_team
+        if is_staff_somewhere?
+          most_nested_ministry.try(:name)
+        else
+          primary_campus_involvement.try(:campus).try(:abbrv)
+        end
+      end
+      
       # wrapper to make gender display nicely with crusade tables
       def human_gender(value = nil)
         gender = value || self.gender
@@ -356,12 +363,11 @@ module Common
       
       # for students, use their campuse involvements; for staff, use ministry teams
       def working_campuses(ministry_involvement)
-        return @working_campuses if @working_campuses
         return [] unless ministry_involvement
         if ministry_involvement.ministry_role.is_a?(::StudentRole)
-          @working_campuses = campuses
+          campuses
         elsif ministry_involvement.ministry_role.is_a?(::StaffRole)
-          @working_campuses = ministry_involvement.ministry.campuses
+          ministry_involvement.ministry.campuses
         end
       end
 
@@ -597,11 +603,11 @@ module Common
         lname = name.sub(/.+ +/i, '') if name.include? " "
         if !lname.nil?
           people = ::Person.find(:all,
-                               :conditions => ["#{_(:first_name, :person)} like ? AND #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{lname}%"],
+                               :conditions => ["(#{_(:first_name, :person)} like ? AND #{_(:last_name, :person)} like ?) OR (#{_(:preferred_first_name, :person)} like ? AND #{_(:preferred_last_name, :person)} like ?)", "%#{fname}%", "%#{lname}%", "%#{fname}%", "%#{lname}%"],
                                :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
         else
           people = ::Person.find(:all,
-                               :conditions => ["#{_(:first_name, :person)} like ? OR #{_(:last_name, :person)} like ?", "%#{fname}%", "%#{fname}%"],
+                               :conditions => ["(#{_(:first_name, :person)} like ? OR #{_(:last_name, :person)} like ?) OR (#{_(:preferred_first_name, :person)} like ? OR #{_(:preferred_last_name, :person)} like ?)", "%#{fname}%", "%#{fname}%", "%#{fname}%", "%#{fname}%"],
                                :order => "#{_(:first_name, :person)}, #{_(:last_name, :person)}")
         end
 

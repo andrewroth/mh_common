@@ -71,7 +71,7 @@ module Common
         @leaders[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", leader_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
       
-      def student(subs = false)
+      def students(subs = false)
         @students ||= {}
         @students[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", student_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
