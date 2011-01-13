@@ -511,7 +511,6 @@ module Common
       def has_permission_to_update_role(ministry_involvement, new_role)
         permission_granted = false
         ministry = ministry_involvement.ministry
-        my_role = self.ministry_involvements.first(:conditions => {:ministry_id => ministry.id}).ministry_role
 
         # trying to promote someone
         if new_role.compare_class_and_position(ministry_involvement.ministry_role) >= 0

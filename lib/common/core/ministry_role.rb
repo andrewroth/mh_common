@@ -74,11 +74,15 @@ module Common
       # roles that person can promote others up to, from a lower role
       def promotable_roles(person, ministry)
           roles = []
-          my_involvement_at_ministry = person.ministry_involvements.first(:conditions => {:ministry_id => ministry.id})
 
-          unless my_involvement_at_ministry.nil?
-            my_role_at_ministry = ::MinistryRole.find(my_involvement_at_ministry.ministry_role_id)
+          # get person's involvements at ministry or ministries above ministry
+          my_involvements_at_ministry_or_above = person.ministry_involvements.all(:conditions => ["#{::MinistryInvolvement.__(:ministry_id)} IN (?)", ministry.ancestor_ids])
 
+          unless my_involvements_at_ministry_or_above.nil?
+            # get person's highest ministry role in these involvements
+            my_involvements_at_ministry_or_above.sort!{|a,b| b.ministry_role.compare_class_and_position(a.ministry_role)} # sort by highest ministry role first (e.g. team leader is higher than team member)
+            my_role_at_ministry = ::MinistryRole.find(my_involvements_at_ministry_or_above.first.ministry_role_id)
+            
             if my_role_at_ministry.class == ::StaffRole
               roles += ::MinistryRole.all(:conditions => ["(#{::MinistryRole.__(:position)} >= ? AND #{::MinistryRole.__(:type)} = 'StaffRole') OR
                                                             #{::MinistryRole.__(:type)} = 'StudentRole'", my_role_at_ministry.position])
@@ -92,10 +96,14 @@ module Common
       # roles that person can demote others from, to a lower role
       def demotable_roles(person, ministry)
           roles = []
-          my_involvement_at_ministry = person.ministry_involvements.first(:conditions => {:ministry_id => ministry.id})
 
-          unless my_involvement_at_ministry.nil?
-            my_role_at_ministry = ::MinistryRole.find(my_involvement_at_ministry.ministry_role_id)
+          # get person's involvements at ministry or ministries above ministry
+          my_involvements_at_ministry_or_above = person.ministry_involvements.all(:conditions => ["#{::MinistryInvolvement.__(:ministry_id)} IN (?)", ministry.ancestor_ids])
+
+          unless my_involvements_at_ministry_or_above.nil?
+            # get person's highest ministry role in these involvements
+            my_involvements_at_ministry_or_above.sort!{|a,b| b.ministry_role.compare_class_and_position(a.ministry_role)} # sort by highest ministry role first (e.g. team leader is higher than team member)
+            my_role_at_ministry = ::MinistryRole.find(my_involvements_at_ministry_or_above.first.ministry_role_id)
 
             roles += promotable_roles(person, ministry)
             roles -= [my_role_at_ministry]
