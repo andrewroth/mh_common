@@ -336,6 +336,13 @@ module Test
       Factory(:ministrycampus_3)
     end
 
+    def setup_months
+      Factory(:month_1)
+      Factory(:month_2)
+      Factory(:month_3)
+      Factory(:month_4)
+      Factory(:month_5)
+    end
 
     protected
 
