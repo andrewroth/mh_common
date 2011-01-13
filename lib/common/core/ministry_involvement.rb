@@ -29,23 +29,54 @@ module Common
     
       def archived?() end_date.present? end
 
-      def new_staff_history
-        ::StaffInvolvementHistory.new :person_id => person_id, :end_date => Date.today, :ministry_role_id => ministry_role_id, :start_date => (last_history_update_date || start_date), :ministry_involvement_id => id, :ministry_id => ministry_id
+      def new_history
+        if ministry_role.class == ::StaffRole
+          ::StaffInvolvementHistory.new   :person_id => person_id, :end_date => (end_date || Date.today), :ministry_role_id => ministry_role_id,
+                                          :start_date => (last_history_update_date || start_date), :ministry_involvement_id => id, :ministry_id => ministry_id
+
+        elsif ministry_role.class == ::StudentRole
+          ::StudentInvolvementHistory.new :person_id => person_id, :end_date => (end_date || Date.today), :ministry_role_id => ministry_role_id,
+                                          :start_date => (last_history_update_date || start_date), :ministry_involvement_id => id, :ministry_id => ministry_id
+        end
+      end
+
+      def update_ministry_role_and_history(ministry_role_id)
+        save_history = self.ministry_role_id.to_s != ministry_role_id.to_s
+        history = self.new_history if save_history
+        
+        self.end_date = nil if self.archived?
+
+        self.ministry_role_id = ministry_role_id
+        self.last_history_update_date = Date.today
+        if self.save!
+          history.save if save_history
+        end
+
+        history
+      end
+
+      def demote_staff_to_student(new_student_role_id)
+        return unless self.ministry_role.class == ::StaffRole
+
+        new_role = ::MinistryRole.first(:conditions => {:id => new_student_role_id})
+        return unless new_role.class == ::StudentRole
+
+        staff_ministry_involvements = ::MinistryInvolvement.all(:include => [:ministry_role], :conditions => {:person_id => self.person.id, :ministry_roles => {:type => ::StaffRole.to_s}})
+
+        # end all staff involvements
+        staff_ministry_involvements.each do |staff_ministry_involvement|
+          unless staff_ministry_involvement.ministry.id == self.ministry.id
+            history = staff_ministry_involvement.new_history
+            staff_ministry_involvement.end_date = Date.today
+            history.save if staff_ministry_involvement.save!
+          else
+            # change the involvement at the relevant ministry to the new student type role
+            staff_ministry_involvement.update_ministry_role_and_history(new_role.id)
+          end
+        end
       end
 
       module MinistryInvolvementMethods
-
-        # This method appears to be in the c4c.* branches but not utopian.  If that's the case,
-        # it should be in Common::Core::Ca::MinistryInvolvement module, not here. -AR June 18, 2010
-        def build_highest_ministry_involvement_possible(person = nil)
-          mi = ::MinistryInvolvement.new
-          mi.person_id = person.nil? ? nil : person.id
-          mi.ministry_id = 1
-          mi.start_date = Date.today
-          mi.admin = 1
-          mi.ministry_role_id = ::StaffRole.find(:first, :order => :position).id
-          mi
-        end
 
       end
 

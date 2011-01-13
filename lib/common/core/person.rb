@@ -508,6 +508,24 @@ module Common
         end
       end
 
+      def has_permission_to_update_role(ministry_involvement, new_role)
+        permission_granted = false
+        ministry = ministry_involvement.ministry
+        my_role = self.ministry_involvements.first(:conditions => {:ministry_id => ministry.id}).ministry_role
+
+        # trying to promote someone
+        if new_role.compare_class_and_position(ministry_involvement.ministry_role) >= 0
+          permission_granted = ::MinistryRole.promotable_roles(self, ministry).include?(new_role)
+
+        # trying to demote someone
+        elsif new_role.compare_class_and_position(ministry_involvement.ministry_role) < 0
+          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role)
+
+        end
+
+        permission_granted
+      end
+
       protected
 
       def update_stamp
