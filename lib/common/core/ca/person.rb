@@ -248,6 +248,14 @@ module Common
               if loc_country then loc_country.country_shortDesc else 'no local country set' end
             end
 
+            def local_country=(val)
+              self.loc_country = ::Country.find_by_country_shortDesc(val)
+            end
+
+            def permanent_country=(val)
+              self.perm_country = ::Country.find_by_country_shortDesc(val)
+            end
+
             ######### end address helpers
 
             def local_state=(val)
@@ -587,7 +595,7 @@ module Common
             v
           end
 
-          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+          def create_new_cim_hrdb_person(fn, ln, email)
             # first and last names can't be nil
             # rails insists on putting null into columns with emptry strings
             hack_fn = fn.nil?
@@ -597,15 +605,18 @@ module Common
             guid ||= ''
             p = ::Person.create! :person_fname => fn, :person_lname => ln,
               :person_legal_fname => 'lfn', :person_legal_lname => 'lln',
-              :birth_date => nil, :person_email => uid
+              :birth_date => nil, :person_email => email
             p.person_fname = '' if hack_fn
             p.person_lname = '' if hack_ln
             p.person_legal_fname = ''
             p.person_legal_lname = ''
             p.save(false)
+            return p
+          end
 
+          def create_new_cim_hrdb_account(guid, fn, ln, uid)
+            p = create_new_cim_hrdb_person(fn, ln, uid)
             p.create_user_and_access_only(guid, uid)
-
             p.user
           end
 

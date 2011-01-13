@@ -90,11 +90,16 @@ module Common
             if guid
               u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
             else
+              guid ||= "GUID" if RAILS_ENV == "test"
               u = nil
             end
 
             # if we have a user by this method, great! update the email address if it doesn't match
             if u
+              unless u.person
+                p = ::Person.create_new_cim_hrdb_person first_name, last_name, email
+                p.setup_and_create_access(u)
+              end
               u.person.email = email
             else
               # If we didn't find a user with the guid, do it by email address and stamp the guid
