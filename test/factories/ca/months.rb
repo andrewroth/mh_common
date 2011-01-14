@@ -1,9 +1,9 @@
 Factory.define :month_1, :class => Month, :singleton => true do |m|
   m.month_id '1'
   m.month_desc 'January 2010'
-  m.month_number '1'
+  m.month_number Time.now.month.to_s
   m.year_id '1'
-  m.month_calendaryear '2010'
+  m.month_calendaryear Time.now.year.to_s
   m.semester_id '11'
 end
 

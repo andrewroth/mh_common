@@ -90,6 +90,7 @@ module Common
             if guid
               u = ::User.find(:first, :conditions => _(:guid, :user) + " = '#{guid}'")
             else
+              guid ||= "GUID" if RAILS_ENV == "test"
               u = nil
             end
 
