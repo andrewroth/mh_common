@@ -11,7 +11,8 @@ module Common
         protected
 
         def set_graduated_school_year_if_involved_alumni
-          if self.ministry_role.name == "Alumni"
+          mr = ::MinistryRole.find(self.ministry_role_id)
+          if mr && mr.name == "Alumni"
             # automatically set the person's campus involvements to be graduated
             graduated = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", "Graduated"])
             self.person.campus_involvements.each do |ci|
