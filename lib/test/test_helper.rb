@@ -193,6 +193,15 @@ module Test
       Factory(:groupinvolvement_6)
     end
 
+    def setup_semesters
+      Factory(:semester_10)
+      Factory(:semester_11)
+      Factory(:semester_12)
+      Factory(:semester_13)
+      Factory(:current_semester)
+      Factory(:next_semester)
+    end
+
     def setup_ministry_campuses
       Factory(:ministrycampus_1)
       Factory(:ministrycampus_2)
