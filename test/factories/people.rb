@@ -7,10 +7,10 @@ Factory.define :person_1, :class => Person, :singleton => true do |p|
   p.preferred_name 'Josh'
   p.year_in_school 'Alumni'
   p.level_of_school 'Undergrad'
-  p.graduation_date '06/15/2004'
+  p.graduation_date '06-15-2004'
   p.major 'Philosophy'
   p.minor 'Computer Science'
-  p.birth_date '07/07/1982'
+  p.birth_date '07-07-1982'
   p.bio "I\'m an MK"
   p.gender '1'
 end
