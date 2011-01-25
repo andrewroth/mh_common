@@ -23,6 +23,12 @@ module Common
               s = ::State.find :first, :conditions => { ::State._(:abbrev) => v }
               self[:health_province_id] = s.try(:id)
             end
+
+            def birth_date
+              person.try(:birth_date)
+            end
+
+            def birthdate() birth_date end
           end
         end
       end
