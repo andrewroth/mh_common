@@ -62,5 +62,5 @@ Factory.define :campusinvolvement_7, :class => CampusInvolvement, :singleton => 
   c.campus_id '3'
   c.ministry_id '1'
   c.school_year_id '1'
-  c.end_date Date.yesterday
+  c.end_date Date.yesterday.to_date.to_s
 end
