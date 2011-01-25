@@ -78,7 +78,7 @@ module Common
           # get person's involvements at ministry or ministries above ministry
           my_involvements_at_ministry_or_above = person.ministry_involvements.all(:conditions => ["#{::MinistryInvolvement.__(:ministry_id)} IN (?)", ministry.ancestor_ids])
 
-          unless my_involvements_at_ministry_or_above.nil?
+          unless my_involvements_at_ministry_or_above.blank?
             # get person's highest ministry role in these involvements
             my_involvements_at_ministry_or_above.sort!{|a,b| b.ministry_role.compare_class_and_position(a.ministry_role)} # sort by highest ministry role first (e.g. team leader is higher than team member)
             my_role_at_ministry = ::MinistryRole.find(my_involvements_at_ministry_or_above.first.ministry_role_id)
@@ -100,7 +100,7 @@ module Common
           # get person's involvements at ministry or ministries above ministry
           my_involvements_at_ministry_or_above = person.ministry_involvements.all(:conditions => ["#{::MinistryInvolvement.__(:ministry_id)} IN (?)", ministry.ancestor_ids])
 
-          unless my_involvements_at_ministry_or_above.nil?
+          unless my_involvements_at_ministry_or_above.blank?
             # get person's highest ministry role in these involvements
             my_involvements_at_ministry_or_above.sort!{|a,b| b.ministry_role.compare_class_and_position(a.ministry_role)} # sort by highest ministry role first (e.g. team leader is higher than team member)
             my_role_at_ministry = ::MinistryRole.find(my_involvements_at_ministry_or_above.first.ministry_role_id)
