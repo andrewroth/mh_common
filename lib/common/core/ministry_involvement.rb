@@ -29,6 +29,10 @@ module Common
     
       def archived?() end_date.present? end
 
+      def new_staff_history
+        new_history
+      end
+
       def new_history
         if ministry_role.class == ::StaffRole
           ::StaffInvolvementHistory.new   :person_id => person_id, :end_date => (end_date || Date.today), :ministry_role_id => ministry_role_id,
