@@ -525,6 +525,22 @@ module Common
         permission_granted
       end
 
+      def highest_ministry_role
+        # find highest staff role
+        highest_involvement = ::MinistryInvolvement.first(:joins => [:ministry_role],
+                                                          :conditions => {:person_id => self.id, :end_date => nil, :ministry_roles => {:type => "StaffRole"}},
+                                                          :order => "#{::MinistryRole._(:position)}")
+
+        # if no staff role, find highest student role
+        unless highest_involvement
+          highest_involvement = ::MinistryInvolvement.first(:joins => [:ministry_role],
+                                                            :conditions => {:person_id => self.id, :end_date => nil, :ministry_roles => {:type => "StudentRole"}},
+                                                            :order => "#{::MinistryRole._(:position)}")
+        end
+
+        highest_involvement.try(:ministry_role)
+      end
+
       protected
 
       def update_stamp
