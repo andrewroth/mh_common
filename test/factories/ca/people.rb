@@ -96,4 +96,10 @@ Factory.define :person_111, :class => Person, :singleton => true do |p|
   p.person_legal_lname 'Person'
 end
 
-
+Factory.define :person_8, :class => Person, :singleton => true do |p|
+  p.id '4003'
+  p.first_name 'Joe'
+  p.person_legal_fname 'Joe'
+  p.last_name 'Student'
+  p.person_legal_lname 'Student'
+end
