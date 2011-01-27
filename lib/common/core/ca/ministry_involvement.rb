@@ -32,6 +32,7 @@ module Common
           end
         end
 
+
         protected
 
         def set_graduated_school_year_if_involved_alumni
