@@ -508,6 +508,39 @@ module Common
         end
       end
 
+      def has_permission_to_update_role(ministry_involvement, new_role)
+        permission_granted = false
+        ministry = ministry_involvement.ministry
+
+        # trying to promote someone
+        if new_role.compare_class_and_position(ministry_involvement.ministry_role) >= 0
+          permission_granted = ::MinistryRole.promotable_roles(self, ministry).include?(new_role)
+
+        # trying to demote someone
+        elsif new_role.compare_class_and_position(ministry_involvement.ministry_role) < 0
+          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role)
+
+        end
+
+        permission_granted
+      end
+
+      def highest_ministry_role
+        # find highest staff role
+        highest_involvement = ::MinistryInvolvement.first(:joins => [:ministry_role],
+                                                          :conditions => {:person_id => self.id, :end_date => nil, :ministry_roles => {:type => "StaffRole"}},
+                                                          :order => "#{::MinistryRole._(:position)}")
+
+        # if no staff role, find highest student role
+        unless highest_involvement
+          highest_involvement = ::MinistryInvolvement.first(:joins => [:ministry_role],
+                                                            :conditions => {:person_id => self.id, :end_date => nil, :ministry_roles => {:type => "StudentRole"}},
+                                                            :order => "#{::MinistryRole._(:position)}")
+        end
+
+        highest_involvement.try(:ministry_role)
+      end
+
       protected
 
       def update_stamp

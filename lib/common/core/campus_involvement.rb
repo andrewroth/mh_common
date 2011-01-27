@@ -51,7 +51,7 @@ module Common
       end
 
       def new_student_history
-        ::StudentInvolvementHistory.new :person_id => person_id, :campus_id => campus_id, :school_year_id => school_year_id, :end_date => Date.today, :ministry_role_id => find_or_create_ministry_involvement.ministry_role_id, :start_date => (last_history_update_date || start_date), :campus_involvement_id => id
+        ::StudentInvolvementHistory.new :person_id => person_id, :campus_id => campus_id, :school_year_id => school_year_id, :end_date => (end_date || Date.today), :ministry_role_id => find_or_create_ministry_involvement.ministry_role_id, :start_date => (last_history_update_date || start_date), :campus_involvement_id => id
       end
 
       def update_student_campus_involvement(flash, my_role, ministry_role_id, school_year_id, campus_id)
@@ -90,6 +90,7 @@ module Common
           :campus_id => campus_id
         if ministry_role_being_updated # update role
           @campus_ministry_involvement.ministry_role = requested_role
+          @campus_ministry_involvement.last_history_update_date = Date.today
           @campus_ministry_involvement.save!
         end
         if record_history && self.errors.empty? && @campus_ministry_involvement.errors.empty?
