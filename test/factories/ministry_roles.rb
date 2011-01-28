@@ -80,3 +80,11 @@ Factory.define :ministryrole_10, :class => StaffRole, :singleton => true  do |m|
   m.position '4'
   m.type 'StaffRole'
 end
+
+Factory.define :ministryrole_11, :class => StaffRole, :singleton => true  do |m|
+  m.id '12'
+  m.ministry_id '1'
+  m.name 'Alumni'
+  m.position '9'
+  m.type 'StudentRole'
+end
