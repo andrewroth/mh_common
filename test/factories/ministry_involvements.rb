@@ -49,3 +49,36 @@ Factory.define :ministryinvolvement_7, :class => MinistryInvolvement, :singleton
   m.ministry_role_id '10'
   m.admin 'false'
 end
+
+Factory.define :ministryinvolvement_8, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '8'
+  m.person_id '4001'
+  m.ministry_id '1'
+  m.ministry_role_id '4'	# Ministry Leader
+  m.admin 'false'
+end
+
+Factory.define :ministryinvolvement_9, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '9'
+  m.person_id '2000'      # Sue
+  m.ministry_id '1'
+  m.ministry_role_id '7'  # Student
+  m.admin 'false'
+end
+
+Factory.define :ministryinvolvement_10, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '10'
+  m.person_id '3000'      # Fred
+  m.ministry_id '1'
+  m.ministry_role_id '7'  # Student
+  m.admin 'false'
+end
+
+
+Factory.define :ministryinvolvement_11, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '11'
+  m.person_id '50000'
+  m.ministry_id '1'
+  m.ministry_role_id '5'
+  m.admin 'false'
+end
