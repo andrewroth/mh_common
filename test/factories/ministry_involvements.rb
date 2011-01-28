@@ -82,3 +82,4 @@ Factory.define :ministryinvolvement_11, :class => MinistryInvolvement, :singleto
   m.ministry_role_id '5'
   m.admin 'false'
 end
+

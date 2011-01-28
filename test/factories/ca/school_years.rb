@@ -45,5 +45,5 @@ end
 
 Factory.define :schoolyear_10, :class => SchoolYear, :singleton => true do |s|
   s.id '10'
-  s.name 'Alumni'
+  s.name 'Graduated'
 end
