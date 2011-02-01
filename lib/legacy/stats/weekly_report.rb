@@ -67,7 +67,7 @@ module Legacy
           start_week_id = get_start_week_id(period)
           end_week_id = get_end_week_id(period)
 
-          select = stats_reports.collect{|k, v| stats_reports[k].collect{|k, c| (c[:column_type] == :database_column && c[:collected] == :weekly && c[:grouping_method] == :sum) ? c[:column] : nil}.compact }.flatten.compact.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
+          select = stats_reports.collect{|k, v| stats_reports[k].collect{|k, c| (c[:column_type] == :database_column && c[:collected] == :weekly && c[:grouping_method] == :sum) ? c[:column] : nil}.compact }.flatten.uniq.compact.collect{|c| "sum(#{c}) as #{c}"}.join(', ')
           conditions = []
           conditions += ["#{_(:campus_id, :weekly_reports)} IN (#{campus_ids.join(',')})"] unless campus_ids.nil?
           conditions += ["#{_(:staff_id, :weekly_reports)} = (#{staff_id})"] unless staff_id.nil?
