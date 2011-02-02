@@ -349,6 +349,16 @@ module Test
       Factory(:month_5)
     end
 
+    def setup_accesses
+      Factory(:access_1)
+      Factory(:access_2)
+      Factory(:access_3)
+      Factory(:access_4)
+      Factory(:access_5)
+      Factory(:access_6)
+      Factory(:access_7)
+    end
+
     protected
 
       def upload_file(options = {})

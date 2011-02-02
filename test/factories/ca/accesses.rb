@@ -33,3 +33,9 @@ Factory.define :access_6, :class => Access, :singleton => true do |c|
   c.viewer_id '6'
   c.person_id '4002'
 end
+
+Factory.define :access_7, :class => Access, :singleton => true do |c|
+  c.id '7'
+  c.viewer_id '7'
+  c.person_id '111'
+end
