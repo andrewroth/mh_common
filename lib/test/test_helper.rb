@@ -121,7 +121,12 @@ module Test
 
     def setup_users
       Factory(:user_1)
+      Factory(:user_2)
       Factory(:user_3)
+      Factory(:user_4)
+      Factory(:user_5)
+      Factory(:user_6)
+      Factory(:user_7)
     end
 
     def setup_genders
