@@ -68,6 +68,7 @@ module Common
           has_many :imports
           
           has_one :timetable, :class_name => "Timetable", :foreign_key => _(:person_id, :timetable)
+          has_many :updated_timetables, :class_name => "Timetable", :foreign_key => _(:updated_by_person_id, :timetable)
           has_many :free_times, :through => :timetable, :order => "#{_(:day_of_week, :free_times)}, #{_(:start_time, :free_times)}"
           
           # Searches
@@ -176,6 +177,14 @@ module Common
             ministry
           end
         }
+      end
+
+      def campus_or_team
+        if is_staff_somewhere?
+          most_nested_ministry.try(:name)
+        else
+          primary_campus_involvement.try(:campus).try(:abbrv)
+        end
       end
 
 
@@ -501,6 +510,9 @@ module Common
           end
         end
       end
+
+      def curr_dorm() local_dorm end
+      def curr_dorm=(val) local_dorm = val end
 
       protected
 

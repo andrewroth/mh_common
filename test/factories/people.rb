@@ -67,6 +67,7 @@ Factory.define :person_111, :class => Person, :singleton => true do |p|
   p.id '111'
   p.first_name 'Random'
   p.last_name 'Person'
+  p.user_id '7'
 end
 
 

@@ -37,3 +37,10 @@ Factory.define :user_6, :class => User, :singleton => true do |u|
   u.password  User.encrypt('test') 
   u.guid '253b648c-3537-464c-b97a-e2d7e2c748b9'
 end
+
+Factory.define :user_7, :class => User, :singleton => true do |u|
+  u.id '7'
+  u.username 'random guy'
+  u.password  User.encrypt('test') 
+  u.guid '12345'
+end
