@@ -121,7 +121,12 @@ module Test
 
     def setup_users
       Factory(:user_1)
+      Factory(:user_2)
       Factory(:user_3)
+      Factory(:user_4)
+      Factory(:user_5)
+      Factory(:user_6)
+      Factory(:user_7)
     end
 
     def setup_genders
@@ -342,6 +347,16 @@ module Test
       Factory(:month_3)
       Factory(:month_4)
       Factory(:month_5)
+    end
+
+    def setup_accesses
+      Factory(:access_1)
+      Factory(:access_2)
+      Factory(:access_3)
+      Factory(:access_4)
+      Factory(:access_5)
+      Factory(:access_6)
+      Factory(:access_7)
     end
 
     protected
