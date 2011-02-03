@@ -4,6 +4,7 @@ Factory.define :campus_1, :class => Campus, :singleton => true do |c|
   c.state 'CA'
   c.type 'College'
   c.country 'USA'
+  c.abbrv 'UCD'
 end
 
 Factory.define :campus_2, :class => Campus, :singleton => true do |c|
@@ -12,6 +13,7 @@ Factory.define :campus_2, :class => Campus, :singleton => true do |c|
   c.state 'CA'
   c.type 'College'
   c.country 'USA'
+  c.abbrv 'C2'
 end
 
 Factory.define :campus_3, :class => Campus, :singleton => true do |c|
@@ -19,4 +21,5 @@ Factory.define :campus_3, :class => Campus, :singleton => true do |c|
   c.name 'Campus of Wyoming'
   c.state 'WY # 1 is Wyoming id'
   c.country 'USA'
+  c.abbrv 'Wy'
 end
