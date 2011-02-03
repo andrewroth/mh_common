@@ -208,6 +208,10 @@ module Common
               self.person_city
             end
 
+            def permanent_city=(val)
+              self.person_city = val
+            end
+
             def permanent_state
               permanent_province
             end
