@@ -252,6 +252,7 @@ module Test
       Factory(:campusinvolvement_3)
       Factory(:ministry_1)
       Factory(:ministry_2)
+      Factory(:ministryrole_1)
       Factory(:ministryinvolvement_1)
       Factory(:ministryinvolvement_2)
       Factory(:campus_1)

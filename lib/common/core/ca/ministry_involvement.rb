@@ -6,6 +6,7 @@ module Common
           base.class_eval do
             load_mappings
             before_save :set_graduated_school_year_if_involved_alumni
+
           end
 
           base.extend MinistryInvolvementMethods
@@ -60,6 +61,7 @@ module Common
           end
 
         end
+
 
       end
     end
