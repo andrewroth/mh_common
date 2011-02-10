@@ -55,4 +55,5 @@ Factory.define :user_7, :class => User, :singleton => true do |u|
   u.username 'random guy'
   u.password  User.encrypt('test') 
   u.guid '12345'
+  u.last_login { Date.today }
 end
