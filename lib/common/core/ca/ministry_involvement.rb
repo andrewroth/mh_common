@@ -40,9 +40,11 @@ module Common
           if mr && (mr.name == "Alumni" || mr.class == ::StaffRole)
             # automatically set the person's campus involvements to be graduated
             graduated = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", "Graduated"])
-            self.person.campus_involvements.each do |ci|
-              ci.school_year = graduated
-              ci.save
+            if self.person
+              self.person.campus_involvements.each do |ci|
+                ci.school_year = graduated
+                ci.save
+              end
             end
           end
         end
