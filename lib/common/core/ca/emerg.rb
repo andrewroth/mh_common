@@ -7,6 +7,18 @@ module Common
             belongs_to :person
             belongs_to :health_state, :class_name => "State", :foreign_key => "health_province_id"
 
+            def contact_home_phone
+              emerg_contactHome
+            end
+
+            def contact_mobile_phone
+              emerg_contactMobile
+            end
+
+            def contact_work_phone
+              emerg_contactWork
+            end
+
             def health_coverage_country
               health_state.try(:country).try(:abbrev)
             end
