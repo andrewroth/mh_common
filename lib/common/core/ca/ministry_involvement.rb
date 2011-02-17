@@ -5,6 +5,7 @@ module Common
         def self.included(base)
           base.class_eval do
             load_mappings
+            before_save :set_graduated_school_year_if_alumni_or_staff
 
           end
 
@@ -31,6 +32,22 @@ module Common
           end
         end
 
+
+        protected
+
+        def set_graduated_school_year_if_alumni_or_staff
+          mr = ::MinistryRole.find(self.ministry_role_id)
+          if mr && (mr.name == "Alumni" || mr.class == ::StaffRole)
+            # automatically set the person's campus involvements to be graduated
+            graduated = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", "Graduated"])
+            self.person.campus_involvements.each do |ci|
+              ci.school_year = graduated
+              ci.save
+            end
+          end
+        end
+
+
         module MinistryInvolvementMethods
 
           def build_highest_ministry_involvement_possible(person = nil)
@@ -44,6 +61,7 @@ module Common
           end
 
         end
+
 
       end
     end

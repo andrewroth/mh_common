@@ -36,6 +36,7 @@ Factory.define :person_2, :class => Person, :singleton => true do |p|
   p.last_name 'anderson'
   p.person_legal_lname 'anderson'
   p.gender_id '1'
+  p.person_mentor_id '4001'
 end
 
 Factory.define :person_3, :class => Person, :singleton => true do |p|

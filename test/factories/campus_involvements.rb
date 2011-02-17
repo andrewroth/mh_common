@@ -64,3 +64,19 @@ Factory.define :campusinvolvement_7, :class => CampusInvolvement, :singleton => 
   c.school_year_id '1'
   c.end_date Date.yesterday.to_date.to_s
 end
+
+Factory.define :campusinvolvement_8, :class => CampusInvolvement, :singleton => true do |c|
+  c.id '1008'
+  c.person_id '4001'
+  c.campus_id '1'
+  c.ministry_id '7'
+  c.school_year_id '1'
+end
+
+Factory.define :campusinvolvement_9, :class => CampusInvolvement, :singleton => true do |c|
+  c.id '1009'
+  c.person_id '4001'
+  c.campus_id '2'
+  c.ministry_id '1'
+  c.school_year_id '1'
+end

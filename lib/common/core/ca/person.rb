@@ -526,7 +526,7 @@ module Common
             ci.campus_id = campus.id
             ci.graduation_date = graduation_date
             if staff
-              ci.school_year = ::SchoolYear.find_by_year_desc "Alumni"
+              ci.school_year = ::SchoolYear.find_by_year_desc "Graduated"
             else
               ci.school_year = school_year
             end
