@@ -19,6 +19,22 @@ module Common
               emerg_contactWork
             end
 
+            def contact2_name
+              emerg_contact2Name
+            end
+
+            def contact2_home_phone
+              emerg_contactHome
+            end
+
+            def contact2_mobile_phone
+              emerg_contactMobile
+            end
+
+            def contact2_work_phone
+              emerg_contactWork
+            end
+
             def health_coverage_country
               health_state.try(:country).try(:abbrev)
             end
