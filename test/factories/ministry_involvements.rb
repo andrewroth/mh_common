@@ -83,3 +83,11 @@ Factory.define :ministryinvolvement_11, :class => MinistryInvolvement, :singleto
   m.admin 'false'
 end
 
+Factory.define :ministryinvolvement_12, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '12'
+  m.person_id '4003'
+  m.ministry_id '1'
+  m.ministry_role_id '7'
+  m.admin 'false'
+end
+
