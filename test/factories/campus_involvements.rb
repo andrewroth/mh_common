@@ -14,6 +14,14 @@ Factory.define :campusinvolvement, :class => CampusInvolvement do |c|
   c.school_year_id '1'
 end
 
+Factory.define :campusinvolvement_setperson, :class => CampusInvolvement do |c|
+  c.id { Factory.next(:campusinvolvement_id) }
+  c.person_id { :person_id }
+  c.campus_id '1'
+  c.ministry_id '1'
+  c.school_year_id '1'
+end
+
 Factory.define :campusinvolvement_2, :class => CampusInvolvement, :singleton => true do |c|
   c.id '1002'
   c.person_id '2000'
