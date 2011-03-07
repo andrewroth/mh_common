@@ -89,6 +89,10 @@ module Common
           before_create :create_stamp
           after_create do |person| person.just_created = true end
 
+          def local_province_short
+            local_state
+          end
+
           def gender=(value)
             if value.present?
               self[:gender] = (male?(value) ? 1 : 0)
