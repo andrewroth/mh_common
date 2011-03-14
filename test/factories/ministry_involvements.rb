@@ -38,7 +38,7 @@ end
 Factory.define :ministryinvolvement_6, :class => MinistryInvolvement, :singleton => true do |m|
   m.id '6'
   m.person_id '4002'
-  m.ministry_id '4'
+  m.ministry_id '1' # why go with 4?
   m.ministry_role_id '10'
 end
 

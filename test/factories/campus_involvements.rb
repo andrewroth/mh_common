@@ -88,3 +88,11 @@ Factory.define :campusinvolvement_9, :class => CampusInvolvement, :singleton => 
   c.ministry_id '1'
   c.school_year_id '1'
 end
+
+Factory.define :campusinvolvement_10, :class => CampusInvolvement, :singleton => true do |c|
+  c.id '1010'
+  c.person_id '4002'
+  c.campus_id '2'
+  c.ministry_id '1'
+  c.school_year_id '1'
+end

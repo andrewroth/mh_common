@@ -14,6 +14,8 @@ Factory.define :ministryrole_2, :class => StaffRole, :singleton => true  do |m|
   m.type 'StaffRole'
 end
 
+# what happened to id 3?
+
 Factory.define :ministryrole_3, :class => StudentRole, :singleton => true  do |m|
   m.id '4'
   m.ministry_id '1'
