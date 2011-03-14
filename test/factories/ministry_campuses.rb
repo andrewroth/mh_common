@@ -15,3 +15,11 @@ Factory.define :ministrycampus_3, :class => MinistryCampus, :singleton => true d
   m.ministry_id '1'
   m.campus_id '3'
 end
+
+Factory.define :ministrycampus_4, :class => MinistryCampus, :singleton => true do |m|
+  m.id '4'
+  m.ministry_id '1'
+  m.campus_id '2'
+end
+
+
