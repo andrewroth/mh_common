@@ -7,6 +7,10 @@ module Common
           base.class_eval do
             #  doesnt_implement_attributes :major => '', :minor => '', :url => '', :staff_notes => '', :updated_at => '', :updated_by => ''
 
+            has_many :summer_reports, :class_name => "SummerReport"
+            has_many :summer_report_reviewers, :class_name => "SummerReportReviewer"
+            has_many :summer_reports_to_review, :through => :summer_report_reviewers, :source => :summer_report
+
             has_many :cim_hrdb_admins, :class_name => 'CimHrdbAdmin'
 
             has_one :access
