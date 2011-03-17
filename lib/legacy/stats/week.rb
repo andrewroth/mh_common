@@ -244,6 +244,12 @@ module Legacy
         def find_semester_id(id)
           find(:first, :conditions => {_(:id) => id})["#{_(:semester_id)}"]
         end
+
+        def find_week_containing_date(date)
+          week = ::Week.first(:conditions => ["#{::Week._(:end_date)} = ?", date])
+          week = ::Week.first(:conditions => ["#{::Week._(:end_date)} > ?", date]) if week.blank?
+          week
+        end
       end
     end
   end

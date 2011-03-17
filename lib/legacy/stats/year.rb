@@ -9,7 +9,6 @@ module Legacy
           has_many :annual_goals_reports, :class_name => 'AnnualGoalsReport'
           has_many :annual_reports, :class_name => 'AnnualReport'
           has_many :summer_reports, :class_name => 'SummerReport'
-          has_many :summer_report_summer_definitions, :class_name => 'SummerReportSummerDefinition'
         end
 
         base.extend YearClassMethods
