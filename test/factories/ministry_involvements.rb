@@ -98,3 +98,12 @@ Factory.define :ministryinvolvement_13, :class => MinistryInvolvement, :singleto
   m.ministry_role_id '7'
   m.admin 'false'
 end
+
+Factory.define :ministryinvolvement_979, :class => MinistryInvolvement, :singleton => true do |m|
+  m.id '14'
+  m.person_id '4002'
+  m.ministry_id '4'
+  m.ministry_role_id '10'
+  m.admin 'false'
+end
+
