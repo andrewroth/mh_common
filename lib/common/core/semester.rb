@@ -30,7 +30,7 @@ module Common
             end
           end
 
-          def self.create_default_semesters(num_years_to_add)
+          def self.create_default_semesters(num_years_to_add, also_add_weeks_and_months = false)
             num_years_to_add.times do
 
               # add year first
@@ -79,6 +79,67 @@ module Common
                   end
                 end # year == 3
               end # years loop
+
+
+              if also_add_weeks_and_months
+                # for each year, if there are not 12 months, add them
+                ::Year.all.each do |year|
+                  unless year.months.size == 12
+
+                    if year.months.any?
+                      last_month_number = year.months.last.month_number
+                      month_counter = last_month_number == 12 ? 1 : last_month_number + 1
+                    else
+                      month_counter = 9 # month 9, September, is the first month of a year
+                    end
+
+                    while year.months.size < 12 do
+                      new_month = year.months.build(:month_number => month_counter)
+
+                      new_month.calendar_year = month_counter > 8 ? year.description[0..3] : year.description[-4..-1]
+
+                      new_month.description = "#{Date::MONTHNAMES[month_counter]} #{new_month.calendar_year}"
+
+                      new_month.semester_id = ::Semester.find_semester_from_date("#{new_month.calendar_year}-#{month_counter}-1").id
+
+                      puts "Adding month #{new_month.description}" unless Rails.env.test?
+                      new_month.save
+
+                      month_counter = month_counter == 12 ? 1 : month_counter + 1
+                    end
+
+                  end
+                end
+
+
+                # go to last week and, stopping after the last month, add enough weeks
+
+                last_week = ::Week.last
+                week_counter_date = Date.parse(last_week.end_date.to_s)
+                raise "The last week in your database has an unexpected date (it is not a Saturday)" if week_counter_date.wday != 6 && !Rails.env.test?
+                week_counter_date += 7
+
+                last_month = ::Month.last
+                last_month_date = Date.parse("#{last_month.description[-4..-1]}-#{last_month.month_number}-4") # if day is <= 3 it belongs to previous month
+                last_month_date = last_month_date >> 1 # get date of first day of next month
+
+                while week_counter_date.year <= last_month_date.year && week_counter_date.month < last_month_date.month do
+                  new_week = ::Week.new
+                  new_week.end_date = week_counter_date
+
+                  # set semester_id
+                  new_week.semester_id = ::Semester.find_semester_from_date(new_week.end_date, true).id
+
+                  # set month_id
+                  new_week.month_id = ::Month.find_month_from_date(new_week.end_date, true).id
+
+                  puts "Adding week #{new_week.end_date}" unless Rails.env.test?
+                  new_week.save
+
+                  week_counter_date += 7
+                end
+              end # if also_add_weeks_and_months
+
             end # num years to add
           end
         end

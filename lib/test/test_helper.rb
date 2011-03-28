@@ -363,11 +363,6 @@ module Test
     def setup_summer_reports
       Factory(:summer_report_assignment_1)
       Factory(:summer_report_assignment_2)
-      Factory(:summer_report_1_week_1)
-      Factory(:summer_report_1_week_2)
-      Factory(:summer_report_1_reviewer_1)
-      Factory(:summer_report_1_reviewer_2)
-      Factory(:summer_report_1)
     end
 
     protected
