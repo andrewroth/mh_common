@@ -73,6 +73,7 @@ Factory.define :ministryrole_9, :class => StaffRole, :singleton => true  do |m|
   m.name 'Staff'
   m.position '3'
   m.type 'StaffRole'
+  m.involved true
 end
 
 Factory.define :ministryrole_10, :class => StaffRole, :singleton => true  do |m|
