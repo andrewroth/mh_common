@@ -140,6 +140,14 @@ module Common
 
             return u
           end
+          
+          def find_by_email(email)
+            ::User.all(:conditions => ["#{::User._(:username)} = ?", email])
+          end
+          
+          def find_by_username(username)
+            find_by_email(username)
+          end
 
           def search(search, page, per_page)
             if search then
