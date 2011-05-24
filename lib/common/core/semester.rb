@@ -3,7 +3,8 @@ module Common
     module Semester
       def self.included(base)
         base.class_eval do
-          belongs_to :semester
+          belongs_to :semester # this is confusing
+          has_one :month
 
           def next_semester
             ::Semester.first(:order => "#{::Semester._(:start_date)} ASC", :conditions => [ "#{::Semester._(:start_date)} > ?", self.start_date ])
