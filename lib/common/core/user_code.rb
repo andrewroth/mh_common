@@ -6,7 +6,6 @@ module Common
           belongs_to :user
           belongs_to :login_code
           
-          after_initialize :init
           after_create :init
         end
 
