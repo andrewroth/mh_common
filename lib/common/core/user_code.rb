@@ -19,6 +19,10 @@ module Common
       def pass_hash
         Marshal.load(pass)
       end
+      
+      def code
+        self.login_code.code
+      end
 
       private
       
