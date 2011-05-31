@@ -6,7 +6,6 @@ module Common
           belongs_to :user
           belongs_to :login_code
           
-          after_initialize :init
           after_create :init
         end
 
@@ -19,6 +18,10 @@ module Common
 
       def pass_hash
         pass.present? ? Marshal.load(pass) : {}
+      end
+      
+      def code
+        self.login_code.code
       end
 
       private

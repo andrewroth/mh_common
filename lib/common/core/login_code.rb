@@ -3,7 +3,6 @@ module Common
     module LoginCode
       def self.included(base)
         base.class_eval do
-          after_initialize :init
           after_create :init
         end
 
