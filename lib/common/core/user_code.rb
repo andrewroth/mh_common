@@ -20,9 +20,6 @@ module Common
         Marshal.load(pass)
       end
       
-      def code
-        self.login_code.code
-      end
 
       private
       
