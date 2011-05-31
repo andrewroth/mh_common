@@ -18,7 +18,7 @@ module Common
       end
 
       def pass_hash
-        Marshal.load(pass)
+        pass.present? ? Marshal.load(pass) : {}
       end
 
       private
