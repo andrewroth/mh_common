@@ -185,9 +185,18 @@ module Common
       
       def campus_or_team
         if is_staff_somewhere?
-          most_nested_ministry.try(:name)
+          campus_or_team_involvement.try(:ministry).try(:name)
         else
-          primary_campus_involvement.try(:campus).try(:abbrv)
+          campus_or_team_involvement.try(:campus).try(:abbrv)
+        end
+      end
+      
+      def campus_or_team_involvement
+        if is_staff_somewhere?
+          mid = most_nested_ministry.try(:id)
+          ::MinistryInvolvement.first(:conditions => {:person_id => self.id, :ministry_id => mid}) if mid
+        else
+          primary_campus_involvement
         end
       end
       
