@@ -8,6 +8,7 @@ module Legacy
           belongs_to :year, :class_name => 'Year'
           belongs_to :semester, :class_name => 'Semester'
           has_many :weeks, :class_name => 'Week', :foreign_key => _(:month_id, :week)
+          default_scope :order => "month_literalyear ASC, month_number ASC"
         end
 
         base.extend StatsClassMethods
