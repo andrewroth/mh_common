@@ -1,5 +1,5 @@
 
-Factory.define :login_code_1, :class => LoginCode do |l|
+Factory.define :login_code_1, :class => LoginCode, :singleton => true  do |l|
   l.id '1'
   l.acceptable '1'
   l.times_used '0'
