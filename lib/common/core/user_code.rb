@@ -7,6 +7,8 @@ module Common
           belongs_to :login_code
           
           after_create :init
+          
+          validates_uniqueness_of :login_code_id, :allow_blank => true, :allow_nil => true
         end
 
         base.extend UserCodeClassMethods
@@ -24,10 +26,7 @@ module Common
       private
       
       def init
-        lc = ::LoginCode.new
-        lc.save!
-        self.login_code_id = lc.id
-        self.save!
+        ::LoginCode.set_login_code_id(self)
       end
 
       module UserCodeClassMethods
