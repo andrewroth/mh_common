@@ -35,7 +35,7 @@ module Common
             num_years_to_add.times do
 
               # add year first
-              last_year = ::Year.last
+              last_year = ::Year.all.last
               new_year = ::Year.new
               if last_year
                 last_year_year = last_year.description[-4..-1].to_i
@@ -115,16 +115,16 @@ module Common
 
                 # go to last week and, stopping after the last month, add enough weeks
 
-                last_week = ::Week.last
+                last_week = ::Week.all(:order => "#{::Week._(:end_date)} asc").last
                 week_counter_date = Date.parse(last_week.end_date.to_s)
                 raise "The last week in your database has an unexpected date (it is not a Saturday)" if week_counter_date.wday != 6 && !Rails.env.test?
                 week_counter_date += 7
 
-                last_month = ::Month.last
+                last_month = ::Month.all(:order => "#{::Month._(:calendar_year)} asc, #{::Month._(:month_number)} asc").last
                 last_month_date = Date.parse("#{last_month.description[-4..-1]}-#{last_month.month_number}-4") # if day is <= 3 it belongs to previous month
                 last_month_date = last_month_date >> 1 # get date of first day of next month
 
-                while week_counter_date.year <= last_month_date.year && week_counter_date.month < last_month_date.month do
+                while week_counter_date.year < last_month_date.year || (week_counter_date.year == last_month_date.year && week_counter_date.month < last_month_date.month) do
                   new_week = ::Week.new
                   new_week.end_date = week_counter_date
 
