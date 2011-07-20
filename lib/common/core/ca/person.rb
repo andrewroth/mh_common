@@ -586,6 +586,17 @@ module Common
         def is_student
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
+        
+        
+        def update_from_latest_event_attendee
+          latest_event_attendee = self.event_attendees.first(:order => "#{EventAttendee._(:ticket_updated_at)} desc")
+          
+          if latest_event_attendee && latest_event_attendee.ticket_updated_at > self.updated_at
+            # campus
+            # year in school
+            # home, work, cell phone
+          end
+        end
 
 
 
@@ -649,6 +660,72 @@ module Common
             end
             return p
           end
+          
+          
+          def find_and_associate_person_to_event_attendee(event_attendee)
+            # try to find a person to match the event_attendee, if found associate that person to the event_attendee by creating a PersonEventAttendee
+            
+            person = nil
+            
+            # first try to find by email address
+            user = ::User.find(:first, :conditions => ["#{User._(:username)} = ?", event_attendee.email])
+            
+            if user && user.person
+              # found 'em, that was easy
+              person = user.person
+            else
+              # no email matched, let's try something more complex...
+              
+              people_name_matches = ::Person.all(:conditions => ["#{Person._(:first_name)} = ? and #{Person._(:last_name)} = ?",
+                                                 event_attendee.first_name, event_attendee.last_name])
+              
+              case people_name_matches.size
+              when 1
+                # found 'em
+                person = people_name_matches.first
+              when 0
+                # give up, there's no one with this name
+                person = nil
+              else
+                # there's more than one, keep going...
+                
+                people_name_and_campus_matches = people_name_matches.select { |person| person.primary_campus.matches_eventbrite_campus(event_attendee.campus) }
+                
+                case people_name_and_campus_matches.size
+                when 1
+                  # found 'em
+                  person = people_name_and_campus_matches.first
+                when 0
+                  # give up, there's no one with this name and campus
+                  person = nil
+                else
+                  # still more than one, keep going...
+                  
+                  people_name_campus_and_year_matches = people_name_and_campus_matches.select { |person| person.year_in_school.name == event_attendee.year_in_school }
+                  
+                  case people_name_campus_and_year_matches
+                  when 1
+                    # found 'em
+                    person = people_name_campus_and_year_matches.first
+                  else
+                    # give up, there's no one with this name, campus and year_in_school
+                    person = nil
+                    
+                  end
+                end
+              end
+            end
+            
+            
+            # if we found a person associate them with the event_attendee
+            if person.present? && person.event_attendees.all(:conditions => {:event_attendee_id => event_attendee.id}).empty?
+              person_event_attendee = ::PersonEventAttendee.new({:person_id => person.id, :event_attendee_id => event_attendee.id})
+              person_event_attendee.save!
+            end
+            
+            person
+          end
+          
         end
       end
     end

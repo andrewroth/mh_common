@@ -5,7 +5,7 @@ module Common
         base.class_eval do
 
           belongs_to :event
-          
+
         end
       end
 
