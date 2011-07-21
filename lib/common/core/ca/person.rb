@@ -589,12 +589,27 @@ module Common
         
         
         def update_from_latest_event_attendee
-          latest_event_attendee = self.event_attendees.first(:order => "#{EventAttendee._(:ticket_updated_at)} desc")
+          latest_event_attendee = self.event_attendees.first(:order => "#{::EventAttendee._(:ticket_updated_at)} desc")
           
-          if latest_event_attendee && latest_event_attendee.ticket_updated_at > self.updated_at
-            # campus
-            # year in school
-            # home, work, cell phone
+          # only update the person if the attendee info is newer than the last time their profile was updated
+          if latest_event_attendee && latest_event_attendee.ticket_updated_at > Time.parse(self.updated_at).in_time_zone(latest_event_attendee.ticket_updated_at.zone)
+            
+            campus = ::Campus.find_campus_from_eventbrite(latest_event_attendee.campus)
+            school_year = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", latest_event_attendee.year_in_school])
+            
+            if campus && school_year
+              ci = self.campus_involvements.detect {|ci| ci.campus.id == campus.id }
+              ci = ::CampusInvolvement.new({:campus_id => campus.id, :start_date => Time.now()}) unless ci.present?
+              ci.school_year_id = school_year.id
+              ci.save!
+            end
+            
+            # update phone numbers
+            self.cell_phone == latest_event_attendee.cell_phone if latest_event_attendee.cell_phone.present?
+            self.current_address.phone == latest_event_attendee.home_phone || latest_event_attendee.work_phone if latest_event_attendee.home_phone.present? || latest_event_attendee.work_phone.present?
+            
+            self.current_address.save!
+            self.save!
           end
         end
 
@@ -668,57 +683,49 @@ module Common
             person = nil
             
             # first try to find by email address
-            user = ::User.find(:first, :conditions => ["#{User._(:username)} = ?", event_attendee.email])
+            user = ::User.find(:first, :conditions => ["#{::User._(:username)} = ?", event_attendee.email])
             
             if user && user.person
               # found 'em, that was easy
               person = user.person
+              Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by email")
             else
               # no email matched, let's try something more complex...
-              
-              people_name_matches = ::Person.all(:conditions => ["#{Person._(:first_name)} = ? and #{Person._(:last_name)} = ?",
+
+              people_name_matches = ::Person.all(:conditions => ["#{::Person._(:first_name)} = ? and #{::Person._(:last_name)} = ?",
                                                  event_attendee.first_name, event_attendee.last_name])
               
-              case people_name_matches.size
+              people_name_and_campus_matches = people_name_matches.select { |person| person.primary_campus.try(:matches_eventbrite_campus, event_attendee.campus) }
+              
+              case people_name_and_campus_matches.size
               when 1
                 # found 'em
-                person = people_name_matches.first
+                person = people_name_and_campus_matches.first
+                Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by name and campus")
               when 0
-                # give up, there's no one with this name
+                # give up, there's no one with this name and campus
                 person = nil
               else
-                # there's more than one, keep going...
+                # still more than one, keep going...
                 
-                people_name_and_campus_matches = people_name_matches.select { |person| person.primary_campus.matches_eventbrite_campus(event_attendee.campus) }
+                people_name_campus_and_year_matches = people_name_and_campus_matches.select { |person| person.year_in_school.name == event_attendee.year_in_school }
                 
-                case people_name_and_campus_matches.size
+                case people_name_campus_and_year_matches
                 when 1
                   # found 'em
-                  person = people_name_and_campus_matches.first
-                when 0
-                  # give up, there's no one with this name and campus
-                  person = nil
+                  person = people_name_campus_and_year_matches.first
+                  Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by name, campus and year in school")
                 else
-                  # still more than one, keep going...
+                  # give up, there's no one with this name, campus and year_in_school
+                  person = nil
                   
-                  people_name_campus_and_year_matches = people_name_and_campus_matches.select { |person| person.year_in_school.name == event_attendee.year_in_school }
-                  
-                  case people_name_campus_and_year_matches
-                  when 1
-                    # found 'em
-                    person = people_name_campus_and_year_matches.first
-                  else
-                    # give up, there's no one with this name, campus and year_in_school
-                    person = nil
-                    
-                  end
                 end
               end
             end
             
             
             # if we found a person associate them with the event_attendee
-            if person.present? && person.event_attendees.all(:conditions => {:event_attendee_id => event_attendee.id}).empty?
+            if person.present? && person.event_attendees.all(:conditions => {:id => event_attendee.id}).empty?
               person_event_attendee = ::PersonEventAttendee.new({:person_id => person.id, :event_attendee_id => event_attendee.id})
               person_event_attendee.save!
             end
