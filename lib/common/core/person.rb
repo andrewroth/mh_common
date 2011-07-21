@@ -85,9 +85,20 @@ module Common
         
           has_one :profile_picture, :class_name => "ProfilePicture", :foreign_key => _("person_id", :profile_picture)
           
+          has_many :person_event_attendees
+          has_many :event_attendees, :through => :person_event_attendees, :order => "#{::EventAttendee._(:updated_at)} desc"
+          
           before_save :update_stamp
           before_create :create_stamp
           after_create do |person| person.just_created = true end
+
+          def events
+            self.event_attendees.collect { |ea| ea.event }
+          end
+          
+          def events_attended
+            self.events
+          end
 
           def local_province_short
             local_state
