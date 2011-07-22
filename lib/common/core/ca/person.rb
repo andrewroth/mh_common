@@ -598,10 +598,7 @@ module Common
             school_year = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", latest_event_attendee.year_in_school])
             
             if campus && school_year
-              ci = self.campus_involvements.detect {|ci| ci.campus.id == campus.id }
-              ci = ::CampusInvolvement.new({:campus_id => campus.id, :start_date => Time.now()}) unless ci.present?
-              ci.school_year_id = school_year.id
-              ci.save!
+              self.add_or_update_campus(campus.id, school_year.id, campus.derive_ministry.id, "MT")
             end
             
             # update phone numbers
