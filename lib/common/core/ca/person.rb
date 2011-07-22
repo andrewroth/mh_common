@@ -592,7 +592,7 @@ module Common
           latest_event_attendee = self.event_attendees.first(:order => "#{::EventAttendee._(:ticket_updated_at)} desc")
           
           # only update the person if the attendee info is newer than the last time their profile was updated
-          if latest_event_attendee && latest_event_attendee.ticket_updated_at > Time.parse(self.updated_at).in_time_zone(latest_event_attendee.ticket_updated_at.zone)
+          if latest_event_attendee && latest_event_attendee.ticket_updated_at > Time.parse(self.updated_at.to_s).in_time_zone(latest_event_attendee.ticket_updated_at.zone)
             
             campus = ::Campus.find_campus_from_eventbrite(latest_event_attendee.campus)
             school_year = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", latest_event_attendee.year_in_school])
