@@ -603,9 +603,10 @@ module Common
             
             # update phone numbers
             self.cell_phone = latest_event_attendee.cell_phone if latest_event_attendee.cell_phone.present?
-            self.current_address.phone = latest_event_attendee.home_phone || latest_event_attendee.work_phone if latest_event_attendee.home_phone.present? || latest_event_attendee.work_phone.present?
+            current_address = self.current_address
+            current_address.phone = latest_event_attendee.home_phone || latest_event_attendee.work_phone if latest_event_attendee.home_phone.present? || latest_event_attendee.work_phone.present?
             
-            self.current_address.save!
+            current_address.save!
             self.save!
           end
         end
