@@ -131,7 +131,7 @@ module Common
         if new_record?
           raise "Can't create a user_code for a new record."
         else
-          ::UserCode.create! :user_id => self.id, :code => ::UserCode.new_code, :pass => Marshal.dump(pass)
+          ::UserCode.create! :user_id => self.id, :pass => Marshal.dump(pass)
         end
       end
 

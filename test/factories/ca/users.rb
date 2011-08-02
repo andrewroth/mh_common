@@ -11,7 +11,7 @@ Factory.define :user_2, :class => User, :singleton => true do |u|
   u.id '2'
   u.username 'fred@uscm.org'
   u.password 'test'
-  u.guid ''
+  u.guid '78ff7247-7b8f-4f42-8117-e03524fd1260'
   u.last_login { Date.today }
   u.accountgroup_id '11'
 end
