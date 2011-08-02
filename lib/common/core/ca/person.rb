@@ -586,6 +586,30 @@ module Common
         def is_student
           ministry_involvements.detect{ |mi| mi.ministry_role.is_a?(StaffRole) && mi.end_date.nil? }.nil?
         end
+        
+        
+        def update_from_latest_event_attendee
+          latest_event_attendee = self.event_attendees.first(:order => "#{::EventAttendee._(:ticket_updated_at)} desc")
+          
+          # only update the person if the attendee info is newer than the last time their profile was updated
+          if latest_event_attendee && latest_event_attendee.ticket_updated_at > Time.parse(self.updated_at.to_s).in_time_zone(latest_event_attendee.ticket_updated_at.zone)
+            
+            campus = ::Campus.find_campus_from_eventbrite(latest_event_attendee.campus)
+            school_year = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", latest_event_attendee.year_in_school])
+            
+            if campus && school_year
+              self.add_or_update_campus(campus.id, school_year.id, campus.derive_ministry.id, "MT")
+            end
+            
+            # update phone numbers
+            self.cell_phone = latest_event_attendee.cell_phone if latest_event_attendee.cell_phone.present?
+            current_address = self.current_address
+            current_address.phone = latest_event_attendee.home_phone || latest_event_attendee.work_phone if latest_event_attendee.home_phone.present? || latest_event_attendee.work_phone.present?
+            
+            current_address.save!
+            self.save!
+          end
+        end
 
 
 
@@ -649,6 +673,64 @@ module Common
             end
             return p
           end
+          
+          
+          def find_and_associate_person_to_event_attendee(event_attendee)
+            # try to find a person to match the event_attendee, if found associate that person to the event_attendee by creating a PersonEventAttendee
+            
+            person = nil
+            
+            # first try to find by email address
+            user = ::User.find(:first, :conditions => ["#{::User._(:username)} = ?", event_attendee.email])
+            
+            if user && user.person
+              # found 'em, that was easy
+              person = user.person
+              Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by email")
+            else
+              # no email matched, let's try something more complex...
+
+              people_name_matches = ::Person.all(:conditions => ["#{::Person._(:first_name)} = ? and #{::Person._(:last_name)} = ?",
+                                                 event_attendee.first_name, event_attendee.last_name])
+              
+              people_name_and_campus_matches = people_name_matches.select { |person| person.primary_campus.try(:matches_eventbrite_campus, event_attendee.campus) }
+              
+              case people_name_and_campus_matches.size
+              when 1
+                # found 'em
+                person = people_name_and_campus_matches.first
+                Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by name and campus")
+              when 0
+                # give up, there's no one with this name and campus
+                person = nil
+              else
+                # still more than one, keep going...
+                
+                people_name_campus_and_year_matches = people_name_and_campus_matches.select { |person| person.year_in_school.name == event_attendee.year_in_school }
+                
+                case people_name_campus_and_year_matches
+                when 1
+                  # found 'em
+                  person = people_name_campus_and_year_matches.first
+                  Rails.logger.info("Matched event_attendee #{event_attendee.id} to person #{person.id} by name, campus and year in school")
+                else
+                  # give up, there's no one with this name, campus and year_in_school
+                  person = nil
+                  
+                end
+              end
+            end
+            
+            
+            # if we found a person associate them with the event_attendee
+            if person.present? && person.event_attendees.all(:conditions => {:id => event_attendee.id}).empty?
+              person_event_attendee = ::PersonEventAttendee.new({:person_id => person.id, :event_attendee_id => event_attendee.id})
+              person_event_attendee.save!
+            end
+            
+            person
+          end
+          
         end
       end
     end
