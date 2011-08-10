@@ -4,6 +4,11 @@ module Common
       module Event
         def self.included(base)
           base.class_eval do
+            
+            validates_presence_of :registrar_event_id, :message => "can't be blank (Eventbrite event ID)"
+            validates_uniqueness_of :registrar_event_id, :message => "ID is taken (there is already an event with that Eventbrite event ID in the database)"
+            validates_presence_of :event_group_id
+            
             def eventbrite_id() self.registrar_event_id end
             
             base.extend EventClassMethods
@@ -18,15 +23,17 @@ module Common
 
           eb_event = EventBright::Event.new(@eventbrite_user, {:id => self.eventbrite_id})
 
-          eb_event.attendees.each do |attendee|
-            if attendee.answers then
-              answer = attendee.answer_to_question(eventbrite[:campus_question])
+          if eb_event.num_attendee_rows > 0
+            eb_event.attendees.each do |attendee|
+              if attendee.answers then
+                answer = attendee.answer_to_question(eventbrite[:campus_question])
 
-              if answer
-                # answer_text should be in the format "campus.desc (campus.short_desc)"
-                # if either campus.desc or campus.short_desc matches then true
-                if campus.matches_eventbrite_campus(answer)
-                  attendees << attendee
+                if answer
+                  # answer_text should be in the format "campus.desc (campus.short_desc)"
+                  # if either campus.desc or campus.short_desc matches then true
+                  if campus.matches_eventbrite_campus(answer)
+                    attendees << attendee
+                  end
                 end
               end
             end
@@ -44,6 +51,7 @@ module Common
           begin
             Rails.logger.info("Syncing Eventbrite event (#{Date.today}, event_id:#{local_event.id}, eventbrite_id:#{local_event.eventbrite_id})")
             eventbrite_user ||= EventBright.setup_from_initializer()
+            
             eb_event = EventBright::Event.new(eventbrite_user, {:id => local_event.eventbrite_id})
             raise "Didn't get the Eventbrite event from Eventbrite" unless eb_event.present?
             
@@ -53,19 +61,21 @@ module Common
             local_event.start_date = eb_event.start_date
             local_event.end_date = eb_event.end_date
             
-            attendee_ids = []
-            eb_event.attendees.each do |attendee|
-              attendee_ids << attendee.id
-              ::EventAttendee.update_or_create_from_eventbrite(attendee)
+            if eb_event.num_attendee_rows > 0
+              attendee_ids = []
+              eb_event.attendees.each do |attendee|
+                attendee_ids << attendee.id
+                ::EventAttendee.update_or_create_from_eventbrite(attendee)
+              end
+              
+              # it's possible that an attendee cancelled or is otherwise no longer attending the event
+              # so delete all attendees in local database that aren't on eventbrite anymore
+              cancelled_attendees = ::EventAttendee.all(:conditions => ["event_id = ? and ticket_id not in (?)", local_event.id, attendee_ids])
+              cancelled_event_attendee_ids = cancelled_attendees.collect{|a| a.id}
+              ::PersonEventAttendee.delete_all(["event_attendee_id in (?)", cancelled_event_attendee_ids])
+              ::EventAttendee.delete_all(["id in (?)", cancelled_event_attendee_ids])
             end
-            
-            # it's possible that an attendee cancelled or is otherwise no longer attending the event
-            # so delete all attendees in local database that aren't on eventbrite anymore
-            cancelled_attendees = ::EventAttendee.all(:conditions => ["event_id = ? and ticket_id not in (?)", local_event.id, attendee_ids])
-            cancelled_event_attendee_ids = cancelled_attendees.collect{|a| a.id}
-            ::PersonEventAttendee.delete_all(["event_attendee_id in (?)", cancelled_event_attendee_ids])
-            ::EventAttendee.delete_all(["id in (?)", cancelled_event_attendee_ids])
-            
+          
             local_event.synced_at = Time.now
             local_event.save!
             
