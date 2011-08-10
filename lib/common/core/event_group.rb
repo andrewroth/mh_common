@@ -6,6 +6,8 @@ module Common
 
           has_many :events
           
+          validates_no_association_data :events
+          
         end
       end
 

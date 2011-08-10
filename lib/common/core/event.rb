@@ -9,6 +9,8 @@ module Common
           has_many :event_attendees
           belongs_to :event_group
           
+          validates_no_association_data :event_attendees
+          validates_no_association_data :event_campuses
         end
       end
 

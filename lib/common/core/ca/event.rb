@@ -4,6 +4,11 @@ module Common
       module Event
         def self.included(base)
           base.class_eval do
+            
+            validates_presence_of :registrar_event_id, :message => "can't be blank (Eventbrite event ID)"
+            validates_uniqueness_of :registrar_event_id, :message => "ID is taken (there is already an event with that Eventbrite event ID in the database)"
+            validates_presence_of :event_group_id
+            
             def eventbrite_id() self.registrar_event_id end
             
             base.extend EventClassMethods
