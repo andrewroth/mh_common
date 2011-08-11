@@ -37,6 +37,15 @@ module Common
             end
             campus = ::Campus.first(:conditions => ["#{::Campus._(:campus_desc)} = ? or #{::Campus._(:short_desc)} = ?", desc, short_desc])
           end
+          
+          def find_nearest_to(lat, lng)
+            ::Campus.find(:first,
+                          :select => "*, ( 6371 * acos( cos( radians(#{lat}) ) * cos( radians( #{::Campus._(:latitude)} ) ) *
+                                      cos( radians( #{::Campus._(:longitude)} ) - radians(#{lng}) ) + sin( radians(#{lat}) ) *
+                                      sin( radians( #{::Campus._(:latitude)} ) ) ) ) AS distance",
+                          :group => "#{::Campus._(:id)} HAVING distance IS NOT NULL",
+                          :order => "distance ASC")
+          end
         end
 
       end
