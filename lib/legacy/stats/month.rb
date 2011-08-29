@@ -218,6 +218,10 @@ module Legacy
           months = ::Month.all(:conditions => {_(:description) => "#{Date::MONTHNAMES[date.month]} #{date.year}"})
           months.any? ? months.first : nil
         end
+        
+        def current
+          ::Month.find_month_from_date(Date.today)
+        end
       end
 
     end
