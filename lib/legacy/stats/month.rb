@@ -220,7 +220,7 @@ module Legacy
         end
         
         def current
-          ::Month.find_month_from_date(Date.today)
+          ::Month.first(:conditions => ["#{::Month._(:month_number)} = ? && #{::Month._(:calendar_year)} = ?", Date.today.month, Date.today.year])
         end
       end
 
