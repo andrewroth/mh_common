@@ -42,3 +42,12 @@ Factory.define :month_5, :class => Month, :singleton => true do |m|
   m.month_calendaryear '2010'
   m.semester_id '12'
 end
+
+Factory.define :month_current, :class => Month, :singleton => true do |m|
+  m.month_id '6'
+  m.month_desc "#{Date.today.strftime("%B")} #{Date.today.year}"
+  m.month_number Date.today.month
+  m.year_id '1'
+  m.month_calendaryear Date.today.year
+  m.semester_id '12'
+end

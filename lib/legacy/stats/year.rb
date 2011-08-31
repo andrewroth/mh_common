@@ -156,6 +156,8 @@ module Legacy
 
         # return the current year
         def current
+          #throw ::Year.all.inspect
+          #throw ::Month.find(:first, :conditions => {:month_calendaryear => Time.now.year, :month_number => Time.now.month}).year
           ::Month.find(:first, :conditions => {:month_calendaryear => Time.now.year, :month_number => Time.now.month}).year
         end
       end
