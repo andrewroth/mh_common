@@ -348,6 +348,14 @@ module Test
       Factory(:month_3)
       Factory(:month_4)
       Factory(:month_5)
+      mc = Factory(:month_current)
+      if Year.all.present?
+        # school year starts in sept.  Ex if it is Nov 2010, school year is 2010 - 2011
+        #   if month is Jan - Aug 2010, school year is 2009 - 2010
+        current_year = Year.find_by_year_number(Date.today.year - (Date.today.month <= 8 ? 1 : 0))
+        mc.year_id = current_year.id
+        mc.save!
+      end
     end
 
     def setup_accesses

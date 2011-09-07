@@ -1,13 +1,8 @@
 module Common
-  module Core
+  module Pat
     module EventGroup
       def self.included(base)
         base.class_eval do
-
-          has_many :events
-          
-          validates_no_association_data :events
-
           acts_as_tree
         end
       end
