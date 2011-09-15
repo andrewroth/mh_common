@@ -153,12 +153,10 @@ module Common
             if search then
               ::User.paginate(:page => page,
                               :per_page => per_page,
-                              :joins => :accountadmin_accountgroup,
                               :conditions => ["#{_(:username, :user)} like ? " +
                                               "or #{_(:guid, :user)} like ? " +
-                                              "or #{_(:viewer_id, :user)} like ? " +
-                                              "or #{_(:english_value, :accountadmin_accountgroup)} like ? ",
-                                              "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%"])
+                                              "or #{_(:viewer_id, :user)} like ? ",
+                                              "%#{search}%", "%#{search}%", "%#{search}%"])
             else
               nil
             end
