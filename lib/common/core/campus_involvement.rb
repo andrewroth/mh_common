@@ -5,6 +5,7 @@ module Common
         base.class_eval do
 
           validates_presence_of :campus_id, :person_id, :ministry_id
+          validates_uniqueness_of :person_id, :scope => [:campus_id, :end_date], :message => "This person already has a campus involvement at this campus. Please edit or remove the existing campus involvement."
 
           belongs_to :school_year
           belongs_to :campus
@@ -15,13 +16,6 @@ module Common
         end
       end
 
-      def validate
-        if !archived?
-          if (ci = ::CampusInvolvement.find(:first, :conditions => { :person_id => person_id, :campus_id => campus_id, :end_date => nil })) && (ci != self)
-            errors.add_to_base "There is already a campus involvement for the campus \"#{campus.name}\"; you can only be involved once per campus.  Archive the existing involvement and try again."
-          end
-        end
-      end
 
       def archived?() end_date.present? end
 
