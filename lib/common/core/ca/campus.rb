@@ -9,6 +9,7 @@ module Common
             belongs_to :state, :foreign_key => _(:state_id)
             has_many :assignments, :foreign_key => _(:campus_id, :assignment)
 
+            validates_presence_of :desc, :short_desc, :campus_website, :province_id, :longitude, :latitude
             validates_no_association_data :people, :campus_involvements, :groups, :ministry_campuses, :ministries, :dorms
 
             def type=(val) '' end
