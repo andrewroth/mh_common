@@ -29,6 +29,7 @@ module Common
 
         module CampusClassMethods
           def find_campus_from_eventbrite(eb_campus_string)
+            return nil unless eb_campus_string
             unless eb_campus_string.include? "("
               desc = eb_campus_string
               short_desc = ""
