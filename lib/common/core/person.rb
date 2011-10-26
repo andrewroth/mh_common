@@ -537,12 +537,13 @@ module Common
         ministry = ministry_involvement.ministry
 
         # trying to promote someone
-        if new_role.compare_class_and_position(ministry_involvement.ministry_role) >= 0
+        if new_role.compare_class_and_position(ministry_involvement.ministry_role) > 0
           permission_granted = ::MinistryRole.promotable_roles(self, ministry).include?(new_role)
 
         # trying to demote someone
-        elsif new_role.compare_class_and_position(ministry_involvement.ministry_role) < 0
-          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role)
+        # or the role's not changing but maybe something else is being updated and the role is just being checked for permission
+        elsif new_role.compare_class_and_position(ministry_involvement.ministry_role) <= 0
+          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role) || ministry_involvement.person == self
 
         end
 
