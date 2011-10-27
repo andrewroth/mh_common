@@ -36,7 +36,7 @@ module Common
         protected
 
         def set_graduated_school_year_if_alumni_or_staff
-          mr = ::MinistryRole.find(self.ministry_role_id)
+          mr = ::MinistryRole.exists?(self.ministry_role_id) ? ::MinistryRole.find(self.ministry_role_id) : nil
           if mr && (mr.name == "Alumni" || mr.class == ::StaffRole)
             # automatically set the person's campus involvements to be graduated
             graduated = ::SchoolYear.first(:conditions => ["#{::SchoolYear._(:name)} = ?", "Graduated"])
