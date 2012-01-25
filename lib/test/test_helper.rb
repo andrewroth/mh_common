@@ -66,6 +66,7 @@ module Test
     def setup_years
       Factory(:year_1)
       Factory(:year_2)
+      Factory(:year_3)
     end
 
     def setup_weeks

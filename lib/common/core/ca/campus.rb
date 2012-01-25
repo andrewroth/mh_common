@@ -9,6 +9,7 @@ module Common
             belongs_to :state, :foreign_key => _(:state_id)
             has_many :assignments, :foreign_key => _(:campus_id, :assignment)
 
+            validates_presence_of :desc, :short_desc, :province_id, :longitude, :latitude
             validates_no_association_data :people, :campus_involvements, :groups, :ministry_campuses, :ministries, :dorms
 
             def type=(val) '' end
@@ -28,6 +29,7 @@ module Common
 
         module CampusClassMethods
           def find_campus_from_eventbrite(eb_campus_string)
+            return nil unless eb_campus_string
             unless eb_campus_string.include? "("
               desc = eb_campus_string
               short_desc = ""

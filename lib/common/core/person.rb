@@ -298,7 +298,7 @@ module Common
       
       def admin?(ministry)
         mi = ::MinistryInvolvement.find(:first, :conditions => "#{_(:person_id, :ministry_involvement)} = #{self.id} AND
-                                                              #{_(:ministry_id, :ministry_involvement)} IN (#{(ministry.ancestor_ids << ministry.id).join(',')}) AND
+                                                              #{_(:ministry_id, :ministry_involvement)} IN (#{(([] << ministry.ancestor_ids) << ministry.id).join(',')}) AND
                                                               #{_(:admin, :ministry_involvement)} = 1")
         return !mi.nil?
       end
@@ -541,8 +541,9 @@ module Common
           permission_granted = ::MinistryRole.promotable_roles(self, ministry).include?(new_role)
 
         # trying to demote someone
+        # or the role's not changing but maybe something else is being updated and the role is just being checked for permission
         elsif new_role.compare_class_and_position(ministry_involvement.ministry_role) < 0
-          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role)
+          permission_granted = ::MinistryRole.demotable_roles(self, ministry).include?(ministry_involvement.ministry_role) || ministry_involvement.person == self
 
         end
 

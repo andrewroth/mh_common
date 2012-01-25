@@ -18,7 +18,7 @@ module Common
       def validate
         if !archived?
           if (ci = ::CampusInvolvement.find(:first, :conditions => { :person_id => person_id, :campus_id => campus_id, :end_date => nil })) && (ci != self)
-            errors.add_to_base "There is already a campus involvement for the campus \"#{campus.name}\"; you can only be involved once per campus.  Archive the existing involvement and try again."
+            errors.add_to_base "There is already a campus involvement for the campus \"#{campus.name}\"; you can only be involved once per campus. Archive the existing involvement and try again."
           end
         end
       end
@@ -54,17 +54,15 @@ module Common
         ::StudentInvolvementHistory.new :person_id => person_id, :campus_id => campus_id, :school_year_id => school_year_id, :end_date => (end_date || Date.today), :ministry_role_id => find_or_create_ministry_involvement.ministry_role_id, :start_date => (last_history_update_date || start_date), :campus_involvement_id => id
       end
 
-      def update_student_campus_involvement(flash, my_role, ministry_role_id, school_year_id, campus_id)
+      def update_student_campus_involvement(flash, me, ministry_role_id, school_year_id, campus_id)
         @campus_ministry_involvement = self.find_or_create_ministry_involvement
-
+        
         # restrict students to making ministry involvements of their role or less
         if ministry_role_id && ministry_role_id != :same
           requested_role = ::MinistryRole.find(ministry_role_id) || ::MinistryRole.default_student_role
           ministry_role_id = requested_role.id
 
-          # note that get_my_role sets @ministry_involvement as a side effect
-          if !(my_role.is_a?(::StaffRole) && requested_role.is_a?(::StudentRole)) &&
-            requested_role.position < get_my_role.position
+          unless me.has_permission_to_update_role(@campus_ministry_involvement, requested_role)
             flash[:notice] = "You can only set ministry roles of less than or equal to your current role"
             ministry_role_being_updated = false
             ministry_role_id = @campus_ministry_involvement.ministry_role_id.to_s
@@ -88,7 +86,7 @@ module Common
         # update the records
         self.update_attributes :school_year_id => school_year_id,
           :campus_id => campus_id
-        if ministry_role_being_updated # update role
+        unless ministry_role_being_updated == false # update role
           @campus_ministry_involvement.ministry_role = requested_role
           @campus_ministry_involvement.last_history_update_date = Date.today
           @campus_ministry_involvement.save!

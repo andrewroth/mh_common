@@ -131,10 +131,15 @@ module Common
                 u.guid = guid
                 u.save!
               elsif u.nil?
-                # If we still don't have a user in SSM, we need to create one.
-                #u = User.create!(:username => receipt.user, :guid => guid)
-                u = ::Person.create_new_cim_hrdb_account guid, first_name,
-                  last_name, email
+                if ::User.all(:conditions => ["#{_(:username, :user)} = ?", email]).present?
+                  # don't create a new user for them, email is already in the database
+                  u = nil
+                else
+                  # If we still don't have a user in SSM, we need to create one.
+                  #u = User.create!(:username => receipt.user, :guid => guid)
+                  u = ::Person.create_new_cim_hrdb_account guid, first_name,
+                    last_name, email
+                end
               end
             end
 
@@ -153,12 +158,10 @@ module Common
             if search then
               ::User.paginate(:page => page,
                               :per_page => per_page,
-                              :joins => :accountadmin_accountgroup,
                               :conditions => ["#{_(:username, :user)} like ? " +
                                               "or #{_(:guid, :user)} like ? " +
-                                              "or #{_(:viewer_id, :user)} like ? " +
-                                              "or #{_(:english_value, :accountadmin_accountgroup)} like ? ",
-                                              "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%"])
+                                              "or #{_(:viewer_id, :user)} like ? ",
+                                              "%#{search}%", "%#{search}%", "%#{search}%"])
             else
               nil
             end
