@@ -113,6 +113,8 @@ module Common
             end
 
             def birthdate() birth_date end
+
+            def health_province() health_state end
           end
         end
       end

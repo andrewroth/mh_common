@@ -76,6 +76,8 @@ module Common
             def most_recent_involvement() campus_involvements.last end
             def primary_campus_involvement() most_recent_involvement end
             def primary_campus() most_recent_involvement.try(:campus) end
+            def campus_shortDesc() primary_campus.try(:campus_shortDesc) end
+            def campus_longDesc() primary_campus.try(:campus_shortDesc) end
 
             after_update { |record|
               record.person_extra.save!
