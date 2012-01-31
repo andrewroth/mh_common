@@ -221,9 +221,11 @@ module Common
               self.person_city = val
             end
 
-            def permanent_state
-              permanent_province
-            end
+            def local_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
+            def permanent_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
+
+            def permanent_province_short() permanent_province end
+            def local_province_short() local_province end
 
             def permanent_province
               if perm_state then perm_state.province_shortDesc else 'no perm province set' end
