@@ -208,8 +208,8 @@ module Common
             def permanent_address_line1() self.person_addr end
             def permanent_address_line2() "" end
 
-            def local_addr_line1() self.person_local_addr end
-            def local_addr_line2() "" end
+            def local_address_line1() self.person_local_addr end
+            def local_address_line2() "" end
 
             def permanent_city
               self.person_city
