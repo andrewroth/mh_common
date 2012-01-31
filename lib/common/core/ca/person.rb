@@ -205,13 +205,11 @@ module Common
               self.person_phone
             end
 
-            def permanent_address_line1
-              self.person_addr
-            end
+            def permanent_address_line1() self.person_addr end
+            def permanent_address_line2() "" end
 
-            def permanent_address_line2
-              ""
-            end
+            def person_local_addr_line1() self.person_local_addr end
+            def person_local_addr_line2() "" end
 
             def permanent_city
               self.person_city
@@ -221,11 +219,10 @@ module Common
               self.person_city = val
             end
 
-            def local_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
-            def permanent_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
-
-            def permanent_province_short() permanent_province end
             def local_province_short() local_province end
+            def local_province_long() if loc_state then loc_state.province_desc else 'no perm province set' end; end
+            def permanent_province_short() permanent_province end
+            def permanent_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
 
             def permanent_province
               if perm_state then perm_state.province_shortDesc else 'no perm province set' end
