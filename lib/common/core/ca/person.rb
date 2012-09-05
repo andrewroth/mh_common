@@ -435,7 +435,7 @@ module Common
         end
 
         def map_cim_hrdb_to_mt(options = {})
-          c4c = ::Ministry.find_by_name 'Campus for Christ'
+          c4c = ::Ministry.find_by_name 'Power to Change - Students'
 
           # assume if they already have involvements they're properly set up on the pulse
           return if ministry_involvements.present? || campus_involvements.present?
