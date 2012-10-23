@@ -30,6 +30,7 @@ module Legacy
                                 :montlyreport_integratedNewBelievers,
                                 :monthlyreport_event_exposures,
                                 :monthlyreport_unrecorded_engagements,
+                                :monthlyreport_ministering_disciples,
                                 :message => "can't be blank, enter 0 if nothing happened during this period."
 
           validates_numericality_of :campus_id,
@@ -51,6 +52,7 @@ module Legacy
                                 :montlyreport_integratedNewBelievers,
                                 :monthlyreport_event_exposures,
                                 :monthlyreport_unrecorded_engagements,
+                                :monthlyreport_ministering_disciples,
                                 :message => 'should be a number'
         end
 
