@@ -28,6 +28,8 @@ module Legacy
                                 :montlyreport_p2c_numSharingInP2c,
                                 :montlyreport_p2c_numSharingOutP2c,
                                 :montlyreport_integratedNewBelievers,
+                                :monthlyreport_event_exposures,
+                                :monthlyreport_unrecorded_engagements,
                                 :message => "can't be blank, enter 0 if nothing happened during this period."
 
           validates_numericality_of :campus_id,
@@ -47,6 +49,8 @@ module Legacy
                                 :montlyreport_p2c_numSharingInP2c,
                                 :montlyreport_p2c_numSharingOutP2c,
                                 :montlyreport_integratedNewBelievers,
+                                :monthlyreport_event_exposures,
+                                :monthlyreport_unrecorded_engagements,
                                 :message => 'should be a number'
         end
 
