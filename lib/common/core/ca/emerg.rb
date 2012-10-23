@@ -91,14 +91,6 @@ module Common
               self.medical_plan_carrier
             end
 
-            def health_coverage_country
-              health_state.try(:country).try(:abbrev)
-            end
-
-            def health_coverage_country=(v)
-              # country is derived through the state association
-            end
-
             def health_coverage_state
               health_state.try(:abbrev)
             end
