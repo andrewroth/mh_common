@@ -12,7 +12,7 @@ module Common
           acts_as_nested_set
 
           # acts_as_tree :order => _(:name), :counter_cache => true
-          
+
           has_many :permissions, :through => :ministry_roles, :source => :ministry_role_permissions
           # note - dependent is removed since these role methods are overridden
           #  to return the root ministry's roles as well, meaning the root ministry's
@@ -29,24 +29,24 @@ module Common
           has_many :ministry_involvements, :dependent => :destroy, :dependent => :destroy
           has_many :training_question_activations
           has_many :active_training_questions, :through => :training_question_activations, :source => :training_question
-          
+
           validates_presence_of _(:name)
-          
+
           validates_uniqueness_of _(:name), :scope => _(:parent_id)
-          
+
           after_create :create_default_roles
-          
+
           #alias_method :my_ministry_roles, :ministry_roles
           #alias_method :my_staff_roles, :staff_roles
           #alias_method :my_student_roles, :student_roles
           #alias_method :my_other_roles, :other_roles
           #alias_method :campus_ids, :campus_ids2
-          
+
           # Create a default view for this ministry
           # Training categories including all the categories higher up on the tree
           # Training questions including all the questions higher up on the tree
           #protected
-        
+
           def self.default_ministry
             return @default_ministry if @default_ministry.present?
             @default_ministry = ::Ministry.find(:first, :conditions => { :name => Cmt::CONFIG[:default_ministry_name] })
@@ -55,8 +55,12 @@ module Common
         end
       end
 
+      def to_s
+        name
+      end
+
       def staff_involvements
-        @staff_involvements ||= ministry_involvements.find(:all, 
+        @staff_involvements ||= ministry_involvements.find(:all,
             :conditions => [ "ministry_role_id in (?)", staff_role_ids ]
         )
       end
@@ -65,12 +69,12 @@ module Common
         @staff ||= {}
         @staff[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", staff_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
-      
+
       def leaders(subs = false)
         @leaders ||= {}
         @leaders[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", leader_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
       end
-      
+
       def students(subs = false)
         @students ||= {}
         @students[subs] ||= ::Person.find(:all, :conditions => ["#{_(:ministry_role_id, :ministry_involvement)} IN (?) AND #{_(:ministry_id, :ministry_involvement)} IN (?)", student_role_ids, subs ? self_and_descendants.collect(&:id) : [ self.id ] ], :joins => :ministry_involvements, :order => _(:first_name, :person))
@@ -79,19 +83,19 @@ module Common
       def ministry_roles
         self.root? ? my_ministry_roles : self.root.my_ministry_roles
       end
-      
+
       def staff_roles
         self.root? ? my_staff_roles : self.root.my_staff_roles
       end
-      
+
       def student_roles
         self.root? ? my_student_roles : self.root.my_student_roles
       end
-      
+
       def other_roles
         self.root? ? my_other_roles : self.root.my_other_roles
       end
-      
+
       def unique_campuses
         # it's faster to uniq this in rails than try to do it in sql
         ::Campus.all(:joins => :ministries, :conditions => descendants_condition, :order => ::Campus._(:name)).uniq
@@ -105,7 +109,7 @@ module Common
         end
         return @unique_campuses
       end
-      
+
       def subministry_campuses(skip_self = true)
         conditions = descendants_condition
         conditions += " AND #{::MinistryCampus._(:ministry_id)} != #{self.id}" if skip_self
@@ -122,7 +126,7 @@ module Common
         end
         return @subministry_campuses
       end
-    
+
       def unique_ministry_campuses(skip_self = true)
         conditions = descendants_condition
         conditions += " AND #{::MinistryCampus._(:ministry_id)} != #{self.id}" if skip_self
@@ -146,7 +150,7 @@ module Common
         end
         return @unique_ministry_campuses
       end
-      
+
 =begin
       def ancestors
         unless @ancestors
@@ -156,11 +160,11 @@ module Common
         @ancestors
       end
 =end
-      
+
       def ancestor_ids
         @ancestor_ids ||= self_and_ancestors.collect(&:id)
       end
-      
+
       def campus_ids2_old # TODO: make this _old once awesome nested set is used everywhere
         unless @campus_ids
           res =  lambda {
@@ -196,73 +200,73 @@ module Common
         return @descendants
       end
 =end
-      
+
       def root
         @root ||= self.parent_id ? self.parent.root : self
       end
-      
+
       def root?
         self.parent_id.nil?
       end
-      
+
       def leader_roles
         @leader_roles ||= staff_roles
       end
-      
+
       def leader_role_ids
         @leader_roles_ids ||= leader_roles.collect(&:id)
       end
-      
+
       def staff_role_ids
         @staff_role_ids ||= staff_roles.find(:all).collect(&:id)
       end
-      
+
       def student_role_ids
         @student_role_ids ||= student_roles.collect(&:id)
       end
-      
+
       def involved_student_roles
         @involved_student_roles ||= ::StudentRole.find(:all, :conditions => { _(:involved, :ministry_roles) => true }, :order => _(:position, :ministry_roles))
       end
-      
+
       def involved_student_role_ids
         @involved_student_role_ids ||= involved_student_roles.collect(&:id)
       end
-      
+
       def self_plus_descendants
         res =  lambda {(self.descendants + [self]).sort}
         Rails.env.production? ? Rails.cache.fetch([self, 'self_plus_descendants']) {res.call} : res.call
       end
-      
+
       def deleteable?
         !self.root? && self.children.count.to_i == 0
       end
-      
+
       def <=>(ministry)
         self.name <=> ministry.name
       end
-      
+
       def campus_to_hash(campus)
         base_hash = { 'text' => campus.campus_shortDesc, 'id' => "#{id}_#{campus.id}" , 'leaf' => true }
       end
-      
+
       def leaf_merge(show_campuses)
         leaf_hash = {}
         if show_campuses && campuses.count > 1
-          leaf_hash.merge!('expanded' => true, 
+          leaf_hash.merge!('expanded' => true,
             'children' => campuses.collect{|c| campus_to_hash(c)})
         else
           leaf_hash.merge!('leaf' => true)
         end
         leaf_hash
       end
-      
+
       def to_hash_with_children(show_campuses = false)
         base_hash = { 'text' => name, 'id' => id }
         if children.empty?
           base_hash.merge(leaf_merge(show_campuses))
         else
-          base_hash.merge('expanded' => true, 
+          base_hash.merge('expanded' => true,
             'children' => children.collect{|c| c.to_hash_with_children(show_campuses)})
         end
       end
@@ -274,7 +278,7 @@ module Common
 
         if children_involved_in.empty?
           if show_ministries_under_involvement && involved_ministries(person).include?(self) && !(children.empty?)
-            base_hash.merge('expanded' => true, 
+            base_hash.merge('expanded' => true,
             'children' => children.collect{|c| c.to_hash_with_children(show_ministries_under_involvement)})
           else
             base_hash.merge(leaf_merge(show_ministries_under_involvement))
@@ -297,13 +301,13 @@ module Common
 
         false
       end
-      
+
       def before_destroy
         my_ministry_roles.each do |mr|
           mr.destroy
         end
       end
-      
+
       def descendants_condition
         "#{::Ministry.__(:lft)} >= #{lft} AND #{::Ministry.__(:rgt)} <= #{rgt}"
       end
@@ -329,7 +333,7 @@ module Common
       # Training categories including all the categories higher up on the tree
       # Training questions including all the questions higher up on the tree
       protected
-      
+
       # TODO this should use the seed instead of recreating it inline here
       def create_default_roles
         if self.root?

@@ -1,13 +1,13 @@
 module Common
   module Core
     module Person
-      ADDRESS_PREFIX_TO_ASSOC = { 
-        "local" => "current_address", 
+      ADDRESS_PREFIX_TO_ASSOC = {
+        "local" => "current_address",
         "permanent" => "permanent_address",
         "emergency" => "emergency_address"
       }
 
-      ADDRESS_SUFFIX_TO_COLUMN = { 
+      ADDRESS_SUFFIX_TO_COLUMN = {
         "address1_line" => "address1",
         "address2_line" => "address2",
         "city" => "city",
@@ -18,7 +18,7 @@ module Common
         "country" => "country",
         "state" => "state",
         "dorm" => "dorm"
-      } 
+      }
 
       def self.included(base)
         base.class_eval do
@@ -44,50 +44,50 @@ module Common
           has_one :responsible_person, :class_name => "Person", :through => :ministry_involvements
           has_many :involvements_responsible_for, :class_name => "MinistryInvolvement", :foreign_key => "responsible_person_id"
           has_many :people_responsible_for, :class_name => "Person", :through => :involvements_responsible_for, :source => :person
-         
+
           # Address Relationships
           has_many :addresses, :class_name => "Address", :foreign_key => _(:person_id, :address)
           has_one :current_address, :class_name => "CurrentAddress", :foreign_key => _(:person_id, :address), :conditions => _(:address_type, :address) + " = 'current'"
           has_one :permanent_address, :class_name => "PermanentAddress", :foreign_key => _(:person_id, :address), :conditions => _(:address_type, :address) + " = 'permanent'"
           has_one :emergency_address, :class_name => "EmergencyAddress", :foreign_key => _(:person_id, :address), :conditions => _(:address_type, :address) + " = 'emergency1'"
-          
+
           # Conferences
           has_many :conference_registrations, :class_name => "ConferenceRegistration", :foreign_key => _(:person_id, :conference_registration)
           has_many :conferences, :through => :conference_registrations
-          
+
           # STINTs
           has_many :stint_applications, :class_name => "StintApplication", :foreign_key => _(:person_id, :stint_application)
           has_many :stint_locations, :through => :stint_applications
-        
+
           # Users
           belongs_to :user, :class_name => "User", :foreign_key => _(:user_id)
-          
+
           # Emergency Information
           has_one :emerg
-          
+
           has_many :imports
-          
+
           has_one :timetable, :class_name => "Timetable", :foreign_key => _(:person_id, :timetable)
           has_many :updated_timetables, :class_name => "Timetable", :foreign_key => _(:updated_by_person_id, :timetable)
           has_many :free_times, :through => :timetable, :order => "#{_(:day_of_week, :free_times)}, #{_(:start_time, :free_times)}"
-          
+
           # Searches
           has_many :searches, :class_name => "Search", :foreign_key => _(:person_id, :search), :order => "#{_(:updated_at, :search)} desc"
-        
+
           # Correspondences
           has_many :correspondences
-          
+
           validates_presence_of _(:first_name)
           validates_presence_of _(:last_name), :on => :update
           # validates_presence_of _(:gender)
-          
+
           validate :birth_date_is_in_the_past
-        
+
           has_one :profile_picture, :class_name => "ProfilePicture", :foreign_key => _("person_id", :profile_picture)
-          
+
           has_many :person_event_attendees
           has_many :event_attendees, :through => :person_event_attendees, :order => "#{::EventAttendee._(:updated_at)} desc"
-          
+
           before_save :update_stamp
           before_create :create_stamp
           after_create do |person| person.just_created = true end
@@ -95,7 +95,7 @@ module Common
           def events
             self.event_attendees.collect { |ea| ea.event }
           end
-          
+
           def events_attended
             self.events
           end
@@ -126,7 +126,7 @@ module Common
 
           # Note that since the email is stored in address, the email can't be set on a new
           # record.  Actually, it can get set and get, it's just not saved to the db after
-          # the record is created.  This is because after_create callback is done in the 
+          # the record is created.  This is because after_create callback is done in the
           # transaction, so the foreign key for address back to person can't be determined.
           # So we need to create the person objects first, then save the email after.
           # Cdn schema is different and does have email in person.
@@ -141,7 +141,7 @@ module Common
               ca.save
             end
           end
-          
+
           after_save do |record|
             record.update_addresses
           end
@@ -172,18 +172,22 @@ module Common
             end
             return true
           end
-      
+
           base.extend PersonClassMethods
         end
       end
-      
+
+      def to_s
+        full_name
+      end
+
       def campus(o = {}) primary_campus end
 
       #liquid_methods :first_name, :last_name
       def to_liquid
         { "hisher" => hisher, "himher" => himher, "heshe" => heshe, "first_name" => first_name, "last_name" => last_name, "preferred_name" => preferred_name, "user" => user, "currentaddress" => current_address }
       end
-      
+
       def most_nested_ministry
         ministries.inject(nil) { |best, ministry|
           if best
@@ -193,7 +197,7 @@ module Common
           end
         }
       end
-      
+
       def campus_or_team
         if is_staff_somewhere?
           campus_or_team_involvement.try(:ministry).try(:name)
@@ -201,7 +205,7 @@ module Common
           campus_or_team_involvement.try(:campus).try(:abbrv)
         end
       end
-      
+
       def campus_or_team_involvement
         if is_staff_somewhere?
           mid = most_nested_ministry.try(:id)
@@ -210,19 +214,19 @@ module Common
           primary_campus_involvement
         end
       end
-      
+
       # wrapper to make gender display nicely with crusade tables
       def human_gender(value = nil)
         gender = value || self.gender
         ::Person.human_gender(gender)
       end
-      
+
       def gender=(value)
         if value.present?
           self[:gender] = (male?(value) ? 1 : 0)
         end
       end
-      
+
       def male?(value = nil)
         human_gender(value) == 'Male'
       end
@@ -243,7 +247,7 @@ module Common
       def heshe
         heshe = human_gender == 'Male' ? 'he' : 'she'
       end
-      
+
       def full_name
         (preferred_first_name || first_name).to_s + ' ' + (preferred_last_name || last_name).to_s
       end
@@ -254,18 +258,18 @@ module Common
         @primary_email = user.username if @primary_email.blank? && user && user.username =~ /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
         @primary_email
       end
-      
+
       def email
         self[:email] || primary_email
       end
-      
+
       def email=(value)
         ca = current_address
         ca ||= self.addresses.new(:address_type => 'current')
         ca.email = value
         ca.save
       end
-      
+
       def ministry_tree
         res =  lambda {
           ministries = self.ministries.find(:all, :include => [:parent, :children])
@@ -273,7 +277,7 @@ module Common
         }
         Rails.env.production? ? Rails.cache.fetch([self, 'ministry_tree']) {res.call} : res.call
       end
-      
+
       def campus_list(ministry_involvement, for_ministry = :all)
         if ministry_involvement && ministry_involvement.ministry_role.class == ::StudentRole
           self.campuses
@@ -295,20 +299,20 @@ module Common
         end
         @roles[ministry]
       end
-      
+
       def admin?(ministry)
         mi = ::MinistryInvolvement.find(:first, :conditions => "#{_(:person_id, :ministry_involvement)} = #{self.id} AND
                                                               #{_(:ministry_id, :ministry_involvement)} IN (#{(([] << ministry.ancestor_ids) << ministry.id).join(',')}) AND
                                                               #{_(:admin, :ministry_involvement)} = 1")
         return !mi.nil?
       end
-      
+
       def initialize_addresses(types = nil)
         self.current_address ||= ::CurrentAddress.new
         self.permanent_address ||= ::PermanentAddress.new
         self.emergency_address ||= ::EmergencyAddress.new
       end
-      
+
       # return true or false based on update / save success
       def add_or_update_campus(campus_id, school_year_id, ministry_id, added_by)
         # Make sure they're not already on this campus
@@ -321,8 +325,8 @@ module Common
           end
         else
           ci = campus_involvements.create(
-            :campus_id => campus_id, :ministry_id => ministry_id, 
-            :added_by_id => added_by, :start_date => Time.now(), 
+            :campus_id => campus_id, :ministry_id => ministry_id,
+            :added_by_id => added_by, :start_date => Time.now(),
             :school_year_id => school_year_id)
         end
         ci
@@ -333,18 +337,18 @@ module Common
         role = ::MinistryRole.find role_id
 
         # TODO: add security so that only staff can add other staff roles
-        
+
         # Add the person to the ministry
         mi = ::MinistryInvolvement.find_by_ministry_id_and_person_id(ministry_id, self.id)
         if mi
-          mi.ministry_role_id = role.id 
+          mi.ministry_role_id = role.id
           mi.save
         else
-          mi = ministry_involvements.create(:ministry_id => ministry_id, :ministry_role_id => role.id, :start_date => Time.now) 
+          mi = ministry_involvements.create(:ministry_id => ministry_id, :ministry_role_id => role.id, :start_date => Time.now)
         end
         mi
       end
-      
+
       # will import all details existing on gcx profile into the user
       def import_gcx_profile(proxy_granting_ticket)
         service_uri = "https://www.mygcx.org/system/report/profile/attributes"
@@ -379,12 +383,12 @@ module Common
         ca.save(false) if ca
         self.save(false)
       end
-      
+
       # Question: what does this help with?
       def most_recent_involvement
         @most_recent_involvement = primary_campus_involvement || campus_involvements.last
       end
-      
+
       # for students, use their campuse involvements; for staff, use ministry teams
       def working_campuses(ministry_involvement)
         return [] unless ministry_involvement
@@ -403,7 +407,7 @@ module Common
           self[:birth_date] = value
         end
       end
-      
+
       def is_staff_somewhere?
         root_ministry = ::Ministry.first.try(:root)
         return false unless root_ministry
@@ -413,9 +417,9 @@ module Common
       end
 
       def get_emerg
-        return @emerg if @emerg 
+        return @emerg if @emerg
         @emerg = emerg
-        return @emerg if @emerg 
+        return @emerg if @emerg
         unless self.new_record?
           @emerg = create_emerg
         end
@@ -605,7 +609,7 @@ module Common
         end
         gender ? gender.titlecase : nil
       end
-      
+
       # Question: what is this finding? a user who has the username and email address provided?
       def find_exact(person, address)
         # check based on username first
