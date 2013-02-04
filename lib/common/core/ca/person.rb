@@ -76,6 +76,8 @@ module Common
             def most_recent_involvement() campus_involvements.last end
             def primary_campus_involvement() most_recent_involvement end
             def primary_campus() most_recent_involvement.try(:campus) end
+            def campus_shortDesc() primary_campus.try(:campus_shortDesc) end
+            def campus_longDesc() primary_campus.try(:campus_shortDesc) end
 
             after_update { |record|
               record.person_extra.save!
@@ -203,13 +205,11 @@ module Common
               self.person_phone
             end
 
-            def permanent_address_line1
-              self.person_addr
-            end
+            def permanent_address_line1() self.person_addr end
+            def permanent_address_line2() "" end
 
-            def permanent_address_line2
-              ""
-            end
+            def local_address_line1() self.person_local_addr end
+            def local_address_line2() "" end
 
             def permanent_city
               self.person_city
@@ -219,9 +219,10 @@ module Common
               self.person_city = val
             end
 
-            def permanent_state
-              permanent_province
-            end
+            def local_province_short() local_province end
+            def local_province_long() if loc_state then loc_state.province_desc else 'no perm province set' end; end
+            def permanent_province_short() permanent_province end
+            def permanent_province_long() if perm_state then perm_state.province_desc else 'no perm province set' end; end
 
             def permanent_province
               if perm_state then perm_state.province_shortDesc else 'no perm province set' end
@@ -434,7 +435,7 @@ module Common
         end
 
         def map_cim_hrdb_to_mt(options = {})
-          c4c = ::Ministry.find_by_name 'Campus for Christ'
+          c4c = ::Ministry.find_by_name 'Power to Change - Students'
 
           # assume if they already have involvements they're properly set up on the pulse
           return if ministry_involvements.present? || campus_involvements.present?

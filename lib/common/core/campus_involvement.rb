@@ -56,6 +56,7 @@ module Common
 
       def update_student_campus_involvement(flash, me, ministry_role_id, school_year_id, campus_id)
         @campus_ministry_involvement = self.find_or_create_ministry_involvement
+        ministry_role_being_updated = false
         
         # restrict students to making ministry involvements of their role or less
         if ministry_role_id && ministry_role_id != :same
@@ -66,11 +67,11 @@ module Common
             flash[:notice] = "You can only set ministry roles of less than or equal to your current role"
             ministry_role_being_updated = false
             ministry_role_id = @campus_ministry_involvement.ministry_role_id.to_s
+          else
+            ministry_role_being_updated = true
           end
-        elsif ministry_role_id == :same
-          ministry_role_id = @campus_ministry_involvement.ministry_role_id
         else
-          ministry_role_id = ::MinistryRole.default_student_role.id
+          ministry_role_id = @campus_ministry_involvement.try(:ministry_role_id) || ::MinistryRole.default_student_role.id
         end
 
         # record history
@@ -83,19 +84,22 @@ module Common
           @history.ministry_role_id = @campus_ministry_involvement.ministry_role_id
         end
 
-        # update the records
-        self.update_attributes :school_year_id => school_year_id,
-          :campus_id => campus_id
-        unless ministry_role_being_updated == false # update role
+        # update school year and campus
+        self.update_attributes :school_year_id => school_year_id, :campus_id => campus_id
+
+        # update role
+        if ministry_role_being_updated && requested_role.present?
           @campus_ministry_involvement.ministry_role = requested_role
           @campus_ministry_involvement.last_history_update_date = Date.today
           @campus_ministry_involvement.save!
         end
+
         if record_history && self.errors.empty? && @campus_ministry_involvement.errors.empty?
           @history.save!
           self.update_attributes :last_history_update_date => Date.today
         end
       end
+
     end
   end
 end
