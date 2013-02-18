@@ -12,6 +12,8 @@ module Common
           belongs_to :ministry
           belongs_to :added_by, :class_name => "Person", :foreign_key => _(:added_by_id)
           has_many :student_involvement_histories
+
+          delegate :translation_key, :to => :school_year, :prefix => true, :allow_nil => true
         end
       end
 
@@ -57,7 +59,7 @@ module Common
       def update_student_campus_involvement(flash, me, ministry_role_id, school_year_id, campus_id)
         @campus_ministry_involvement = self.find_or_create_ministry_involvement
         ministry_role_being_updated = false
-        
+
         # restrict students to making ministry involvements of their role or less
         if ministry_role_id && ministry_role_id != :same
           requested_role = ::MinistryRole.find(ministry_role_id) || ::MinistryRole.default_student_role

@@ -4,16 +4,18 @@ module Common
       def self.included(base)
         base.class_eval do
           load_mappings
-          
+
           belongs_to :responsible_person, :class_name => "Person"
           belongs_to :person, :class_name => "Person", :foreign_key => _(:person_id)
           belongs_to :ministry
           belongs_to :ministry_role, :class_name => "MinistryRole", :foreign_key => _("ministry_role_id")
           has_many :permissions, :through => :ministry_role, :source => :ministry_role_permissions
           has_many :staff_involvement_histories
-          
+
           validates_presence_of _(:ministry_role_id), :on => :create, :message => "can't be blank"
           validates_presence_of _(:ministry_id)
+
+          delegate :translation_key, :to => :ministry_role, :prefix => true, :allow_nil => true
         end
 
         base.extend MinistryInvolvementMethods
@@ -26,7 +28,7 @@ module Common
           end
         end
       end
-    
+
       def archived?() end_date.present? end
 
       def new_staff_history
@@ -47,7 +49,7 @@ module Common
       def update_ministry_role_and_history(ministry_role_id)
         save_history = self.ministry_role_id.to_s != ministry_role_id.to_s
         history = self.new_history if save_history
-        
+
         self.end_date = nil if self.archived?
 
         self.ministry_role_id = ministry_role_id
