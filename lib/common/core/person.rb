@@ -505,7 +505,7 @@ module Common
       end
 
       def has_permission_from_ministry_or_higher(action, controller, ministry)
-        ministry_ids = ministry.ancestors.collect{|m| m.id}
+        ministry_ids = (ministry.ancestors << ministry).collect{ |m| m.id }
 
         involvements = ::MinistryInvolvement.all(:conditions => ["#{_(:ministry_id, :ministry_involvement)} IN (?) AND #{_(:person_id, :ministry_involvement)} = ?", ministry_ids, self.id])
 
