@@ -612,6 +612,63 @@ module Common
           end
         end
 
+        def merge(other)
+          if other == self
+            throw "Error: Can't merge self with self."
+          end
+          
+          throw("Error: Person #{self.id} (self) does not have a User") unless self.user.present?
+          throw("Error: Person #{other.id} (other) does not have a User") unless self.user.present?
+
+          pat_db = Rails.configuration.database_configuration["pat_#{Rails.env}"]["database"]
+
+          # PAT rows that can have viewer_id updated
+          self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.processors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.applns SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.project_administrators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.project_directors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.project_staffs SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.projects_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.support_coaches SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.profiles SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+
+          # PAT rows that can be deleted
+          self.connection.execute("DELETE FROM #{pat_db}.preferences WHERE viewer_id = #{other.user.id}")
+
+          mpdtool_db = Rails.configuration.database_configuration["mpdtool_#{Rails.env}"]["database"]
+
+          # Mpdtool MpdUser should be moved over only if there is not already one for self
+          begin
+            mpdtool_db = Rails.configuration.database_configuration["mpdtool_#{Rails.env}"]["database"]
+            mpd_user = User.connection.execute("SELECT * FROM #{mpdtool_db}.mpd_users WHERE user_id = 1").first
+            unless mpd_user
+              self.connection.execute("UPDATE #{mpdtool_db}.mpd_users SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
+            end
+          rescue
+            mpd_user.first
+          end
+
+          # Pulse rows that can have user_id updated
+          other.user.user_codes.update_all(:user_id => self.user.id)
+
+          # Pulse rows that can have person_id updated
+          other.searches.update_all(:person_id => self.id)
+          other.dismissed_notices.update_all(:person_id => self.id)
+          other.imports.update_all(:person_id => self.id)
+
+          # Pulse rows that can be deleted
+          other.timetable.try(:destroy)
+          other.profile_picture.try(:destroy)
+          other.updated_timetables.collect(&:destroy)
+          other.free_times.collect(&:destroy)
+          other.involvement_history.collect(&:destroy)
+          other.all_ministry_involvements.collect(&:destroy)
+          other.all_campus_involvements.collect(&:destroy)
+        end
 
 
         
@@ -675,7 +732,6 @@ module Common
             return p
           end
           
-          
           def find_and_associate_person_to_event_attendee(event_attendee)
             # try to find a person to match the event_attendee, if found associate that person to the event_attendee by creating a PersonEventAttendee
             
@@ -731,7 +787,7 @@ module Common
             
             person
           end
-          
+
         end
       end
     end
