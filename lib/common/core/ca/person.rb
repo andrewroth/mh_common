@@ -639,8 +639,6 @@ module Common
           # PAT rows that can be deleted
           self.connection.execute("DELETE FROM #{pat_db}.preferences WHERE viewer_id = #{other.user.id}")
 
-          mpdtool_db = Rails.configuration.database_configuration["mpdtool_#{Rails.env}"]["database"]
-
           # Mpdtool MpdUser should be moved over only if there is not already one for self
           begin
             mpdtool_db = Rails.configuration.database_configuration["mpdtool_#{Rails.env}"]["database"]
