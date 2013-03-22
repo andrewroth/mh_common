@@ -649,7 +649,6 @@ module Common
               self.connection.execute("UPDATE #{mpdtool_db}.mpd_users SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
             end
           rescue
-            mpd_user.first
           end
 
           # Pulse rows that can have user_id updated
@@ -668,6 +667,17 @@ module Common
           other.involvement_history.collect(&:destroy)
           other.all_ministry_involvements.collect(&:destroy)
           other.all_campus_involvements.collect(&:destroy)
+          other.group_involvements.collect(&:destroy)
+
+          # Delete Other's intranet tables (including deleting other itself)
+          other.person_extra.try(:destroy)
+          other.emerg.try(:destroy)
+          other.user.try(:destroy)
+          other.access.try(:destroy)
+          other.assignments.collect(&:destroy)
+          intranet_db = Rails.configuration.database_configuration["intranet_#{Rails.env}"]["database"]
+          self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_admin WHERE person_id = #{other.id}")
+          other.destroy
         end
 
 
