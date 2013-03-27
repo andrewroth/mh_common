@@ -613,12 +613,9 @@ module Common
         end
 
         def merge(other)
-          if other == self
-            throw "Error: Can't merge self with self."
-          end
-          
+          throw("Error: Can't merge self with self.") if other == self
           throw("Error: Person #{self.id} (self) does not have a User") unless self.user.present?
-          throw("Error: Person #{other.id} (other) does not have a User") unless self.user.present?
+          throw("Error: Person #{other.id} (other) does not have a User") unless other.user.present?
 
           pat_db = Rails.configuration.database_configuration["pat_#{Rails.env}"]["database"]
 
@@ -642,43 +639,60 @@ module Common
           # Mpdtool MpdUser should be moved over only if there is not already one for self
           begin
             mpdtool_db = Rails.configuration.database_configuration["mpdtool_#{Rails.env}"]["database"]
-            mpd_user = User.connection.execute("SELECT * FROM #{mpdtool_db}.mpd_users WHERE user_id = 1").first
-            unless mpd_user
+            mpd_user = User.connection.execute("SELECT * FROM #{mpdtool_db}.mpd_users WHERE user_id = #{self.user.id}").first
+            if mpd_user
+              # keep the current one and delete the other's mpd_user
+              self.connection.execute("DELETE FROM #{mpdtool_db}.mpd_users WHERE user_id = #{other.user.id}")
+            else
+              # use the other's mpd_user since self doesn't have one (though he might not have one either)
               self.connection.execute("UPDATE #{mpdtool_db}.mpd_users SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
             end
           rescue
           end
 
-          # Pulse rows that can have user_id updated
-          other.user.user_codes.update_all(:user_id => self.user.id)
-
-          # Pulse rows that can have person_id updated
-          other.searches.update_all(:person_id => self.id)
-          other.dismissed_notices.update_all(:person_id => self.id)
-          other.imports.update_all(:person_id => self.id)
-
           # Pulse rows that can be deleted
           other.timetable.try(:destroy)
           other.profile_picture.try(:destroy)
+          other.person_extra.try(:destroy)
           other.updated_timetables.collect(&:destroy)
           other.free_times.collect(&:destroy)
-          other.involvement_history.collect(&:destroy)
-          other.all_ministry_involvements.collect(&:destroy)
-          other.all_campus_involvements.collect(&:destroy)
-          other.group_involvements.collect(&:destroy)
+          other.contract_signatures.collect(&:destroy)
+          self.connection.execute("UPDATE #{::InvolvementHistory.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::MinistryInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::CampusInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::GroupInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::ContactsPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET recipient_person_id = #{self.id} WHERE recipient_person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET sender_person_id = #{self.id} WHERE sender_person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::Search.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::DismissedNotice.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::UserCode.table_name} SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
+          self.connection.execute("UPDATE #{::LabelPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::Note.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::PersonEventAttendee.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::PersonTrainingCourse.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::Recruitment.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{::Recruitment.table_name} SET recruiter_id = #{self.id} WHERE recruiter_id = #{other.id}")
 
           # Delete Other's intranet tables (including deleting other itself)
-          other.person_extra.try(:destroy)
-          other.emerg.try(:destroy)
-          other.user.try(:destroy)
-          other.access.try(:destroy)
-          other.assignments.collect(&:destroy)
           intranet_db = Rails.configuration.database_configuration["intranet_#{Rails.env}"]["database"]
+          other.emerg.try(:destroy) # cim_hrdb_emerg
+          other.user.try(:destroy) # accountadmin_viewer
+          other.access.try(:destroy) # cim_hrdb_access
+          other.assignments.collect(&:destroy) # cim_hrdb_assignment
           self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_admin WHERE person_id = #{other.id}")
+          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_accountadminaccess WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_viewer WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_vieweraccessgroup WHERE viewer_id = #{other.user.id}")
+          self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_person_year WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{intranet_db}.cim_hrdb_staff SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{intranet_db}.cim_reg_registration SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{intranet_db}.summer_reports SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{intranet_db}.summer_report_reviewers SET person_id = #{self.id} WHERE person_id = #{other.id}")
+
+          # Destroy the other person!
           other.destroy
         end
-
-
         
         module PersonClassMethods
 
