@@ -687,6 +687,7 @@ module Common
           self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_person_year WHERE person_id = #{other.id}")
           self.connection.execute("UPDATE #{intranet_db}.cim_hrdb_staff SET person_id = #{self.id} WHERE person_id = #{other.id}")
           self.connection.execute("UPDATE #{intranet_db}.cim_reg_registration SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          self.connection.execute("UPDATE #{intranet_db}.cim_reg_eventadmin SET viewer_id = #{self.id} WHERE viewer_id = #{other.user.id}")
           self.connection.execute("UPDATE #{intranet_db}.summer_reports SET person_id = #{self.id} WHERE person_id = #{other.id}")
           self.connection.execute("UPDATE #{intranet_db}.summer_report_reviewers SET person_id = #{self.id} WHERE person_id = #{other.id}")
 
