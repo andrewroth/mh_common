@@ -612,6 +612,16 @@ module Common
           end
         end
 
+        def capture_errors
+          begin
+            yield
+            return []
+          rescue => e
+            important_line = e.backtrace.find{ |l| l =~ /person.rb/ }
+            return [ "#{e.message}: #{important_line}" ]
+          end
+        end
+
         def merge(other)
           throw("Error: Can't merge self with self.") if other == self
           throw("Error: Person #{self.id} (self) does not have a User") unless self.user.present?
@@ -619,22 +629,24 @@ module Common
 
           pat_db = Rails.configuration.database_configuration["pat_#{Rails.env}"]["database"]
 
+          @errors = []
+
           # PAT rows that can have viewer_id updated
-          self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.processors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.applns SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.project_administrators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.project_directors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.project_staffs SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.projects_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.support_coaches SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.profiles SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}")
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.processors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.applns SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.project_administrators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.project_directors SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.project_staffs SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.projects_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.support_coaches SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.profiles SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.eventgroup_coordinators SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{pat_db}.notification_acknowledgments SET viewer_id = #{self.user.id} WHERE viewer_id = #{other.user.id}") }
 
           # PAT rows that can be deleted
-          self.connection.execute("DELETE FROM #{pat_db}.preferences WHERE viewer_id = #{other.user.id}")
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{pat_db}.preferences WHERE viewer_id = #{other.user.id}") }
 
           # Mpdtool MpdUser should be moved over only if there is not already one for self
           begin
@@ -642,37 +654,37 @@ module Common
             mpd_user = User.connection.execute("SELECT * FROM #{mpdtool_db}.mpd_users WHERE user_id = #{self.user.id}").first
             if mpd_user
               # keep the current one and delete the other's mpd_user
-              self.connection.execute("DELETE FROM #{mpdtool_db}.mpd_users WHERE user_id = #{other.user.id}")
+              @errors += capture_errors { self.connection.execute("DELETE FROM #{mpdtool_db}.mpd_users WHERE user_id = #{other.user.id}") }
             else
               # use the other's mpd_user since self doesn't have one (though he might not have one either)
-              self.connection.execute("UPDATE #{mpdtool_db}.mpd_users SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
+              @errors += capture_errors { self.connection.execute("UPDATE #{mpdtool_db}.mpd_users SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}") }
             end
           rescue
           end
 
           # Pulse rows that can be deleted
-          other.timetable.try(:destroy)
-          other.profile_picture.try(:destroy)
-          other.person_extra.try(:destroy)
-          other.updated_timetables.collect(&:destroy)
-          other.free_times.collect(&:destroy)
-          other.contract_signatures.collect(&:destroy)
-          self.connection.execute("UPDATE #{::InvolvementHistory.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::MinistryInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::CampusInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::GroupInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::ContactsPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET recipient_person_id = #{self.id} WHERE recipient_person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET sender_person_id = #{self.id} WHERE sender_person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::Search.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::DismissedNotice.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::UserCode.table_name} SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}")
-          self.connection.execute("UPDATE #{::LabelPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::Note.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::PersonEventAttendee.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::PersonTrainingCourse.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::Recruitment.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{::Recruitment.table_name} SET recruiter_id = #{self.id} WHERE recruiter_id = #{other.id}")
+          @errors += capture_errors { other.timetable.try(:destroy) }
+          @errors += capture_errors { other.profile_picture.try(:destroy) }
+          @errors += capture_errors { other.person_extra.try(:destroy) }
+          @errors += capture_errors { other.updated_timetables.collect(&:destroy) }
+          @errors += capture_errors { other.free_times.collect(&:destroy) }
+          @errors += capture_errors { other.contract_signatures.collect(&:destroy) }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::InvolvementHistory.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::MinistryInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::CampusInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::GroupInvolvement.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::ContactsPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET recipient_person_id = #{self.id} WHERE recipient_person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::GroupInvitation.table_name} SET sender_person_id = #{self.id} WHERE sender_person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::Search.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::DismissedNotice.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::UserCode.table_name} SET user_id = #{self.user.id} WHERE user_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::LabelPerson.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::Note.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::PersonEventAttendee.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::PersonTrainingCourse.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::Recruitment.table_name} SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{::Recruitment.table_name} SET recruiter_id = #{self.id} WHERE recruiter_id = #{other.id}") }
 
           # Delete Other's intranet tables (including deleting other itself)
           intranet_db = Rails.configuration.database_configuration["intranet_#{Rails.env}"]["database"]
@@ -680,18 +692,20 @@ module Common
           other.user.try(:destroy) # accountadmin_viewer
           other.access.try(:destroy) # cim_hrdb_access
           other.assignments.collect(&:destroy) # cim_hrdb_assignment
-          self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_admin WHERE person_id = #{other.id}")
-          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_accountadminaccess WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_viewer WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_vieweraccessgroup WHERE viewer_id = #{other.user.id}")
-          self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_person_year WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{intranet_db}.cim_hrdb_staff SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{intranet_db}.cim_reg_registration SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{intranet_db}.summer_reports SET person_id = #{self.id} WHERE person_id = #{other.id}")
-          self.connection.execute("UPDATE #{intranet_db}.summer_report_reviewers SET person_id = #{self.id} WHERE person_id = #{other.id}")
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_admin WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_accountadminaccess WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_viewer WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{intranet_db}.accountadmin_vieweraccessgroup WHERE viewer_id = #{other.user.id}") }
+          @errors += capture_errors { self.connection.execute("DELETE FROM #{intranet_db}.cim_hrdb_person_year WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{intranet_db}.cim_hrdb_staff SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{intranet_db}.cim_reg_registration SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{intranet_db}.summer_reports SET person_id = #{self.id} WHERE person_id = #{other.id}") }
+          @errors += capture_errors { self.connection.execute("UPDATE #{intranet_db}.summer_report_reviewers SET person_id = #{self.id} WHERE person_id = #{other.id}") }
 
           # Destroy the other person!
-          other.destroy
+          @errors += capture_errors { other.destroy }
+
+          return @errors
         end
         
         module PersonClassMethods
